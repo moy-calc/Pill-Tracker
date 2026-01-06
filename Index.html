@@ -177,20 +177,29 @@
             const packRef = collection(db, "users", user, "current_pack");
             const histRef = doc(db, "users", user, "history", today);
 
-            if(isActive) {
-                await deleteDoc(doc(packRef, n.toString()));
-            } else {
-                await setDoc(doc(packRef, n.toString()), { taken: true });
-            }
+            if(isActive) await deleteDoc(doc(packRef, n.toString()));
+            else await setDoc(doc(packRef, n.toString()), { taken: true });
 
-            // Calculer le nouvel état pour aujourd'hui
             const snap = await getDocs(packRef);
-            if(snap.empty) {
+            const countToday = snap.size;
+
+            if(countToday === 0) {
                 await deleteDoc(histRef);
             } else {
-                let max = 0;
-                snap.forEach(d => { if(parseInt(d.id) > max) max = parseInt(d.id); });
-                await setDoc(histRef, { ratio: `${max}/${size}`, val: max });
+                // Trouver la dernière valeur enregistrée AVANT aujourd'hui
+                const q = query(collection(db, "users", user, "history"), orderBy("__name__", "desc"));
+                const hSnaps = await getDocs(q);
+                let lastVal = 0;
+                
+                for (let d of hSnaps.docs) {
+                    if (d.id < today) {
+                        lastVal = d.data().total || 0;
+                        break;
+                    }
+                }
+                
+                const total = lastVal + countToday;
+                await setDoc(histRef, { ratio: `${total}/${size}`, total: total, count: countToday });
             }
         }
 
@@ -229,7 +238,7 @@
                     if (newVal === null) return;
                     const docRef = doc(db, "users", user, "history", key);
                     if (newVal.trim() === "") await deleteDoc(docRef);
-                    else await setDoc(docRef, { ratio: newVal.trim() });
+                    else await setDoc(docRef, { ratio: newVal.trim(), total: parseInt(newVal.split('/')[0]) });
                 };
                 cal.appendChild(cell);
             }
