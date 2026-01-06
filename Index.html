@@ -3,80 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PillTracker Sync Pro</title>
+    <title>MedTracker Sync</title>
+    <meta name="description" content="Suivi intelligent de vos médicaments">
+    <link rel="manifest" href="data:application/manifest+json,{
+        &quot;name&quot;:&quot;MedTracker Sync&quot;,
+        &quot;short_name&quot;:&quot;MedTracker&quot;,
+        &quot;start_url&quot;:&quot;.&quot;,
+        &quot;display&quot;:&quot;standalone&quot;,
+        &quot;background_color&quot;:&quot;#f8fafc&quot;,
+        &quot;theme_color&quot;:&quot;#6366f1&quot;,
+        &quot;icons&quot;:[{&quot;src&quot;:&quot;https://cdn-icons-png.flaticon.com/512/3063/3063174.png&quot;,&quot;sizes&quot;:&quot;192x192&quot;,&quot;type&quot;:&quot;image/png&quot;}]
+    }">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@500;700&display=swap');
-        :root { --bg: #f8fafc; --card: rgba(255, 255, 255, 0.8); --text: #1e293b; --accent: #6366f1; }
-        .dark { --bg: #0b0f1a; --card: rgba(22, 30, 46, 0.7); --text: #f1f5f9; --accent: #818cf8; }
-        body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.6s ease; min-height: 100vh; }
-        .glass { background: var(--card); backdrop-filter: blur(16px); border: 1px solid rgba(148, 163, 184, 0.1); border-radius: 24px; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); }
-        .text-anim { animation: reveal 0.5s ease both; }
-        @keyframes reveal { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .pill-btn { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); background: rgba(148, 163, 184, 0.1); border-radius: 14px; }
-        .pill-btn.active { background: var(--accent); color: white; transform: scale(1.05); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); }
-        .progress-bar { height: 8px; border-radius: 4px; background: rgba(148, 163, 184, 0.1); overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--accent); transition: width 0.6s ease; }
-        .theme-toggle { width: 42px; height: 42px; border-radius: 12px; cursor: pointer; background: var(--card); border: 1px solid rgba(148, 163, 184, 0.2); display: flex; align-items: center; justify-content: center; }
-        .lang-btn { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.75rem; opacity: 0.5; }
-        .lang-btn.active { opacity: 1; color: var(--accent); }
-        .cal-cell { aspect-ratio: 1/1.2; border-radius: 12px; background: rgba(148, 163, 184, 0.05); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
-        .cal-cell:hover { background: rgba(148, 163, 184, 0.15); }
-        .ratio-tag { background: var(--accent); color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 6px; margin-top: 4px; font-weight: 800; }
+        :root { --bg: #f8fafc; --card: rgba(255,255,255,0.8); --text: #1e293b; --accent: #6366f1; }
+        .dark { --bg: #0b0f1a; --card: rgba(22,30,46,0.7); --text: #f1f5f9; --accent: #818cf8; }
+
+        body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.6s; min-height: 100vh; }
+        .glass { background: var(--card); backdrop-filter: blur(16px); border: 1px solid rgba(148,163,184,0.1); border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.03); }
+        .text-anim { animation: reveal 0.6s cubic-bezier(0.23,1,0.32,1) both; }
+        @keyframes reveal { 0% { opacity:0; transform:translateY(10px); filter:blur(4px); } 100% { opacity:1; transform:none; filter:none; } }
+
+        .pill-btn { @apply transition-all duration-300 bg-slate-500/10 rounded-xl font-bold; }
+        .pill-btn.active { @apply bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 scale-105; }
+
+        .progress-fill { @apply h-full bg-gradient-to-r from-indigo-500 to-purple-600 transition-all duration-800; border-radius: inherit; }
+
+        .toast { @apply fixed bottom-4 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full bg-slate-800 text-white shadow-2xl z-50 animate-pulse; }
+
+        .med-color { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; }
     </style>
 </head>
 <body class="p-4 md:p-8">
+
     <nav class="max-w-4xl mx-auto flex justify-between items-center p-4 glass mb-8">
-        <h1 id="title" class="text-xl font-extrabold tracking-tight">PillTracker</h1>
+        <h1 class="text-2xl font-extrabold tracking-tight">MedTracker</h1>
         <div class="flex items-center gap-4">
             <div class="flex gap-2 bg-slate-500/5 p-1 rounded-xl">
-                <button onclick="setLang('ar')" id="btn-ar" class="lang-btn px-2 py-1">AR</button>
-                <button onclick="setLang('fr')" id="btn-fr" class="lang-btn px-2 py-1">FR</button>
-                <button onclick="setLang('en')" id="btn-en" class="lang-btn px-2 py-1">EN</button>
+                <button onclick="setLang('ar')" id="btn-ar" class="lang-btn px-3 py-1 text-sm font-bold opacity-50">AR</button>
+                <button onclick="setLang('fr')" id="btn-fr" class="lang-btn px-3 py-1 text-sm font-bold opacity-50">FR</button>
+                <button onclick="setLang('en')" id="btn-en" class="lang-btn px-3 py-1 text-sm font-bold opacity-50">EN</button>
             </div>
-            <button onclick="toggleTheme()" class="theme-toggle">🌓</button>
+            <button onclick="toggleTheme()" class="w-10 h-10 rounded-xl glass flex items-center justify-center">🌓</button>
         </div>
     </nav>
 
-    <main class="max-w-md mx-auto space-y-6">
-        <div id="loginBox" class="glass p-8 text-center space-y-5 text-anim">
-            <input type="text" id="userInput" oninput="checkUserAvailability()" placeholder="Identifiant" class="w-full bg-transparent border-b-2 border-slate-300 focus:border-indigo-500 outline-none p-2 text-center text-xl transition-all">
-            <div id="userStatus" class="auth-status text-slate-400 font-bold text-xs uppercase mt-2">...</div>
-            <input type="password" id="passInput" placeholder="Mot de passe" class="hidden w-full bg-transparent border-b-2 border-slate-300 focus:border-indigo-500 outline-none p-2 text-center text-lg transition-all">
-            <button onclick="handleAuth()" id="btnLogin" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg uppercase tracking-widest mt-4">Vérifier</button>
-        </div>
+    <main class="max-w-2xl mx-auto space-y-8">
 
-        <div id="appBody" class="hidden space-y-6">
-            <div class="glass p-6 text-anim">
-                <div class="flex justify-between items-center mb-3">
-                    <span id="labelProgress" class="text-xs font-bold uppercase opacity-60">Progression</span>
-                    <span id="percentText" class="text-xs font-black text-indigo-500">0%</span>
-                </div>
-                <div class="progress-bar"><div id="progressFill" class="progress-fill" style="width: 0%"></div></div>
+        <!-- Écran de connexion / inscription -->
+        <section id="authSection" class="glass p-8 text-center space-y-6 text-anim">
+            <h2 id="authTitle" class="text-3xl font-black">Bienvenue</h2>
+            <input type="email" id="emailInput" placeholder="Email" class="w-full bg-transparent border-b-2 border-slate-400 focus:border-indigo-500 outline-none p-3 text-center text-xl">
+            <input type="password" id="passInput" placeholder="Mot de passe" class="w-full bg-transparent border-b-2 border-slate-400 focus:border-indigo-500 outline-none p-3 text-center text-xl" minlength="6">
+            <div class="flex gap-4 justify-center">
+                <button onclick="signIn()" id="btnSignIn" class="px-8 py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg hover:shadow-indigo-500/50 transition-all">Connexion</button>
+                <button onclick="signUp()" id="btnSignUp" class="px-8 py-4 bg-slate-600 text-white font-bold rounded-2xl shadow-lg transition-all">Inscription</button>
+            </div>
+            <p id="authStatus" class="text-sm text-slate-500"></p>
+        </section>
+
+        <!-- Application principale -->
+        <section id="appSection" class="hidden space-y-8">
+
+            <!-- Streak & Notifications -->
+            <div class="glass p-6 text-center text-anim">
+                <div class="text-5xl font-black text-indigo-600" id="streakCount">0 🔥</div>
+                <p class="text-sm opacity-70 mt-2" id="streakText">Jours consécutifs parfaits</p>
+                <button onclick="requestNotificationPermission()" class="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold">Activer les rappels quotidiens</button>
             </div>
 
+            <!-- Liste des médicaments -->
             <div class="glass p-6 text-anim">
                 <div class="flex justify-between items-center mb-6">
-                    <span id="labelCount" class="text-xs font-bold uppercase opacity-60">Plaque :</span>
-                    <input type="number" id="gridSize" value="10" onchange="updateGridSize()" class="bg-slate-500/10 rounded-lg p-1 w-16 text-center font-bold text-indigo-500 outline-none">
+                    <h3 class="text-lg font-bold">Vos médicaments</h3>
+                    <button onclick="openAddMedModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold">+</button>
                 </div>
-                <div id="grid" class="grid grid-cols-5 gap-3"></div>
+                <div id="medsList" class="space-y-6"></div>
             </div>
 
+            <!-- Calendrier -->
             <div class="glass p-6 text-anim">
                 <div class="flex justify-between items-center mb-4">
-                    <button onclick="changeMonth(-1)" class="p-2 hover:bg-slate-200 rounded-full">←</button>
+                    <button onclick="changeMonth(-1)" aria-label="Mois précédent">←</button>
                     <h3 id="calMonth" class="font-extrabold uppercase text-sm"></h3>
-                    <button onclick="changeMonth(1)" class="p-2 hover:bg-slate-200 rounded-full">→</button>
+                    <button onclick="changeMonth(1)" aria-label="Mois suivant">→</button>
                 </div>
                 <div id="calendar" class="grid grid-cols-7 gap-2"></div>
             </div>
-        </div>
+        </section>
     </main>
+
+    <!-- Modal ajout médicament -->
+    <div id="addMedModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+        <div class="glass p-8 rounded-3xl max-w-sm w-full space-y-6 text-anim">
+            <h3 class="text-xl font-bold text-center">Nouveau médicament</h3>
+            <input id="medName" placeholder="Nom (ex: Paracétamol)" class="w-full bg-transparent border-b-2 border-slate-400 focus:border-indigo-500 outline-none p-3">
+            <input id="medDose" placeholder="Dose (ex: 500mg)" class="w-full bg-transparent border-b-2 border-slate-400 focus:border-indigo-500 outline-none p-3">
+            <input type="number" id="medTotal" placeholder="Nombre total par boîte" value="28" min="1" class="w-full bg-transparent border-b-2 border-slate-400 focus:border-indigo-500 outline-none p-3">
+            <input type="color" id="medColor" value="#6366f1" class="h-12 rounded-xl">
+            <div class="flex gap-4">
+                <button onclick="closeAddMedModal()" class="flex-1 py-3 border border-slate-400 rounded-xl">Annuler</button>
+                <button onclick="addMedication()" class="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold">Ajouter</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast hidden"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, query, orderBy, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAx7c0bFNXuBxadAUItyP6h0U",
@@ -88,212 +127,278 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
 
         const i18n = {
-            fr: { title: "PillTracker Sync", label: "Plaque :", login: "Connecter", available: "Disponible", taken: "Compte trouvé", progress: "Progression" },
-            en: { title: "PillTracker Sync", label: "Pack Size:", login: "Connect", available: "Available", taken: "Account found", progress: "Progress" },
-            ar: { title: "متابع الأدوية", label: "حجم العلبة:", login: "دخول", available: "متاح", taken: "الحساب موجود", progress: "التقدم" }
+            fr: { welcome: "Bienvenue", signin: "Connexion", signup: "Inscription", meds: "Vos médicaments", add: "Ajouter un médicament", streak: "Jours consécutifs parfaits", reminder: "Activer les rappels quotidiens" },
+            en: { welcome: "Welcome", signin: "Sign In", signup: "Sign Up", meds: "Your Medications", add: "Add Medication", streak: "Perfect consecutive days", reminder: "Enable daily reminders" },
+            ar: { welcome: "مرحباً", signin: "تسجيل الدخول", signup: "إنشاء حساب", meds: "أدويتك", add: "إضافة دواء", streak: "أيام متتالية مثالية", reminder: "تفعيل التذكيرات اليومية" }
         };
 
-        let user = "";
-        let currentDate = new Date();
+        let currentUser = null;
+        let medications = [];
         let historyData = {};
-        let userExists = false;
+        let currentDate = new Date();
+        let reminderHour = 20; // 20h par défaut
 
-        // AUTHENTICATION
-        window.checkUserAvailability = async () => {
-            const name = document.getElementById('userInput').value.trim().toLowerCase();
-            if (name.length < 3) return;
-            const userDoc = await getDoc(doc(db, "users", name));
-            userExists = userDoc.exists();
-            const status = document.getElementById('userStatus');
-            const l = localStorage.getItem('lang') || 'fr';
-            status.innerText = userExists ? i18n[l].taken : i18n[l].available;
-            status.style.color = userExists ? "#818cf8" : "#4ade80";
-            document.getElementById('passInput').classList.remove('hidden');
+        // Auth
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('authSection').classList.add('hidden');
+                document.getElementById('appSection').classList.remove('hidden');
+                loadUserData();
+            } else {
+                currentUser = null;
+                document.getElementById('authSection').classList.remove('hidden');
+                document.getElementById('appSection').classList.add('hidden');
+            }
+        });
+
+        window.signIn = () => {
+            const email = document.getElementById('emailInput').value.trim();
+            const pass = document.getElementById('passInput').value;
+            signInWithEmailAndPassword(auth, email, pass)
+                .catch(err => showToast("Erreur : " + err.message));
         };
 
-        window.handleAuth = async () => {
-            const name = document.getElementById('userInput').value.trim().toLowerCase();
+        window.signUp = () => {
+            const email = document.getElementById('emailInput').value.trim();
             const pass = document.getElementById('passInput').value;
-            if (!name || !pass) return;
-            const userRef = doc(db, "users", name);
-            if (userExists) {
-                const snap = await getDoc(userRef);
-                if (snap.data().password === pass) proceed(name); else alert("Mot de passe incorrect");
+            if (pass.length < 6) return showToast("Mot de passe trop court (min 6)");
+            createUserWithEmailAndPassword(auth, email, pass)
+                .catch(err => showToast("Erreur : " + err.message));
+        };
+
+        function loadUserData() {
+            const userRef = doc(db, "users", currentUser.uid);
+
+            // Charger les médicaments
+            onSnapshot(collection(userRef, "medications"), (snap) => {
+                medications = [];
+                snap.forEach(d => medications.push({ id: d.id, ...d.data() }));
+                medications.sort((a,b) => a.name.localeCompare(b.name));
+                renderMedications();
+            });
+
+            // Charger l'historique
+            onSnapshot(collection(userRef, "history"), (snap) => {
+                historyData = {};
+                snap.forEach(d => historyData[d.id] = d.data());
+                renderCalendar();
+                updateStreak();
+            });
+        }
+
+        function renderMedications() {
+            const list = document.getElementById('medsList');
+            list.innerHTML = '';
+            const today = new Date().toISOString().split('T')[0];
+
+            medications.forEach(med => {
+                const div = document.createElement('div');
+                div.className = "space-y-4";
+
+                // Progression du médicament
+                const progressRef = collection(db, "users", currentUser.uid, "packs", med.id);
+                onSnapshot(progressRef, async (packSnap) => {
+                    let taken = packSnap.size;
+                    let progress = (taken / med.total) * 100;
+                    let ratio = `\( {taken}/ \){med.total}`;
+
+                    // Mettre à jour l'historique du jour
+                    const histRef = doc(db, "users", currentUser.uid, "history", today);
+                    const histSnap = await getDoc(histRef);
+                    let dayData = histSnap.data() || { ratios: {} };
+                    dayData.ratios[med.id] = ratio;
+                    await setDoc(histRef, dayData, { merge: true });
+
+                    div.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="med-color" style="background:${med.color}"></span>
+                                <span class="font-bold">${med.name}</span>
+                                <span class="text-sm opacity-70">(${med.dose})</span>
+                            </div>
+                            <button onclick="deleteMed('${med.id}')" class="text-red-500 text-sm">Supprimer</button>
+                        </div>
+                        <div class="text-xs opacity-70 mb-2">${ratio} prises</div>
+                        <div class="h-3 bg-slate-500/20 rounded-full overflow-hidden">
+                            <div class="progress-fill h-full" style="width:${progress}%"></div>
+                        </div>
+                        <div class="grid grid-cols-7 gap-2 mt-4" id="grid-${med.id}"></div>
+                    `;
+
+                    // Grille des prises
+                    const grid = div.querySelector(`#grid-${med.id}`);
+                    grid.innerHTML = '';
+                    for (let i = 1; i <= med.total; i++) {
+                        const btn = document.createElement('button');
+                        btn.className = `pill-btn aspect-square text-sm ${packSnap.docs.some(d => d.id === i.toString()) ? 'active' : ''}`;
+                        btn.textContent = i;
+                        btn.onclick = () => toggleDose(med.id, i, btn);
+                        grid.appendChild(btn);
+                    }
+                });
+
+                list.appendChild(div);
+            });
+        }
+
+        async function toggleDose(medId, num, btn) {
+            const packRef = doc(db, "users", currentUser.uid, "packs", medId, num.toString());
+            const snap = await getDoc(packRef);
+            if (snap.exists()) {
+                await deleteDoc(packRef);
+                btn.classList.remove('active');
             } else {
-                await setDoc(userRef, { password: pass }); proceed(name);
+                await setDoc(packRef, { taken: true });
+                btn.classList.add('active');
+            }
+            showToast("Prise mise à jour");
+        }
+
+        window.deleteMed = async (medId) => {
+            if (!confirm("Supprimer ce médicament ?")) return;
+            const medRef = doc(db, "users", currentUser.uid, "medications", medId);
+            const packCol = collection(db, "users", currentUser.uid, "packs", medId);
+            const packs = await getDocs(packCol);
+            packs.forEach(d => deleteDoc(d.ref));
+            await deleteDoc(medRef);
+            showToast("Médicament supprimé");
+        };
+
+        window.openAddMedModal = () => document.getElementById('addMedModal').classList.remove('hidden');
+        window.closeAddMedModal = () => document.getElementById('addMedModal').classList.add('hidden');
+
+        window.addMedication = async () => {
+            const name = document.getElementById('medName').value.trim();
+            const dose = document.getElementById('medDose').value.trim();
+            const total = parseInt(document.getElementById('medTotal').value);
+            const color = document.getElementById('medColor').value;
+
+            if (!name || total < 1) return showToast("Remplissez tous les champs");
+
+            const medRef = doc(collection(db, "users", currentUser.uid, "medications"));
+            await setDoc(medRef, { name, dose, total, color });
+            closeAddMedModal();
+            document.getElementById('medName').value = '';
+            showToast("Médicament ajouté !");
+        };
+
+        function renderCalendar() {
+            const cal = document.getElementById('calendar');
+            cal.innerHTML = '';
+            const lang = localStorage.getItem('lang') || 'fr';
+            document.getElementById('calMonth').innerText = new Intl.DateTimeFormat(lang, { month: 'long', year: 'numeric' }).format(currentDate);
+
+            const y = currentDate.getFullYear(), m = currentDate.getMonth();
+            const firstDay = new Date(y, m, 1).getDay();
+            const daysInMonth = new Date(y, m + 1, 0).getDate();
+            const offset = firstDay === 0 ? 6 : firstDay - 1;
+
+            for (let i = 0; i < offset; i++) cal.innerHTML += '<div></div>';
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateKey = `\( {y}- \){String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const data = historyData[dateKey];
+                let totalToday = 0, takenToday = 0;
+
+                if (data && data.ratios) {
+                    Object.values(data.ratios).forEach(r => {
+                        const [taken, total] = r.split('/').map(Number);
+                        takenToday += taken;
+                        totalToday += total;
+                    });
+                }
+
+                const cell = document.createElement('div');
+                cell.className = "aspect-square rounded-xl bg-slate-500/10 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-500/20 transition";
+                cell.innerHTML = `
+                    <span class="text-xs font-bold opacity-40">${d}</span>
+                    ${totalToday > 0 ? `<span class="text-xs font-bold \( {takenToday === totalToday ? 'text-green-500' : 'text-orange-500'}"> \){takenToday}/${totalToday}</span>` : ''}
+                `;
+                cal.appendChild(cell);
+            }
+        }
+
+        function updateStreak() {
+            let streak = 0;
+            let tempDate = new Date();
+            while (true) {
+                const key = tempDate.toISOString().split('T')[0];
+                const data = historyData[key];
+                let perfect = true;
+                if (data && data.ratios) {
+                    for (const r of Object.values(data.ratios)) {
+                        const [taken, total] = r.split('/').map(Number);
+                        if (taken < total) perfect = false;
+                    }
+                } else perfect = false;
+
+                if (perfect) streak++;
+                else break;
+
+                tempDate.setDate(tempDate.getDate() - 1);
+            }
+            document.getElementById('streakCount').innerText = streak + (streak > 0 ? " 🔥" : "");
+        }
+
+        window.changeMonth = (dir) => {
+            currentDate.setMonth(currentDate.getMonth() + dir);
+            renderCalendar();
+        };
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+
+        // Notifications
+        window.requestNotificationPermission = async () => {
+            if (!("Notification" in window)) return showToast("Notifications non supportées");
+            if (Notification.permission === "granted") {
+                scheduleDailyReminder();
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(perm => {
+                    if (perm === "granted") scheduleDailyReminder();
+                });
             }
         };
 
-        function proceed(name) {
-            user = name;
-            document.getElementById('loginBox').classList.add('hidden');
-            document.getElementById('appBody').classList.remove('hidden');
-            syncPills();
-            syncHistory();
+        function scheduleDailyReminder() {
+            const now = new Date();
+            const reminderTime = new Date();
+            reminderTime.setHours(reminderHour, 0, 0, 0);
+            if (reminderTime < now) reminderTime.setDate(reminderTime.getDate() + 1);
+
+            const delay = reminderTime - now;
+            setTimeout(() => {
+                new Notification("🔔 MedTracker", { body: "N'oubliez pas vos médicaments aujourd'hui !" });
+                scheduleDailyReminder(); // reprogramme pour demain
+            }, delay);
+            showToast("Rappels activés pour " + reminderHour + "h");
         }
 
-        // SETTINGS & UI
+        // Langue & thème
+        window.setLang = (l) => {
+            document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+            localStorage.setItem('lang', l);
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('opacity-100'));
+            document.getElementById(`btn-${l}`).classList.add('opacity-100');
+            renderCalendar();
+        };
+
         window.toggleTheme = () => {
             document.body.classList.toggle('dark');
             localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
         };
 
-        window.setLang = (l) => {
-            document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
-            document.getElementById('title').innerText = i18n[l].title;
-            document.getElementById('labelCount').innerText = i18n[l].label;
-            document.getElementById('labelProgress').innerText = i18n[l].progress;
-            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`btn-${l}`).classList.add('active');
-            localStorage.setItem('lang', l);
-            renderCalendar();
-            if(document.getElementById('userInput').value) checkUserAvailability();
-        };
-
-        // CORE LOGIC - PILLS
-        function syncPills() {
-            onSnapshot(collection(db, "users", user, "current_pack"), (snap) => {
-                const grid = document.getElementById('grid');
-                const size = parseInt(document.getElementById('gridSize').value);
-                grid.innerHTML = '';
-                let activeCount = 0;
-                let activeSet = new Set();
-                
-                snap.forEach(d => {
-                    activeSet.add(parseInt(d.id));
-                    activeCount++;
-                });
-
-                const progress = (activeCount / size) * 100;
-                document.getElementById('progressFill').style.width = `${progress}%`;
-                document.getElementById('percentText').innerText = `${Math.round(progress)}%`;
-
-                for(let i=1; i<=size; i++) {
-                    const btn = document.createElement('button');
-                    btn.className = `pill-btn aspect-square font-bold ${activeSet.has(i) ? 'active' : ''}`;
-                    btn.innerText = i;
-                    // On passe false si active, true si inactive
-                    btn.onclick = () => togglePill(i, activeSet.has(i));
-                    grid.appendChild(btn);
-                }
-            });
-        }
-
-        async function togglePill(n, isCurrentlyActive) {
-            const today = new Date().toISOString().split('T')[0]; // ex: 2024-05-21
-            const size = document.getElementById('gridSize').value;
-            const packRef = collection(db, "users", user, "current_pack");
-            const histRef = doc(db, "users", user, "history", today);
-
-            // 1. Mettre à jour l'état de la pilule avec la DATE actuelle
-            if(isCurrentlyActive) {
-                await deleteDoc(doc(packRef, n.toString()));
-            } else {
-                await setDoc(doc(packRef, n.toString()), { 
-                    taken: true, 
-                    date: today // IMPORTANT: On stocke la date de prise
-                });
-            }
-
-            // 2. Recalculer le total pour aujourd'hui
-            const allPillsSnap = await getDocs(packRef);
-            let pillsTakenToday = 0;
-            
-            allPillsSnap.forEach(d => {
-                const data = d.data();
-                // On compte seulement si la date correspond à aujourd'hui
-                if(data.date === today) {
-                    pillsTakenToday++;
-                }
-            });
-
-            // 3. Gestion de l'historique
-            if(pillsTakenToday === 0) {
-                // Si aucune pilule prise AUJOURD'HUI, on supprime l'entrée du calendrier d'aujourd'hui
-                await deleteDoc(histRef);
-            } else {
-                // Sinon, on cherche la valeur cumulée d'avant
-                const q = query(collection(db, "users", user, "history"), orderBy("__name__", "desc"));
-                const historySnap = await getDocs(q);
-                
-                let lastTotal = 0;
-                for (let d of historySnap.docs) {
-                    if (d.id < today) { // Trouver la date la plus récente avant aujourd'hui
-                        lastTotal = d.data().total || 0;
-                        break;
-                    }
-                }
-
-                const newTotal = lastTotal + pillsTakenToday;
-                await setDoc(histRef, { 
-                    ratio: `${newTotal}/${size}`, 
-                    total: newTotal,
-                    dailyCount: pillsTakenToday 
-                });
-            }
-        }
-
-        // CALENDAR
-        function syncHistory() {
-            onSnapshot(collection(db, "users", user, "history"), (snap) => {
-                historyData = {};
-                snap.forEach(d => { historyData[d.id] = d.data(); });
-                renderCalendar();
-            });
-        }
-
-        window.changeMonth = (dir) => { currentDate.setMonth(currentDate.getMonth() + dir); renderCalendar(); };
-
-        function renderCalendar() {
-            const cal = document.getElementById('calendar');
-            cal.innerHTML = '';
-            const y = currentDate.getFullYear(), m = currentDate.getMonth();
-            const lang = localStorage.getItem('lang') || 'fr';
-            document.getElementById('calMonth').innerText = new Intl.DateTimeFormat(lang, { month: 'long', year: 'numeric' }).format(currentDate);
-
-            const first = new Date(y, m, 1).getDay();
-            const days = new Date(y, m + 1, 0).getDate();
-            const offset = (first === 0 ? 6 : first - 1);
-
-            for(let i=0; i < offset; i++) cal.innerHTML += '<div></div>';
-
-            for(let d=1; d<=days; d++) {
-                const key = `${y}-${String(m+1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                const data = historyData[key];
-                
-                const cell = document.createElement('div');
-                cell.className = "cal-cell";
-                cell.innerHTML = `
-                    <span class="text-[10px] font-bold opacity-30">${d}</span>
-                    ${data ? `<div class="ratio-tag text-anim">${data.ratio}</div>` : ''}
-                `;
-                
-                // Modification manuelle si besoin
-                cell.onclick = async () => {
-                    const currentVal = data ? data.ratio : "";
-                    const newVal = prompt("Valeur manuelle (ex: 5/10) :", currentVal);
-                    if (newVal === null) return;
-                    
-                    const docRef = doc(db, "users", user, "history", key);
-                    if (newVal.trim() === "") {
-                        await deleteDoc(docRef);
-                    } else {
-                        // On essaie d'extraire le chiffre pour maintenir la cohérence du total
-                        const num = parseInt(newVal.split('/')[0]) || 0;
-                        await setDoc(docRef, { ratio: newVal.trim(), total: num });
-                    }
-                };
-                cal.appendChild(cell);
-            }
-        }
-
-        // INIT
-        if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
+        if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
         setLang(localStorage.getItem('lang') || 'fr');
-        window.updateGridSize = () => syncPills();
     </script>
 </body>
 </html>
