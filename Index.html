@@ -76,7 +76,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, getDocs, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAx7c0bFNXuBxadAUItyP6h0U",
@@ -103,14 +103,13 @@
 
         window.checkUserAvailability = async () => {
             const name = document.getElementById('userInput').value.trim().toLowerCase();
-            const status = document.getElementById('userStatus');
-            const passField = document.getElementById('passInput');
             if (name.length < 3) return;
             const userDoc = await getDoc(doc(db, "users", name));
             userExists = userDoc.exists();
-            status.innerText = userExists ? i18n[localStorage.getItem('lang') || 'fr'].taken : i18n[localStorage.getItem('lang') || 'fr'].available;
+            const status = document.getElementById('userStatus');
+            status.innerText = userExists ? i18n[localStorage.getItem('lang')||'fr'].taken : i18n[localStorage.getItem('lang')||'fr'].available;
             status.style.color = userExists ? "#818cf8" : "#4ade80";
-            passField.classList.remove('hidden');
+            document.getElementById('passInput').classList.remove('hidden');
         };
 
         window.handleAuth = async () => {
@@ -120,7 +119,7 @@
             const userRef = doc(db, "users", name);
             if (userExists) {
                 const snap = await getDoc(userRef);
-                if (snap.data().password === pass) proceed(name); else alert("Error");
+                if (snap.data().password === pass) proceed(name); else alert("Pass Error");
             } else {
                 await setDoc(userRef, { password: pass }); proceed(name);
             }
@@ -174,20 +173,24 @@
 
         async function togglePill(n, isActive) {
             const today = new Date().toISOString().split('T')[0];
+            const size = document.getElementById('gridSize').value;
             const packRef = collection(db, "users", user, "current_pack");
             const histRef = doc(db, "users", user, "history", today);
 
             if(isActive) {
                 await deleteDoc(doc(packRef, n.toString()));
-                const hSnap = await getDoc(histRef);
-                if(hSnap.exists() && hSnap.data().count > 0) {
-                    await updateDoc(histRef, { count: increment(-1) });
-                }
             } else {
                 await setDoc(doc(packRef, n.toString()), { taken: true });
-                const hSnap = await getDoc(histRef);
-                if(!hSnap.exists()) await setDoc(histRef, { count: 1 });
-                else await updateDoc(histRef, { count: increment(1) });
+            }
+
+            // Calculer le nouvel état pour aujourd'hui
+            const snap = await getDocs(packRef);
+            if(snap.empty) {
+                await deleteDoc(histRef);
+            } else {
+                let max = 0;
+                snap.forEach(d => { if(parseInt(d.id) > max) max = parseInt(d.id); });
+                await setDoc(histRef, { ratio: `${max}/${size}`, val: max });
             }
         }
 
@@ -219,14 +222,14 @@
                 const data = historyData[key];
                 const cell = document.createElement('div');
                 cell.className = "cal-cell";
-                cell.innerHTML = `<span class="text-[10px] font-bold opacity-30">${d}</span>${data && data.count > 0 ? `<div class="ratio-tag text-anim">+${data.count}</div>` : ''}`;
+                cell.innerHTML = `<span class="text-[10px] font-bold opacity-30">${d}</span>${data ? `<div class="ratio-tag text-anim">${data.ratio}</div>` : ''}`;
                 
                 cell.onclick = async () => {
-                    const val = prompt("Nombre de pilules pour ce jour :", data ? data.count : "0");
-                    if (val === null) return;
+                    const newVal = prompt("Ratio manuel (ex: 5/10) :", data ? data.ratio : "");
+                    if (newVal === null) return;
                     const docRef = doc(db, "users", user, "history", key);
-                    if (val === "0" || val === "") await deleteDoc(docRef);
-                    else await setDoc(docRef, { count: parseInt(val) });
+                    if (newVal.trim() === "") await deleteDoc(docRef);
+                    else await setDoc(docRef, { ratio: newVal.trim() });
                 };
                 cal.appendChild(cell);
             }
