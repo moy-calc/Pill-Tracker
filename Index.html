@@ -12,7 +12,7 @@
             --bg: #f8fafc; 
             --card: rgba(255, 255, 255, 0.95); 
             --text: #1e293b; 
-            --accent: #10b981; /* Default Green */
+            --accent: #10b981; 
             --accent-glow: rgba(16, 185, 129, 0.3);
             --border: rgba(148, 163, 184, 0.2); 
         }
@@ -90,13 +90,14 @@
         /* Dropdown */
         .med-dropdown { position: relative; }
         .med-dropdown-content {
-            position: absolute; top: 120%; left: 0; 
+            position: absolute; top: 140%; left: 0; 
             background: var(--card); border: 1px solid var(--border);
-            width: 200px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            display: none; flex-direction: column; padding: 8px; z-index: 50;
+            width: 220px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            display: none; flex-direction: column; padding: 8px; z-index: 100;
             animation: fadeIn 0.2s ease;
         }
         .med-dropdown:hover .med-dropdown-content { display: flex; }
+        .med-dropdown-content.open { display: flex; }
         .dropdown-item { padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600; opacity: 0.7; transition: 0.2s; }
         .dropdown-item:hover { background: rgba(0,0,0,0.05); opacity: 1; }
         .dropdown-item.active { background: var(--accent); color: white; opacity: 1; }
@@ -109,10 +110,20 @@
         .dark .count-tag { background: rgba(255,255,255,0.1); }
 
         /* History List Items */
-        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-radius: 12px; margin-bottom: 8px; background: rgba(0,0,0,0.03); border: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
+        .history-item { display: flex; flex-direction: column; padding: 12px; border-radius: 12px; margin-bottom: 8px; background: rgba(0,0,0,0.03); border: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
         .history-item:hover { background: rgba(0,0,0,0.06); transform: translateX(2px); }
         .history-item.active { border-color: var(--accent); background: var(--accent); color: white; }
         .history-item.active * { color: white; }
+        
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .history-details { display: flex; justify-content: space-between; align-items: center; }
+        
+        /* Box Control in History */
+        .box-control { display: flex; align-items: center; gap: 4px; }
+        .box-btn { width: 20px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.1); cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .box-btn:hover { background: rgba(0,0,0,0.2); }
+        .history-item.active .box-btn { background: rgba(255,255,255,0.2); color: white; }
+        .history-item.active .box-btn:hover { background: rgba(255,255,255,0.3); }
 
         /* Modals */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 70; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
@@ -203,6 +214,19 @@
         </div>
     </div>
 
+    <!-- Modal Confirm Delete -->
+    <div id="deleteMedModal" class="modal-overlay" onclick="closeModal('deleteMedModal')">
+        <div class="glass p-6 w-80 text-center transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
+            <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">🗑️</div>
+            <h3 class="font-bold text-lg mb-2">Supprimer ?</h3>
+            <p class="text-sm opacity-60 mb-6">Voulez-vous vraiment supprimer ce médicament et tout son historique ?<br>Cette action est irréversible.</p>
+            <div class="flex gap-2">
+                <button onclick="closeModal('deleteMedModal')" class="flex-1 py-3 bg-slate-500 text-white font-bold rounded-xl active:scale-95 transition-transform">Non</button>
+                <button onclick="confirmDeleteMed()" class="flex-1 py-3 bg-red-600 text-white font-bold rounded-xl shadow-lg active:scale-95 transition-transform">Oui, Supprimer</button>
+            </div>
+        </div>
+    </div>
+
     <!-- NAVBAR -->
     <nav class="max-w-3xl mx-auto flex justify-between items-center p-4 glass mb-4 fade-in relative z-40">
         <div class="flex items-center gap-2">
@@ -212,19 +236,7 @@
             </h1>
         </div>
 
-        <!-- Med Selector Dropdown -->
-        <div id="appNavbarCenter" class="hidden absolute left-1/2 transform -translate-x-1/2">
-            <div class="med-dropdown">
-                <button id="navbarMedBtn" class="flex items-center gap-2 font-bold bg-slate-500/5 px-4 py-2 rounded-xl hover:bg-slate-500/10 transition-colors border border-slate-500/10">
-                    <span id="navbarMedName">Médicament</span>
-                    <span class="text-xs opacity-50">▼</span>
-                </button>
-                <div id="navbarDropdown" class="med-dropdown-content">
-                    <!-- Med Items -->
-                </div>
-            </div>
-        </div>
-
+        <!-- Right Side Buttons -->
         <div class="flex items-center gap-2">
             <button id="btnHistory" onclick="openRightDrawer()" class="hidden w-9 h-9 rounded-xl flex items-center justify-center bg-slate-500/5 hover:bg-slate-500/10 transition-colors text-lg">🕒</button>
             <button id="btnLogout" onclick="doLogout()" class="hidden px-3 py-1 text-xs font-bold bg-slate-500/10 text-slate-500 rounded-lg hover:bg-slate-500/20 transition-colors">X</button>
@@ -245,7 +257,7 @@
                 <input type="password" id="passInput" placeholder="Mot de passe" class="w-full bg-slate-500/10 border border-slate-500/20 rounded-xl p-4 pr-12 text-center text-lg outline-none focus:border-indigo-500 transition-all font-bold">
                 <button onclick="togglePasswordVisibility()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-500 transition-colors">
                     <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                    <svg id="eyeOffIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 0 011.574-2.59M5.22 5.22a10.057 10.057 0 013.226-1.832C9.586 2.832 10.774 2.75 12 2.75c4.478 0 8.268 2.943 9.542 7a10.05 0 01-1.575 2.59m-4.97 4.97a3 3 0 11-4.243-4.243m0 0L3 3m18 18l-3.75-3.75" /></svg>
+                    <svg id="eyeOffIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 0 011.574-2.59M5.22 5.22a10.057 0 013.226-1.832C9.586 2.832 10.774 2.75 12 2.75c4.478 0 8.268 2.943 9.542 7a10.05 0 01-1.575 2.59m-4.97 4.97a3 3 0 11-4.243-4.243m0 0L3 3m18 18l-3.75-3.75" /></svg>
                 </button>
             </div>
 
@@ -258,14 +270,34 @@
         <!-- APP -->
         <div id="appBody" class="hidden space-y-4">
             
-            <!-- Med Controls (Add/Config/Edit) -->
-            <div class="glass p-4 fade-in flex justify-between items-center">
+            <!-- Med Controls -->
+            <div class="glass p-4 fade-in flex justify-between items-center relative z-10">
                 <div class="text-[10px] font-bold uppercase opacity-50 tracking-widest">
                     <span id="lblConfig">Configuration</span>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex gap-2 items-center">
+                    <!-- Archive Button -->
+                    <button id="btnArchive" onclick="archiveMed()" class="hidden w-8 h-8 rounded-lg bg-slate-500/10 text-slate-500 font-bold flex items-center justify-center hover:bg-slate-500 hover:text-white transition-colors" title="Archiver (Garder dans l'historique)">📦</button>
+                    
+                    <!-- Delete Button -->
+                    <button id="btnDeleteMed" onclick="openDeleteMedModal()" class="hidden w-8 h-8 rounded-lg bg-red-500/10 text-red-500 font-bold flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors" title="Supprimer tout">🗑️</button>
+
+                    <!-- Edit Button -->
                     <button id="btnEditConfig" onclick="openEditMedModal()" class="hidden w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 font-bold flex items-center justify-center hover:bg-amber-500 hover:text-white transition-colors" title="Modifier la configuration">✏️</button>
+                    
+                    <!-- Add Button -->
                     <button onclick="openModal('addMedModal')" class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-500 font-bold flex items-center justify-center hover:bg-indigo-500 hover:text-white transition-colors">+</button>
+
+                    <!-- Med Dropdown Container -->
+                    <div class="med-dropdown">
+                        <button id="navbarMedBtn" onclick="window.toggleMedDropdown()" class="flex items-center gap-2 font-bold bg-slate-500/5 px-4 py-2 rounded-xl hover:bg-slate-500/10 transition-colors border border-slate-500/10 shadow-sm">
+                            <span id="navbarMedName">Médicament</span>
+                            <span class="text-xs opacity-50">▼</span>
+                        </button>
+                        <div id="navbarDropdown" class="med-dropdown-content">
+                            <!-- Med Items -->
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -304,7 +336,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, getDocs, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // --- Config ---
         const firebaseConfig = {
@@ -321,12 +353,13 @@
 
         const MED_COLORS = ["#6366f1", "#ef4444", "#10b981", "#f59e0b", "#ec4899", "#06b6d4"];
         let selectedColor = MED_COLORS[0];
-        let isEditingMed = false; // Track if we are editing or creating
+        let isEditingMed = false;
 
         let user = "";
         let currentMedId = null;
         let currentPlateIndex = 0; 
-        let medsList = [];
+        let medsList = []; 
+        let activeMedsList = []; 
         let currentDate = new Date();
         let unsubscribeGrid = null;
         let unsubscribeHistory = null;
@@ -334,9 +367,9 @@
 
         // --- I18n ---
         const i18n = {
-            fr: { title: "MedTracker", add: "Ajouter", edit: "Modifier", editConfig: "Modifier Config", finish: "Boîte Terminée !", finishText: "Voulez-vous commencer une nouvelle boîte ?", recharge: "Oui, Recharger", placeholder: "Mot de passe", config: "Configuration", progress: "Progression Boîte", history: "Historique", lang: "Langue", pieces: "Pièces/Plaque", plates: "Plaques/Boîte", empty: "Aucun traitement", loading: "Chargement..." },
-            en: { title: "MedTracker", add: "Add", edit: "Edit", editConfig: "Edit Config", finish: "Box Finished!", finishText: "Start a new box?", recharge: "Yes, Recharge", placeholder: "Password", config: "Config", progress: "Box Progress", history: "History", lang: "Language", pieces: "Pieces/Plate", plates: "Plates/Box", empty: "No treatments", loading: "Loading..." },
-            ar: { title: "المتتبع", add: "إضافة", edit: "تعديل", editConfig: "تعديل الإعدادات", finish: "انتهت العلبة !", finishText: "هل تريد بدء علبة جديدة؟", recharge: "نعم، إعادة تعبئة", placeholder: "كلمة المرور", config: "الإعدادات", progress: "تقدم العلبة", history: "السجل", lang: "اللغة", pieces: "قطعة/لوحة", plates: "لوحة/علبة", empty: "لا علاج", loading: "جاري التحميل..." }
+            fr: { title: "MedTracker", add: "Ajouter", edit: "Modifier", editConfig: "Modifier Config", finish: "Boîte Terminée !", finishText: "Voulez-vous commencer une nouvelle boîte ?", recharge: "Oui, Recharger", placeholder: "Mot de passe", config: "Configuration", progress: "Progression Boîte", history: "Historique", lang: "Langue", pieces: "Pièces/Plaque", plates: "Plaques/Boîte", empty: "Aucun traitement", loading: "Chargement...", box: "Boîte" },
+            en: { title: "MedTracker", add: "Add", edit: "Edit", editConfig: "Edit Config", finish: "Box Finished!", finishText: "Start a new box?", recharge: "Yes, Recharge", placeholder: "Password", config: "Config", progress: "Box Progress", history: "History", lang: "Language", pieces: "Pieces/Plate", plates: "Plates/Box", empty: "No treatments", loading: "Loading...", box: "Box" },
+            ar: { title: "المتتبع", add: "إضافة", edit: "تعديل", editConfig: "تعديل الإعدادات", finish: "انتهت العلبة !", finishText: "هل تريد بدء علبة جديدة؟", recharge: "نعم، إعادة تعبئة", placeholder: "كلمة المرور", config: "الإعدادات", progress: "تقدم العلبة", history: "السجل", lang: "اللغة", pieces: "قطعة/لوحة", plates: "لوحة/علبة", empty: "لا علاج", loading: "جاري التحميل...", box: "علبة" }
         };
         let curLang = 'fr';
 
@@ -382,63 +415,162 @@
             document.getElementById('drawerOverlay').classList.remove('open');
         };
 
-        // --- Navbar Dropdown ---
+        // --- Toggle Dropdown Logic ---
+        window.toggleMedDropdown = () => {
+            const dd = document.getElementById('navbarDropdown');
+            dd.classList.toggle('open');
+        };
+
+        // --- Navbar Dropdown (Only Active Meds) ---
         function renderNavbarMed() {
             const dd = document.getElementById('navbarDropdown');
             dd.innerHTML = '';
-            medsList.forEach(med => {
+            activeMedsList.forEach(med => {
                 const item = document.createElement('div');
                 item.className = `dropdown-item ${med.id === currentMedId ? 'active' : ''}`;
                 item.innerHTML = `<span class="w-2 h-2 rounded-full" style="background:${med.color}"></span> ${med.name}`;
-                item.onclick = () => {
+                item.onclick = (e) => {
+                    e.stopPropagation();
                     switchMed(med.id);
-                    closeDrawers();
+                    closeDrawers(); 
+                    dd.classList.remove('open');
                 };
                 dd.appendChild(item);
             });
-            if(medsList.length > 0) {
-                const cur = medsList.find(m => m.id === currentMedId);
+            if(activeMedsList.length > 0) {
+                const cur = activeMedsList.find(m => m.id === currentMedId);
                 if(cur) document.getElementById('navbarMedName').innerText = cur.name;
+            } else {
+                 document.getElementById('navbarMedName').innerText = "Aucun";
             }
         }
 
-        // --- Global History Logic ---
+        // --- Global History Logic (RESTORED FROM PERFECT CODE + BOX CONTROLS) ---
         async function loadGlobalHistory() {
             const list = document.getElementById('globalHistoryList');
             list.innerHTML = '';
+            
+            // FIX: Fetch fresh data from DB exactly like the "Perfect Code" did
+            // This ensures the list always loads regardless of global state.
             const snap = await getDocs(collection(db, "users", user, "medications"));
             const allMeds = [];
             snap.forEach(d => allMeds.push({ id: d.id, ...d.data() }));
+
+            if(allMeds.length === 0) {
+                list.innerHTML = `<div class="text-center text-sm opacity-50 mt-4">${i18n[curLang].empty}</div>`;
+                return;
+            }
 
             for (const med of allMeds) {
                 const histSnap = await getDocs(collection(db, "users", user, "medications", med.id, "history"));
                 let lastDate = null;
                 let maxRatio = 0;
-                histSnap.forEach(d => {
-                    if(!lastDate || d.id > lastDate) {
-                        lastDate = d.id;
-                        maxRatio = parseInt(d.data().ratio.split('/')[0]) || 0;
-                    }
+                let boxCount = 1;
+                
+                let entries = [];
+                histSnap.forEach(d => entries.push({ id: d.id, ...d.data() }));
+                entries.sort((a,b) => a.id.localeCompare(b.id));
+
+                // Calculate Box Count (Restored logic)
+                let prevVal = 0;
+                entries.forEach(d => {
+                    const val = parseInt(d.data().ratio.split('/')[0]) || 0;
+                    if(val < prevVal) boxCount++;
+                    prevVal = val;
+                    if(!lastDate || d.id > lastDate) lastDate = d.id;
                 });
 
                 const item = document.createElement('div');
                 item.className = `history-item ${med.id === currentMedId ? 'active' : ''}`;
                 const dateStr = lastDate ? new Date(lastDate).toLocaleDateString(curLang, { day: 'numeric', month: 'short' }) : "Jamais";
                 
-                item.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full" style="background:${med.color}"></span>
-                        <span class="font-bold text-sm">${med.name}</span>
+                // Box Controls
+                const boxControlHTML = `
+                    <div class="box-control mt-1">
+                        <span class="text-[10px] uppercase font-bold opacity-50 mr-1">${i18n[curLang].box}</span>
+                        <button class="box-btn" onclick="event.stopPropagation(); adjustBoxCount('${med.id}', -1)">-</button>
+                        <span class="font-bold text-sm w-6 text-center">${boxCount}</span>
+                        <button class="box-btn" onclick="event.stopPropagation(); adjustBoxCount('${med.id}', 1)">+</button>
                     </div>
-                    <div class="text-xs opacity-60">${lastDate ? `Fin: ${dateStr}` : i18n[curLang].empty}</div>
                 `;
-                item.onclick = () => {
+
+                item.innerHTML = `
+                    <div class="history-header">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full" style="background:${med.color}"></span>
+                            <span class="font-bold text-sm">${med.name}</span>
+                        </div>
+                    </div>
+                    <div class="history-details">
+                        <div class="text-xs opacity-60">${lastDate ? `Fin: ${dateStr}` : i18n[curLang].empty}</div>
+                        ${boxControlHTML}
+                    </div>
+                `;
+                
+                item.onclick = (e) => {
+                    if(e.target.closest('.box-control')) return;
                     switchMed(med.id);
                     closeDrawers();
                 };
                 list.appendChild(item);
             }
         }
+
+        // --- Adjust Box Count Logic ---
+        window.adjustBoxCount = async (medId, delta) => {
+            const histSnap = await getDocs(collection(db, "users", user, "medications", medId, "history"));
+            if(histSnap.empty) return;
+
+            let entries = [];
+            histSnap.forEach(d => entries.push({ id: d.id, ...d.data() }));
+            entries.sort((a,b) => a.id.localeCompare(b.id));
+            
+            const lastEntry = entries[entries.length - 1];
+            const oldRatio = lastEntry.ratio;
+            const size = parseInt(oldRatio.split('/')[1]);
+            const oldMax = parseInt(oldRatio.split('/')[0]);
+            
+            const oldBox = Math.floor((oldMax - 1) / size) + 1;
+            const positionInBox = ((oldMax - 1) % size) + 1;
+            const newBox = oldBox + delta;
+            
+            if(newBox < 1) return; 
+
+            const newMax = ((newBox - 1) * size) + positionInBox;
+            const newRatio = `${newMax}/${size}`;
+            
+            await updateDoc(doc(db, "users", user, "medications", medId, "history", lastEntry.id), { ratio: newRatio });
+            loadGlobalHistory();
+        };
+
+        // --- Archive Logic (ROBUST FIX) ---
+        window.archiveMed = async () => {
+            if(!currentMedId) {
+                alert("Erreur: Aucun médicament sélectionné.");
+                return;
+            }
+
+            if(confirm("Archiver ce médicament ?\n\nIl sera retiré de la liste active mais restera dans l'historique.")) {
+                try {
+                    // 1. Update DB
+                    await updateDoc(doc(db, "users", user, "medications", currentMedId), { active: false });
+                    
+                    // 2. Reset UI State
+                    currentMedId = null; 
+                    
+                    // 3. Refresh All Lists
+                    await loadMeds(); 
+                    
+                    // 4. Force refresh history drawer to reflect change
+                    await loadGlobalHistory();
+                    
+                    showToast("Médicament archivé");
+                } catch (error) {
+                    console.error("Archive error:", error);
+                    alert("Erreur lors de l'archivage. Vérifiez votre connexion.");
+                }
+            }
+        };
 
         // --- Password Toggle ---
         window.togglePasswordVisibility = () => {
@@ -452,7 +584,7 @@
             } else {
                 input.type = "password";
                 eyeIcon.classList.remove('hidden');
-                eyeOffIcon.classList.add('hidden');
+                eyeIcon.classList.add('hidden');
             }
         };
 
@@ -477,7 +609,6 @@
             
             status.innerText = exists ? "Compte existant" : "Nouveau compte";
             status.style.color = exists ? "var(--accent)" : "#10b981";
-            // REMOVED AUTO-FOCUS AND AUTO-SHOW TO FIX USER ISSUE
         };
 
         window.handleAuth = async () => {
@@ -493,7 +624,6 @@
                 return;
             }
 
-            // If password is hidden, show it first (User wants to enter pass)
             if(passContainer.classList.contains('hidden')) {
                 passContainer.classList.remove('hidden');
                 document.getElementById('passInput').focus();
@@ -522,13 +652,13 @@
             } else {
                 await setDoc(userRef, { password: pass, created: new Date().toISOString() });
                 success = true;
-                // Create default med
                 const newMedRef = doc(collection(db, "users", name, "medications"));
                 await setDoc(newMedRef, {
                     name: "Mon Traitement",
                     color: MED_COLORS[0],
                     piecesPerPlate: 10,
-                    platesPerBox: 3
+                    platesPerBox: 3,
+                    active: true 
                 });
             }
 
@@ -547,9 +677,9 @@
                 user = "";
                 currentMedId = null;
                 medsList = [];
+                activeMedsList = [];
                 localStorage.removeItem('medUser');
                 document.getElementById('appBody').classList.add('hidden');
-                document.getElementById('appNavbarCenter').classList.add('hidden');
                 document.getElementById('btnHistory').classList.add('hidden');
                 document.getElementById('btnLogout').classList.add('hidden');
                 document.getElementById('loginBox').classList.remove('hidden');
@@ -565,7 +695,6 @@
             user = name;
             document.getElementById('loginBox').classList.add('hidden');
             document.getElementById('appBody').classList.remove('hidden');
-            document.getElementById('appNavbarCenter').classList.remove('hidden');
             document.getElementById('btnHistory').classList.remove('hidden');
             document.getElementById('btnLogout').classList.remove('hidden');
             loadMeds();
@@ -575,20 +704,29 @@
         async function loadMeds() {
             const snap = await getDocs(collection(db, "users", user, "medications"));
             medsList = [];
-            snap.forEach(d => medsList.push({ id: d.id, ...d.data() }));
+            activeMedsList = [];
+            snap.forEach(d => {
+                const data = { id: d.id, ...d.data() };
+                medsList.push(data);
+                if(data.active !== false) activeMedsList.push(data); 
+            });
             
             renderNavbarMed();
             
-            if (medsList.length > 0) {
-                if (currentMedId && medsList.find(m => m.id === currentMedId)) {
+            if (activeMedsList.length > 0) {
+                if (currentMedId && activeMedsList.find(m => m.id === currentMedId)) {
                     switchMed(currentMedId);
                 } else {
-                    switchMed(medsList[0].id);
+                    switchMed(activeMedsList[0].id);
                 }
                 document.getElementById('btnEditConfig').classList.remove('hidden');
+                document.getElementById('btnArchive').classList.remove('hidden');
+                document.getElementById('btnDeleteMed').classList.remove('hidden');
             } else {
                 currentMedId = null;
                 document.getElementById('btnEditConfig').classList.add('hidden');
+                document.getElementById('btnArchive').classList.add('hidden');
+                document.getElementById('btnDeleteMed').classList.add('hidden');
                 const grid = document.getElementById('grid');
                 grid.innerHTML = `<div class="col-span-full text-center opacity-40 py-10 text-sm">${i18n[curLang].empty}.<br>Cliquez sur +.</div>`;
                 document.getElementById('progressFill').style.width = '0%';
@@ -597,7 +735,6 @@
             }
         }
 
-        // Open Edit Modal with current data
         window.openEditMedModal = () => {
             if(!currentMedId) return;
             const med = medsList.find(m => m.id === currentMedId);
@@ -609,7 +746,6 @@
             document.getElementById('newMedPlates').value = med.platesPerBox;
             selectedColor = med.color;
             
-            // Update UI for Edit Mode
             document.getElementById('modalAddTitle').innerText = i18n[curLang].editConfig;
             document.getElementById('btnAddMed').innerText = "Mettre à jour";
             renderColorPicker();
@@ -617,7 +753,19 @@
             openModal('addMedModal');
         };
 
-        // Create or Update
+        window.openDeleteMedModal = () => {
+             openModal('deleteMedModal');
+        };
+
+        window.confirmDeleteMed = async () => {
+            if(!currentMedId) return;
+            await deleteDoc(doc(db, "users", user, "medications", currentMedId));
+            closeModal('deleteMedModal');
+            currentMedId = null;
+            loadMeds();
+            showToast("Médicament supprimé");
+        };
+
         window.confirmAddMed = async () => {
             const name = document.getElementById('newMedName').value;
             const pieces = parseInt(document.getElementById('newMedPieces').value) || 10;
@@ -626,7 +774,6 @@
             if (!name) return alert("Nom requis");
 
             if(isEditingMed && currentMedId) {
-                // UPDATE EXISTING
                 await updateDoc(doc(db, "users", user, "medications", currentMedId), {
                     name: name,
                     color: selectedColor,
@@ -634,17 +781,17 @@
                     platesPerBox: plates
                 });
                 closeModal('addMedModal');
-                loadMeds(); // Reload to refresh UI with new config
+                loadMeds();
                 showToast("Configuration mise à jour");
                 isEditingMed = false;
             } else {
-                // CREATE NEW
                 const newMedRef = doc(collection(db, "users", user, "medications"));
                 await setDoc(newMedRef, {
                     name: name,
                     color: selectedColor,
                     piecesPerPlate: pieces,
-                    platesPerBox: plates
+                    platesPerBox: plates,
+                    active: true
                 });
                 
                 closeModal('addMedModal');
@@ -695,13 +842,12 @@
             }
         }
 
-        // --- Grid Logic (Multi-Plate) ---
+        // --- Grid Logic ---
         function syncGrid() {
             if(!currentMedId) return;
             const colRef = collection(db, "users", user, "medications", currentMedId, "current_doses");
             unsubscribeGrid = onSnapshot(colRef, (snap) => {
                 const currentMed = medsList.find(m => m.id === currentMedId);
-                // Refresh med data in case of edits
                 if(!currentMed) return;
                 
                 const piecesPerPlate = currentMed.piecesPerPlate || 10;
@@ -716,7 +862,6 @@
                 progressFill.style.width = `${Math.min(progress, 100)}%`;
                 document.getElementById('percentText').innerText = `${Math.round(progress)}%`;
 
-                // Dynamic Color & Notification
                 if(progress < 60) progressFill.style.backgroundColor = '#10b981'; 
                 else if(progress < 80) progressFill.style.backgroundColor = '#f59e0b'; 
                 else if(progress < 90) progressFill.style.backgroundColor = '#ef4444'; 
@@ -756,7 +901,8 @@
                 const isNext = (i === nextAvailable);
                 
                 btn.className = `dose-btn aspect-square font-bold text-sm shadow-sm ${isActive ? 'active' : ''}`;
-                btn.innerText = i;
+                const visualNumber = i - (currentPlateIndex * piecesPerPlate);
+                btn.innerText = visualNumber;
 
                 if (!isActive) {
                     if (!isNext) btn.classList.add('locked');
@@ -781,11 +927,12 @@
                 await setDoc(doc(colRef, n.toString()), { taken: true });
             }
 
+            // Calculate Current Max
             const snap = await getDocs(colRef);
             let currentMax = 0;
             snap.forEach(d => { currentMax = Math.max(currentMax, parseInt(d.id)); });
 
-            // History Logic
+            // Find Previous Max (History)
             const historySnap = await getDocs(collection(db, "users", user, "medications", currentMedId, "history"));
             let lastKnownMax = 0;
             let lastDate = "";
@@ -802,25 +949,10 @@
                 }
             }
 
-            if(isActive) {
-                // Undo Logic
-                if(lastEntry && prevVal === n) {
-                    await deleteDoc(doc(db, "users", user, "medications", currentMedId, "history", lastDate));
-                    let newPrevVal = 0;
-                    for(let i = entries.length - 2; i >= 0; i--) {
-                        if(entries[i].id < today) {
-                            newPrevVal = parseInt(entries[i].ratio.split('/')[0]);
-                            break;
-                        }
-                    }
-                    if (currentMax <= newPrevVal) await deleteDoc(histRef);
-                    else await setDoc(histRef, { ratio: `${currentMax}/${totalSize}` }, { merge: true });
-                } else {
-                    if (currentMax <= lastKnownMax) await deleteDoc(histRef);
-                    else await setDoc(histRef, { ratio: `${currentMax}/${totalSize}` }, { merge: true });
-                }
-            } else {
+            if (currentMax > lastKnownMax) {
                 await setDoc(histRef, { ratio: `${currentMax}/${totalSize}` }, { merge: true });
+            } else {
+                await deleteDoc(histRef);
             }
         }
 
@@ -935,7 +1067,7 @@
             const m = document.getElementById(id);
             m.classList.remove('hidden');
             requestAnimationFrame(() => m.classList.add('open'));
-            if(id === 'addMedModal' && !isEditingMed) {
+            if(id === 'addMedModal') {
                 document.getElementById('newMedName').value = '';
                 document.getElementById('newMedPieces').value = '10';
                 document.getElementById('newMedPlates').value = '3';
@@ -974,12 +1106,18 @@
         const savedLang = localStorage.getItem('medLang') || 'fr';
         applyLang(savedLang);
         
-        // Auto-login logic fix
+        // Auto-login logic
         if(savedUser) {
             document.getElementById('userInput').value = savedUser;
-            // We proceed immediately, assuming valid session. 
-            // If we want to be stricter, we'd verify password again, but for UX let's trust local storage if exists.
-            proceed(savedUser);
+            try {
+                proceed(savedUser);
+            } catch (e) {
+                console.error("Auto-login failed", e);
+                document.getElementById('appBody').classList.add('hidden');
+                document.getElementById('loginBox').classList.remove('hidden');
+                document.getElementById('passContainer').classList.add('hidden');
+                document.getElementById('btnLogin').innerText = "Connexion / Inscription";
+            }
         }
     </script>
 </body>
