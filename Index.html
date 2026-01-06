@@ -11,31 +11,31 @@
         .dark { --bg: #0f172a; --card: rgba(30, 41, 59, 0.9); --text: #f1f5f9; --border: rgba(255, 255, 255, 0.1); }
         body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.4s; min-height: 100vh; overflow-x: hidden; }
         .glass { background: var(--card); backdrop-filter: blur(24px); border: 1px solid var(--border); border-radius: 24px; }
-        .drawer { position: fixed; top: 0; bottom: 0; width: 300px; background: var(--bg); z-index: 2000; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 20px; }
-        .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1500; opacity: 0; pointer-events: none; transition: 0.3s; backdrop-filter: blur(2px); }
-        .drawer-overlay.open { opacity: 1; pointer-events: auto; }
-        .med-dropdown-content { position: absolute; top: 110%; left: 50%; transform: translateX(-50%); background: var(--card); border: 1px solid var(--border); width: 220px; border-radius: 20px; display: none; flex-direction: column; padding: 8px; z-index: 1000 !important; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        
+        /* FIX Z-INDEX NAVIGATION */
+        .med-dropdown-content { 
+            position: absolute; top: 110%; left: 50%; transform: translateX(-50%); 
+            background: var(--card); border: 1px solid var(--border); width: 250px; 
+            border-radius: 20px; display: none; flex-direction: column; padding: 8px; 
+            z-index: 9999 !important; box-shadow: 0 20px 50px rgba(0,0,0,0.3); 
+        }
         .med-dropdown-content.open { display: flex; }
+
         .dose-btn { aspect-ratio: 1/1; transition: 0.2s; background: rgba(148, 163, 184, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; cursor: pointer; }
         .dose-btn.active { background: var(--accent); color: white; transform: scale(1.05); }
         .dose-btn.locked { opacity: 0.15; pointer-events: none; filter: grayscale(1); }
-        .cal-cell { aspect-ratio: 1/1.5; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border: 1px solid transparent; padding: 2px; }
+        .cal-cell { aspect-ratio: 1/1.6; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; padding: 2px; }
         .ratio-tag { background: var(--accent); color: white; font-size: 0.55rem; padding: 1px 4px; border-radius: 4px; margin-top: 1px; font-weight: 800; }
         .count-tag { color: var(--accent); font-size: 0.75rem; font-weight: 900; }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 3000; display: none; align-items: center; justify-content: center; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 5000; display: none; align-items: center; justify-content: center; }
         .modal-overlay.open { display: flex; }
     </style>
 </head>
 <body class="p-3 md:p-6 antialiased">
-    <div id="drawerOverlay" class="drawer-overlay" onclick="closeDrawers()"></div>
+    <div id="drawerOverlay" class="fixed inset-0 bg-black/40 z-[1500] hidden" onclick="closeDrawers()"></div>
 
-    <div id="rightDrawer" class="drawer right-0 translate-x-full">
-        <h2 class="text-xl font-bold mb-6">Gestion / History</h2>
-        <div id="globalHistoryList" class="space-y-4"></div>
-    </div>
-
-    <nav class="max-w-2xl mx-auto flex justify-between items-center p-4 glass mb-4 relative z-50">
-        <div class="w-10"></div>
+    <nav class="max-w-2xl mx-auto flex justify-between items-center p-4 glass mb-4 relative z-[2000]">
+        <button onclick="handleLogout()" id="logoutBtn" class="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center font-bold hidden">🚪</button>
         <h1 class="text-xl font-black text-indigo-500 tracking-tighter italic">MEDTRACKER</h1>
         <div class="flex gap-2">
             <button onclick="openRightDrawer()" class="w-10 h-10 rounded-xl bg-slate-500/5 flex items-center justify-center">🕒</button>
@@ -45,13 +45,18 @@
 
     <main class="max-w-2xl mx-auto space-y-4">
         <div id="loginBox" class="glass p-8 text-center space-y-4">
-            <input type="text" id="userInput" placeholder="Identifiant" class="w-full bg-slate-500/10 rounded-xl p-4 text-center font-bold outline-none">
-            <button onclick="handleAuth()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl">ENTRER</button>
+            <div class="space-y-3">
+                <input type="text" id="userInput" oninput="checkUserAvailability()" placeholder="Nom d'utilisateur" class="w-full bg-slate-500/10 rounded-xl p-4 text-center font-bold outline-none">
+                <div id="authStatus" class="text-[10px] font-bold uppercase tracking-widest opacity-50">Saisissez un nom...</div>
+                <input type="password" id="passInput" placeholder="Mot de passe" class="w-full bg-slate-500/10 rounded-xl p-4 text-center font-bold outline-none hidden">
+            </div>
+            <button id="authBtn" onclick="handleAuth()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl opacity-50 pointer-events-none">CONTINUER</button>
+            <p id="loginError" class="text-red-500 text-xs font-bold hidden"></p>
         </div>
 
         <div id="appBody" class="hidden space-y-4">
-            <div class="glass p-4 flex justify-center items-center relative" style="z-index: 100;">
-                <div class="relative w-full text-center">
+            <div class="glass p-4 flex justify-center items-center relative z-[1000]">
+                <div class="relative">
                     <button onclick="toggleDropdown()" id="navbarMedBtn" class="bg-slate-500/5 px-8 py-3 rounded-2xl font-black text-lg">
                         <span id="navbarMedName">...</span> ▾
                     </button>
@@ -65,9 +70,7 @@
                     <h2 id="currentMedNameDisplay" class="text-2xl font-black">---</h2>
                     <span id="percentText" class="text-3xl font-black opacity-30">0%</span>
                 </div>
-                <div class="h-2 w-full bg-slate-500/10 rounded-full overflow-hidden mb-6">
-                    <div id="progressFill" class="h-full bg-indigo-500 transition-all duration-700" style="width: 0%;"></div>
-                </div>
+                <div class="h-2 w-full bg-slate-500/10 rounded-full overflow-hidden mb-6"><div id="progressFill" class="h-full bg-indigo-500 transition-all duration-700 w-0"></div></div>
                 <div id="plateTabs" class="flex gap-2 mb-6 overflow-x-auto pb-2"></div>
                 <div id="grid" class="grid grid-cols-5 gap-3"></div>
             </div>
@@ -75,7 +78,7 @@
             <div class="glass p-6">
                 <div class="flex justify-between items-center mb-6">
                     <button onclick="changeMonth(-1)" class="font-bold">←</button>
-                    <h3 id="calMonth" class="font-bold uppercase text-xs tracking-widest text-center"></h3>
+                    <h3 id="calMonth" class="font-bold uppercase text-xs tracking-widest"></h3>
                     <button onclick="changeMonth(1)" class="font-bold">→</button>
                 </div>
                 <div id="calendar" class="grid grid-cols-7 gap-1"></div>
@@ -83,19 +86,23 @@
         </div>
     </main>
 
+    <div id="rightDrawer" class="fixed top-0 right-0 bottom-0 width-[300px] bg-white dark:bg-slate-900 z-[2500] translate-x-full transition-transform duration-300 p-6 glass border-l border-white/10">
+        <h2 class="text-xl font-bold mb-6">Gestion</h2>
+        <div id="globalHistoryList" class="space-y-4"></div>
+    </div>
+
     <div id="editCalModal" class="modal-overlay" onclick="closeModal('editCalModal')">
         <div class="glass p-6 w-80" onclick="event.stopPropagation()">
             <h3 class="font-bold mb-4">Modifier Prises</h3>
-            <p class="text-[10px] opacity-50 mb-2">Séparez par espace pour plusieurs (ex: 6/6 1/6)</p>
-            <input type="text" id="editCalInput" class="w-full p-4 bg-slate-500/10 rounded-xl mb-4 font-bold text-center" placeholder="Ex: 6/6 1/6">
-            <button onclick="saveCalEdit()" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl uppercase">Sauvegarder</button>
+            <input type="text" id="editCalInput" class="w-full p-4 bg-slate-500/10 rounded-xl mb-4 font-bold text-center">
+            <button onclick="saveCalEdit()" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl">SAUVEGARDER</button>
         </div>
     </div>
 
     <div id="finishModal" class="modal-overlay" onclick="closeModal('finishModal')">
         <div class="glass p-8 w-80 text-center" onclick="event.stopPropagation()">
             <h3 class="font-black text-xl mb-6">Boîte terminée !</h3>
-            <button onclick="confirmFinishBox()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl">COMMENCER NOUVELLE BOÎTE</button>
+            <button onclick="confirmFinishBox()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl uppercase">Nouvelle Boîte</button>
         </div>
     </div>
 
@@ -104,10 +111,10 @@
             <h3 class="font-bold mb-4">Nouveau Médicament</h3>
             <input type="text" id="newMedName" placeholder="Nom" class="w-full p-3 bg-slate-500/10 rounded-xl mb-3 font-bold">
             <div class="grid grid-cols-2 gap-2 mb-4">
-                <input type="number" id="newMedPieces" placeholder="Pièces/Plq" class="p-3 bg-slate-500/10 rounded-xl">
+                <input type="number" id="newMedPieces" placeholder="Pièces" class="p-3 bg-slate-500/10 rounded-xl">
                 <input type="number" id="newMedPlates" placeholder="Plaques" class="p-3 bg-slate-500/10 rounded-xl">
             </div>
-            <button onclick="confirmAddMed()" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl">AJOUTER</button>
+            <button onclick="confirmAddMed()" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl uppercase">Ajouter</button>
         </div>
     </div>
 
@@ -119,21 +126,62 @@
         const db = getFirestore(initializeApp(firebaseConfig));
 
         let user = localStorage.getItem('medUser') || "";
-        let currentMedId = null, medsList = [], currentPlateIndex = 0, currentDate = new Date(), editingDate = null;
+        let currentMedId = null, medsList = [], currentPlateIndex = 0, currentDate = new Date();
         let unsubGrid = null, unsubHist = null;
 
-        window.handleAuth = () => {
-            const name = document.getElementById('userInput').value.trim().toLowerCase();
-            if(!name) return;
-            user = name; localStorage.setItem('medUser', user); proceed();
+        // AUTH LOGIC
+        window.checkUserAvailability = async () => {
+            const id = document.getElementById('userInput').value.trim().toLowerCase();
+            const status = document.getElementById('authStatus');
+            const passField = document.getElementById('passInput');
+            const btn = document.getElementById('authBtn');
+            
+            if(id.length < 3) {
+                status.innerText = "Saisissez un nom..."; status.className = "text-[10px] font-bold uppercase opacity-50";
+                passField.classList.add('hidden'); btn.classList.add('opacity-50', 'pointer-events-none');
+                return;
+            }
+
+            const snap = await getDoc(doc(db, "credentials", id));
+            passField.classList.remove('hidden');
+            btn.classList.remove('opacity-50', 'pointer-events-none');
+            
+            if(snap.exists()) {
+                status.innerText = "COMPTE TROUVÉ - ENTRER MOT DE PASSE"; status.className = "text-[10px] font-bold text-green-500 uppercase";
+            } else {
+                status.innerText = "NOM DISPONIBLE - CHOISIR UN MOT DE PASSE"; status.className = "text-[10px] font-bold text-blue-500 uppercase";
+            }
         };
 
-        async function proceed() {
+        window.handleAuth = async () => {
+            const id = document.getElementById('userInput').value.trim().toLowerCase();
+            const pw = document.getElementById('passInput').value.trim();
+            const err = document.getElementById('loginError');
+            if(!id || !pw) return;
+
+            const credRef = doc(db, "credentials", id);
+            const snap = await getDoc(credRef);
+
+            if(snap.exists()) {
+                if(snap.data().pw === pw) loginOk(id);
+                else { err.innerText = "Mot de passe incorrect"; err.classList.remove('hidden'); }
+            } else {
+                await setDoc(credRef, { pw: pw });
+                loginOk(id);
+            }
+        };
+
+        function loginOk(id) {
+            user = id; localStorage.setItem('medUser', user);
             document.getElementById('loginBox').classList.add('hidden');
             document.getElementById('appBody').classList.remove('hidden');
+            document.getElementById('logoutBtn').classList.remove('hidden');
             loadMeds();
         }
 
+        window.handleLogout = () => { localStorage.removeItem('medUser'); location.reload(); };
+
+        // APP LOGIC
         async function loadMeds() {
             const snap = await getDocs(collection(db, "users", user, "medications"));
             medsList = []; snap.forEach(d => medsList.push({id: d.id, ...d.data()}));
@@ -157,7 +205,7 @@
                 const max = taken.size > 0 ? Math.max(...Array.from(taken)) : 0;
                 document.getElementById('progressFill').style.width = (taken.size / total) * 100 + "%";
                 document.getElementById('percentText').innerText = Math.round((taken.size / total) * 100) + "%";
-                renderGridUI(med, taken, max); renderPlateTabs(med, max);
+                renderGridUI(med, taken, max); renderPlateTabs(med);
                 if(taken.size >= total && total > 0) openModal('finishModal');
             });
         }
@@ -179,28 +227,19 @@
             const dRef = doc(db, "users", user, "medications", currentMedId, "current_doses", n.toString());
             const hRef = doc(db, "users", user, "medications", currentMedId, "history", today);
             const total = med.piecesPerPlate * med.platesPerBox;
-
             isTaken ? await deleteDoc(dRef) : await setDoc(dRef, { t: Date.now() });
-
             const snap = await getDocs(collection(db, "users", user, "medications", currentMedId, "current_doses"));
             const currentMax = snap.size > 0 ? Math.max(...snap.docs.map(d => parseInt(d.id))) : 0;
-            
             const hSnap = await getDoc(hRef);
             let hData = hSnap.exists() ? hSnap.data().ratio : "";
-
             if (currentMax > 0) {
-                // Gestion transition de boite : si on a déjà un ratio (ex: 6/6), on garde les deux
                 let newRatio = `${currentMax}/${total}`;
-                if (hData && !hData.includes(newRatio)) {
-                    // Si on commence une nouvelle boite (1/6) mais qu'on a déjà fini l'autre (6/6)
-                    if (hData.split(' ').length < 2) hData += " " + newRatio;
-                    else hData = hData.split(' ')[0] + " " + newRatio;
-                } else {
-                    hData = newRatio;
-                }
+                if (hData && hData.includes(`${total}/${total}`) && currentMax < total) hData = `${total}/${total} ${newRatio}`;
+                else hData = newRatio;
                 await setDoc(hRef, { ratio: hData.trim() });
             } else {
-                await deleteDoc(hRef);
+                if (hData && hData.includes(`${total}/${total}`)) await setDoc(hRef, { ratio: `${total}/${total}` });
+                else await deleteDoc(hRef);
             }
         }
 
@@ -217,29 +256,17 @@
             document.getElementById('calMonth').innerText = new Intl.DateTimeFormat('fr', { month: 'long', year: 'numeric' }).format(currentDate);
             const firstDay = (new Date(y, m, 1).getDay() + 6) % 7;
             for(let i=0; i<firstDay; i++) cal.innerHTML += '<div></div>';
-
             const sortedDates = Object.keys(hist).sort();
             for(let d=1; d<=new Date(y, m + 1, 0).getDate(); d++) {
                 const key = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                 const entry = hist[key]; const cell = document.createElement('div');
                 cell.className = "cal-cell"; cell.onclick = () => openEditCal(key, entry?.ratio || "");
                 cell.innerHTML = `<span class="text-[10px] opacity-30 font-bold">${d}</span>`;
-
                 if(entry && entry.ratio) {
                     const ratios = entry.ratio.split(' ');
                     const prevDate = sortedDates.filter(dt => dt < key).pop();
                     const lastValPrevDay = prevDate ? parseInt(hist[prevDate].ratio.split(' ').pop().split('/').shift()) : 0;
-                    
-                    let diff = 0;
-                    if (ratios.length > 1) {
-                        // (Fin de l'ancienne) + (Prises de la nouvelle)
-                        const oldEnd = parseInt(ratios[0].split('/').shift());
-                        const newStart = parseInt(ratios[1].split('/').shift());
-                        diff = (oldEnd - lastValPrevDay) + newStart;
-                    } else {
-                        diff = parseInt(ratios[0].split('/').shift()) - lastValPrevDay;
-                    }
-
+                    let diff = (ratios.length > 1) ? (parseInt(ratios[0].split('/').shift()) - lastValPrevDay) + parseInt(ratios[1].split('/').shift()) : parseInt(ratios[0].split('/').shift()) - lastValPrevDay;
                     if (diff > 0 || ratios[0].startsWith('1/')) {
                         ratios.forEach(r => cell.innerHTML += `<div class="ratio-tag">${r}</div>`);
                         cell.innerHTML += `<div class="count-tag">+${diff < 0 ? ratios[0].split('/').shift() : diff}</div>`;
@@ -249,10 +276,10 @@
             }
         }
 
-        window.openEditCal = (date, val) => { editingDate = date; document.getElementById('editCalInput').value = val; openModal('editCalModal'); };
+        window.openEditCal = (date, val) => { window.editingDate = date; document.getElementById('editCalInput').value = val; openModal('editCalModal'); };
         window.saveCalEdit = async () => {
             const v = document.getElementById('editCalInput').value.trim();
-            const hRef = doc(db, "users", user, "medications", currentMedId, "history", editingDate);
+            const hRef = doc(db, "users", user, "medications", currentMedId, "history", window.editingDate);
             v ? await setDoc(hRef, { ratio: v }) : await deleteDoc(hRef);
             closeModal('editCalModal');
         };
@@ -260,14 +287,10 @@
         window.confirmFinishBox = async () => {
             const medRef = doc(db, "users", user, "medications", currentMedId); 
             const medSnap = await getDoc(medRef);
-            const medData = medSnap.data();
-            const total = medData.piecesPerPlate * medData.platesPerBox;
+            const total = medSnap.data().piecesPerPlate * medSnap.data().platesPerBox;
             const today = new Date().toISOString().split('T')[0];
-            
-            // On sature l'historique de ce jour à Max/Max avant de reset
             await setDoc(doc(db, "users", user, "medications", currentMedId, "history", today), { ratio: `${total}/${total}` }, { merge: true });
-            
-            await updateDoc(medRef, { boxCount: (medData.boxCount || 1) + 1 });
+            await updateDoc(medRef, { boxCount: (medSnap.data().boxCount || 1) + 1 });
             const doses = await getDocs(collection(db, "users", user, "medications", currentMedId, "current_doses"));
             for(const d of doses.docs) await deleteDoc(d.ref);
             closeModal('finishModal');
@@ -279,22 +302,23 @@
             snap.forEach(d => {
                 const m = d.data(); const div = document.createElement('div'); div.className = "p-4 glass space-y-2";
                 div.innerHTML = `<div class="flex justify-between font-bold"><span>${m.name}</span><input type="number" value="${m.boxCount||1}" onchange="updateBoxCount('${d.id}', this.value)" class="w-12 bg-slate-500/10 rounded text-center"></div>
-                    <div class="flex gap-2"><button onclick="toggleActive('${d.id}', ${m.active})" class="flex-1 glass text-[10px] p-2 font-bold">${m.active !== false ? 'ARCHIVE' : 'ACTIVATE'}</button>
-                    <button onclick="deleteMed('${d.id}')" class="bg-red-500/10 text-red-500 p-2 rounded text-[10px] font-bold">DELETE</button></div>`;
+                    <div class="flex gap-2"><button onclick="toggleActive('${d.id}', ${m.active})" class="flex-1 glass text-[10px] p-2 font-bold">${m.active !== false ? 'ARCHIVE' : 'ACTIVER'}</button>
+                    <button onclick="deleteMed('${d.id}')" class="bg-red-500/10 text-red-500 p-2 rounded text-[10px] font-bold">DEL</button></div>`;
                 list.appendChild(div);
             });
-            document.getElementById('rightDrawer').classList.remove('translate-x-full'); document.getElementById('drawerOverlay').classList.add('open');
+            document.getElementById('rightDrawer').classList.remove('translate-x-full'); 
+            document.getElementById('drawerOverlay').classList.remove('hidden');
         };
 
         window.updateBoxCount = async (id, val) => await updateDoc(doc(db, "users", user, "medications", id), { boxCount: parseInt(val) });
         window.toggleActive = async (id, status) => { await updateDoc(doc(db, "users", user, "medications", id), { active: status === false }); loadMeds(); closeDrawers(); };
         window.deleteMed = async (id) => { if(confirm("Supprimer ?")) { await deleteDoc(doc(db, "users", user, "medications", id)); loadMeds(); closeDrawers(); } };
-        window.closeDrawers = () => { document.getElementById('rightDrawer').classList.add('translate-x-full'); document.getElementById('drawerOverlay').classList.remove('open'); };
+        window.closeDrawers = () => { document.getElementById('rightDrawer').classList.add('translate-x-full'); document.getElementById('drawerOverlay').classList.add('hidden'); };
         window.toggleDropdown = () => document.getElementById('navbarDropdown').classList.toggle('open');
         window.openModal = (id) => document.getElementById(id).classList.add('open');
         window.closeModal = (id) => document.getElementById(id).classList.remove('open');
         window.changeMonth = (v) => { currentDate.setMonth(currentDate.getMonth() + v); syncHistory(); };
-        window.renderPlateTabs = (med, max) => {
+        window.renderPlateTabs = (med) => {
             const tabs = document.getElementById('plateTabs'); tabs.innerHTML = "";
             for(let i=0; i<med.platesPerBox; i++) {
                 const b = document.createElement('button'); b.className = `px-4 py-2 rounded-xl text-xs font-bold shrink-0 ${i === currentPlateIndex ? 'bg-indigo-600 text-white' : 'bg-slate-500/10'}`;
@@ -304,7 +328,7 @@
         window.renderDropdown = () => {
             const dd = document.getElementById('navbarDropdown'); dd.innerHTML = "";
             medsList.filter(m => m.active !== false).forEach(m => {
-                const b = document.createElement('button'); b.className = "p-4 text-center font-bold hover:bg-slate-500/10 rounded-xl";
+                const b = document.createElement('button'); b.className = "p-4 font-bold hover:bg-slate-500/10 rounded-xl text-left";
                 b.innerText = m.name; b.onclick = () => switchMed(m.id); dd.appendChild(b);
             });
         };
@@ -313,7 +337,7 @@
             if(name && pieces) { await setDoc(doc(collection(db, "users", user, "medications")), { name, piecesPerPlate: pieces, platesPerBox: plates, boxCount: 1, active: true }); closeModal('addMedModal'); loadMeds(); }
         };
         window.toggleTheme = () => document.body.classList.toggle('dark');
-        if(user) proceed();
+        if(user) loginOk(user);
     </script>
 </body>
 </html>
