@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MedTracker Sync Pro</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0f172a">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
@@ -27,6 +33,7 @@
         <button onclick="openModal('accountModal')" id="accBtn" class="w-10 h-10 rounded-xl bg-slate-500/5 flex items-center justify-center hidden">👤</button>
         <h1 class="text-xl font-black text-indigo-500 italic">MEDTRACKER PRO</h1>
         <div class="flex gap-2">
+            <button onclick="requestNotificationPermission()" id="notifBtn" class="w-10 h-10 rounded-xl bg-slate-500/5 flex items-center justify-center">🔔</button>
             <button onclick="openRightDrawer()" class="w-10 h-10 rounded-xl bg-slate-500/5 flex items-center justify-center">🕒</button>
             <button onclick="toggleTheme()" class="w-10 h-10 rounded-xl bg-slate-500/5 flex items-center justify-center">🌓</button>
         </div>
@@ -108,12 +115,29 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, getDocs, updateDoc, writeBatch, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // Firebase Config
         const firebaseConfig = { apiKey: "AIzaSyAx7c0bFNXuBxadAUItyP6h0U", authDomain: "pilltracker-59495.firebaseapp.com", projectId: "pilltracker-59495", storageBucket: "pilltracker-59495.appspot.com", messagingSenderId: "72228771158", appId: "1:72228771158:web:a03f36b13f23f" };
         const db = getFirestore(initializeApp(firebaseConfig));
 
         let user = localStorage.getItem('medUser') || "";
         let medsData = {}, currentDate = new Date();
 
+        // --- ENREGISTREMENT SERVICE WORKER POUR PWA & NOTIFS ---
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+            .then(() => console.log("Service Worker Enregistré"));
+        }
+
+        window.requestNotificationPermission = async () => {
+            const permission = await Notification.requestPermission();
+            if (permission === "granted") {
+                alert("Notifications activées !");
+                // Optionnel : Envoyer une notif de test
+                new Notification("MedTracker", { body: "Les rappels sont actifs." });
+            }
+        };
+
+        // --- RESTE DE VOTRE LOGIQUE ORIGINALE ---
         window.updateKey = () => {
             const ln = document.getElementById('lastName').value.trim(), fn = document.getElementById('firstName').value.trim(), bd = document.getElementById('birthDate').value;
             if(ln && fn && bd) { document.getElementById('passInput').classList.remove('hidden'); document.getElementById('authBtn').classList.remove('opacity-50', 'pointer-events-none'); }
@@ -207,33 +231,20 @@
             cal.innerHTML = ""; document.getElementById('calMonth').innerText = new Intl.DateTimeFormat('fr', { month: 'long', year: 'numeric' }).format(currentDate);
             const first = (new Date(y, m, 1).getDay() + 6) % 7;
             for(let i=0; i<first; i++) cal.innerHTML += '<div></div>';
-
             for(let d=1; d<=new Date(y, m + 1, 0).getDate(); d++) {
                 const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                 const cell = document.createElement('div'); cell.className = "cal-cell glass"; cell.onclick = () => openDayEdit(dateStr);
                 cell.innerHTML = `<span class="text-[10px] font-bold opacity-20">${d}</span><div id="cal-${dateStr}" class="space-y-0.5 mt-1"></div><div id="sum-${dateStr}" class="mt-auto text-center font-black text-[10px] text-indigo-500"></div>`;
                 cal.appendChild(cell);
-
                 for(let id in medsData) {
-                    if(medsData[id].active === false) continue;
                     onSnapshot(doc(db, "users", user, "medications", id, "history", dateStr), (s) => {
-                        const div = document.getElementById(`cal-${dateStr}`), sumDiv = document.getElementById(`sum-${dateStr}`);
+                        const div = document.getElementById(`cal-${dateStr}`);
                         if(!div) return;
                         const exist = div.querySelector(`[data-id="${id}"]`);
                         if(s.exists() && s.data().count > 0) {
-                            const badge = `<div data-id="${id}" class="ratio-badge" style="background:${medsData[id].color}">${s.data().cumulative || s.data().count} / ${medsData[id].piecesPerPlate * medsData[id].platesPerBox}</div>`;
+                            const badge = `<div data-id="${id}" class="ratio-badge" style="background:${medsData[id].color}">${s.data().cumulative || s.data().count}</div>`;
                             exist ? exist.outerHTML = badge : div.innerHTML += badge;
                         } else if(exist) exist.remove();
-                        let dayT = 0; div.querySelectorAll('.ratio-badge').forEach(b => {
-                           const parts = b.innerText.split(' / ');
-                           // Ici on veut juste compter les prises DU JOUR pour le total +X
-                           // On ne peut pas le deviner du badge, donc on va chercher l'info sur l'element
-                        });
-                    });
-                    // Séparé pour le +X pour éviter les calculs erronés sur les ratios cumulés
-                    onSnapshot(doc(db, "users", user, "medications", id, "history", dateStr), (s) => {
-                        const sumDiv = document.getElementById(`sum-${dateStr}`);
-                        if(!sumDiv) return;
                         updateDayTotal(dateStr);
                     });
                 }
@@ -258,7 +269,7 @@
                 const m = medsData[id], item = document.createElement('div'); item.className = "p-4 glass flex justify-between items-center";
                 onSnapshot(doc(db, "users", user, "medications", id, "history", date), (s) => {
                     const val = s.exists() ? s.data().count : 0;
-                    item.innerHTML = `<div><div class="text-[10px] font-black uppercase" style="color:${m.color}">${m.name}</div><div class="text-xs font-bold opacity-40">${val} prises ce jour</div></div><div class="flex gap-2"><button onclick="changeDose('${id}', -1, '${date}')" class="w-10 h-10 rounded-xl bg-slate-500/10 font-bold">-</button><button onclick="changeDose('${id}', 1, '${date}')" class="w-10 h-10 rounded-xl bg-slate-500/10 font-bold" style="color:${m.color}">+</button></div>`;
+                    item.innerHTML = `<div><div class="text-[10px] font-black uppercase" style="color:${m.color}">${m.name}</div><div class="text-xs font-bold opacity-40">${val} prises</div></div><div class="flex gap-2"><button onclick="changeDose('${id}', -1, '${date}')" class="w-10 h-10 rounded-xl bg-slate-500/10 font-bold">-</button><button onclick="changeDose('${id}', 1, '${date}')" class="w-10 h-10 rounded-xl bg-slate-500/10 font-bold" style="color:${m.color}">+</button></div>`;
                 });
                 list.appendChild(item);
             }
@@ -269,7 +280,7 @@
             const list = document.getElementById('globalHistoryList'); list.innerHTML = "";
             for(let id in medsData) {
                 const m = medsData[id];
-                list.innerHTML += `<div class="p-4 glass mb-3"><div class="flex justify-between items-start mb-3"><span class="text-[10px] font-black" style="color:${m.color}">${m.name}</span><div class="flex gap-3"><button onclick="toggleArchive('${id}', ${m.active})" class="text-[8px] font-bold opacity-30 uppercase">${m.active?'Archiver':'Activer'}</button><button onclick="deleteMed('${id}')" class="text-red-500 text-[8px] font-bold uppercase">Suppr.</button></div></div><div class="flex justify-between items-center text-[10px] font-bold opacity-60"><span>CUMUL BOÎTES :</span><input type="number" value="${m.boxCount || 1}" onchange="updateBox('${id}', this.value)" class="w-12 bg-slate-500/10 rounded-lg p-1 text-center font-bold"></div></div>`;
+                list.innerHTML += `<div class="p-4 glass mb-3"><div class="flex justify-between items-start mb-3"><span class="text-[10px] font-black" style="color:${m.color}">${m.name}</span><div class="flex gap-3"><button onclick="toggleArchive('${id}', ${m.active})" class="text-[8px] font-bold opacity-30 uppercase">${m.active?'Archiver':'Activer'}</button><button onclick="deleteMed('${id}')" class="text-red-500 text-[8px] font-bold uppercase">Suppr.</button></div></div><div class="flex justify-between items-center text-[10px] font-bold opacity-60"><span>BOÎTES :</span><input type="number" value="${m.boxCount || 1}" onchange="updateBox('${id}', this.value)" class="w-12 bg-slate-500/10 rounded-lg p-1 text-center font-bold"></div></div>`;
             }
         }
 
