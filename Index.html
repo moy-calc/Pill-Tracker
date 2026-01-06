@@ -6,13 +6,13 @@
     <title>MedTracker Sync</title>
     <meta name="description" content="Suivi intelligent de vos médicaments">
     <link rel="manifest" href="data:application/manifest+json,{
-        &quot;name&quot;:&quot;MedTracker Sync&quot;,
-        &quot;short_name&quot;:&quot;MedTracker&quot;,
-        &quot;start_url&quot;:&quot;.&quot;,
-        &quot;display&quot;:&quot;standalone&quot;,
-        &quot;background_color&quot;:&quot;#f8fafc&quot;,
-        &quot;theme_color&quot;:&quot;#6366f1&quot;,
-        &quot;icons&quot;:[{&quot;src&quot;:&quot;https://cdn-icons-png.flaticon.com/512/3063/3063174.png&quot;,&quot;sizes&quot;:&quot;192x192&quot;,&quot;type&quot;:&quot;image/png&quot;}]
+        \"name\":\"MedTracker Sync\",
+        \"short_name\":\"MedTracker\",
+        \"start_url\":\".\",
+        \"display\":\"standalone\",
+        \"background_color\":\"#f8fafc\",
+        \"theme_color\":\"#6366f1\",
+        \"icons\":[{\"src\":\"https://cdn-icons-png.flaticon.com/512/3063/3063174.png\",\"sizes\":\"192x192\",\"type\":\"image/png\"}]
     }">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -42,7 +42,7 @@
         <div class="flex items-center gap-4">
             <div class="flex gap-2 bg-slate-500/5 p-1 rounded-xl">
                 <button onclick="setLang('ar')" id="btn-ar" class="lang-btn px-3 py-1 text-sm font-bold opacity-50">AR</button>
-                <button onclick="setLang('fr')" id="btn-fr" class="lang-btn px-3 py-1 text-sm font-bold opacity-50">FR</button>
+                <button onclick="setLang('fr')" id="btn-fr" class="lang-btn px-3 py-1 text-sm font-bold opacity-100">FR</button>
                 <button onclick="setLang('en')" id="btn-en" class="lang-btn px-3 py-1 text-sm font-bold opacity-50">EN</button>
             </div>
             <button onclick="toggleTheme()" class="w-10 h-10 rounded-xl glass flex items-center justify-center">🌓</button>
@@ -53,23 +53,23 @@
 
         <!-- Écran de connexion / inscription -->
         <section id="authSection" class="glass p-8 text-center space-y-6 text-anim">
-            <h2 id="authTitle" class="text-3xl font-black">Bienvenue</h2>
+            <h2 class="text-3xl font-black">Bienvenue</h2>
             <input type="email" id="emailInput" placeholder="Email" class="w-full bg-transparent border-b-2 border-slate-400 focus:border-indigo-500 outline-none p-3 text-center text-xl">
-            <input type="password" id="passInput" placeholder="Mot de passe" class="w-full bg-transparent border-b-2 border-slate-400 focus:border-indigo-500 outline-none p-3 text-center text-xl" minlength="6">
+            <input type="password" id="passInput" placeholder="Mot de passe (min. 6 caractères)" class="w-full bg-transparent border-b-2 border-slate-400 focus:border-indigo-500 outline-none p-3 text-center text-xl" minlength="6">
             <div class="flex gap-4 justify-center">
-                <button onclick="signIn()" id="btnSignIn" class="px-8 py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg hover:shadow-indigo-500/50 transition-all">Connexion</button>
-                <button onclick="signUp()" id="btnSignUp" class="px-8 py-4 bg-slate-600 text-white font-bold rounded-2xl shadow-lg transition-all">Inscription</button>
+                <button onclick="signIn()" class="px-8 py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg hover:shadow-indigo-500/50 transition-all">Connexion</button>
+                <button onclick="signUp()" class="px-8 py-4 bg-slate-600 text-white font-bold rounded-2xl shadow-lg transition-all">Inscription</button>
             </div>
-            <p id="authStatus" class="text-sm text-slate-500"></p>
+            <p id="authStatus" class="text-sm text-red-500 min-h-[20px]"></p>
         </section>
 
         <!-- Application principale -->
         <section id="appSection" class="hidden space-y-8">
 
-            <!-- Streak & Notifications -->
+            <!-- Streak & Rappels -->
             <div class="glass p-6 text-center text-anim">
                 <div class="text-5xl font-black text-indigo-600" id="streakCount">0 🔥</div>
-                <p class="text-sm opacity-70 mt-2" id="streakText">Jours consécutifs parfaits</p>
+                <p class="text-sm opacity-70 mt-2">Jours consécutifs parfaits</p>
                 <button onclick="requestNotificationPermission()" class="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold">Activer les rappels quotidiens</button>
             </div>
 
@@ -95,7 +95,7 @@
     </main>
 
     <!-- Modal ajout médicament -->
-    <div id="addMedModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+    <div id="addMedModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
         <div class="glass p-8 rounded-3xl max-w-sm w-full space-y-6 text-anim">
             <h3 class="text-xl font-bold text-center">Nouveau médicament</h3>
             <input id="medName" placeholder="Nom (ex: Paracétamol)" class="w-full bg-transparent border-b-2 border-slate-400 focus:border-indigo-500 outline-none p-3">
@@ -113,28 +113,22 @@
     <div id="toast" class="toast hidden"></div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, query, orderBy, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyAx7c0bFNXuBxadAUItyP6h0U",
-            authDomain: "pilltracker-59495.firebaseapp.com",
-            projectId: "pilltracker-59495",
-            storageBucket: "pilltracker-59495.appspot.com",
-            messagingSenderId: "72228771158",
-            appId: "1:72228771158:web:a03f36b13f23f"
+            apiKey: "AIzaSyCNsYApKv5hcR833jOkbQfgQZAtWuBDf8Q",
+            authDomain: "pillcheck-f0274.firebaseapp.com",
+            projectId: "pillcheck-f0274",
+            storageBucket: "pillcheck-f0274.appspot.com",
+            messagingSenderId: "993827728910",
+            appId: "1:993827728910:web:205e7c2016b378b0edd65f"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-
-        const i18n = {
-            fr: { welcome: "Bienvenue", signin: "Connexion", signup: "Inscription", meds: "Vos médicaments", add: "Ajouter un médicament", streak: "Jours consécutifs parfaits", reminder: "Activer les rappels quotidiens" },
-            en: { welcome: "Welcome", signin: "Sign In", signup: "Sign Up", meds: "Your Medications", add: "Add Medication", streak: "Perfect consecutive days", reminder: "Enable daily reminders" },
-            ar: { welcome: "مرحباً", signin: "تسجيل الدخول", signup: "إنشاء حساب", meds: "أدويتك", add: "إضافة دواء", streak: "أيام متتالية مثالية", reminder: "تفعيل التذكيرات اليومية" }
-        };
 
         let currentUser = null;
         let medications = [];
@@ -142,7 +136,7 @@
         let currentDate = new Date();
         let reminderHour = 20; // 20h par défaut
 
-        // Auth
+        // Authentification
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
@@ -159,8 +153,9 @@
         window.signIn = () => {
             const email = document.getElementById('emailInput').value.trim();
             const pass = document.getElementById('passInput').value;
+            if (!email || !pass) return showToast("Remplissez email et mot de passe");
             signInWithEmailAndPassword(auth, email, pass)
-                .catch(err => showToast("Erreur : " + err.message));
+                .catch(err => showToast("Erreur connexion : " + err.message));
         };
 
         window.signUp = () => {
@@ -168,21 +163,22 @@
             const pass = document.getElementById('passInput').value;
             if (pass.length < 6) return showToast("Mot de passe trop court (min 6)");
             createUserWithEmailAndPassword(auth, email, pass)
-                .catch(err => showToast("Erreur : " + err.message));
+                .then(() => showToast("Compte créé ! Bienvenue !"))
+                .catch(err => showToast("Erreur inscription : " + err.message));
         };
 
         function loadUserData() {
             const userRef = doc(db, "users", currentUser.uid);
 
-            // Charger les médicaments
+            // Médicaments
             onSnapshot(collection(userRef, "medications"), (snap) => {
                 medications = [];
                 snap.forEach(d => medications.push({ id: d.id, ...d.data() }));
-                medications.sort((a,b) => a.name.localeCompare(b.name));
+                medications.sort((a, b) => a.name.localeCompare(b.name));
                 renderMedications();
             });
 
-            // Charger l'historique
+            // Historique
             onSnapshot(collection(userRef, "history"), (snap) => {
                 historyData = {};
                 snap.forEach(d => historyData[d.id] = d.data());
@@ -196,18 +192,21 @@
             list.innerHTML = '';
             const today = new Date().toISOString().split('T')[0];
 
+            if (medications.length === 0) {
+                list.innerHTML = '<p class="text-center opacity-60">Aucun médicament ajouté. Cliquez sur + pour commencer.</p>';
+            }
+
             medications.forEach(med => {
                 const div = document.createElement('div');
                 div.className = "space-y-4";
 
-                // Progression du médicament
                 const progressRef = collection(db, "users", currentUser.uid, "packs", med.id);
                 onSnapshot(progressRef, async (packSnap) => {
                     let taken = packSnap.size;
                     let progress = (taken / med.total) * 100;
                     let ratio = `\( {taken}/ \){med.total}`;
 
-                    // Mettre à jour l'historique du jour
+                    // Mise à jour historique du jour
                     const histRef = doc(db, "users", currentUser.uid, "history", today);
                     const histSnap = await getDoc(histRef);
                     let dayData = histSnap.data() || { ratios: {} };
@@ -219,7 +218,7 @@
                             <div>
                                 <span class="med-color" style="background:${med.color}"></span>
                                 <span class="font-bold">${med.name}</span>
-                                <span class="text-sm opacity-70">(${med.dose})</span>
+                                <span class="text-sm opacity-70"> (${med.dose})</span>
                             </div>
                             <button onclick="deleteMed('${med.id}')" class="text-red-500 text-sm">Supprimer</button>
                         </div>
@@ -230,7 +229,6 @@
                         <div class="grid grid-cols-7 gap-2 mt-4" id="grid-${med.id}"></div>
                     `;
 
-                    // Grille des prises
                     const grid = div.querySelector(`#grid-${med.id}`);
                     grid.innerHTML = '';
                     for (let i = 1; i <= med.total; i++) {
@@ -260,7 +258,7 @@
         }
 
         window.deleteMed = async (medId) => {
-            if (!confirm("Supprimer ce médicament ?")) return;
+            if (!confirm("Supprimer définitivement ce médicament et toutes ses prises ?")) return;
             const medRef = doc(db, "users", currentUser.uid, "medications", medId);
             const packCol = collection(db, "users", currentUser.uid, "packs", medId);
             const packs = await getDocs(packCol);
@@ -270,7 +268,12 @@
         };
 
         window.openAddMedModal = () => document.getElementById('addMedModal').classList.remove('hidden');
-        window.closeAddMedModal = () => document.getElementById('addMedModal').classList.add('hidden');
+        window.closeAddMedModal = () => {
+            document.getElementById('addMedModal').classList.add('hidden');
+            document.getElementById('medName').value = '';
+            document.getElementById('medDose').value = '';
+            document.getElementById('medTotal').value = '28';
+        };
 
         window.addMedication = async () => {
             const name = document.getElementById('medName').value.trim();
@@ -278,12 +281,11 @@
             const total = parseInt(document.getElementById('medTotal').value);
             const color = document.getElementById('medColor').value;
 
-            if (!name || total < 1) return showToast("Remplissez tous les champs");
+            if (!name || total < 1) return showToast("Vérifiez les champs");
 
             const medRef = doc(collection(db, "users", currentUser.uid, "medications"));
-            await setDoc(medRef, { name, dose, total, color });
+            await setDoc(medRef, { name, dose: dose || "—", total, color });
             closeAddMedModal();
-            document.getElementById('medName').value = '';
             showToast("Médicament ajouté !");
         };
 
@@ -308,16 +310,16 @@
                 if (data && data.ratios) {
                     Object.values(data.ratios).forEach(r => {
                         const [taken, total] = r.split('/').map(Number);
-                        takenToday += taken;
-                        totalToday += total;
+                        takenToday += taken || 0;
+                        totalToday += total || 0;
                     });
                 }
 
                 const cell = document.createElement('div');
-                cell.className = "aspect-square rounded-xl bg-slate-500/10 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-500/20 transition";
+                cell.className = "aspect-square rounded-xl bg-slate-500/10 flex flex-col items-center justify-center text-xs font-bold hover:bg-slate-500/20 transition";
                 cell.innerHTML = `
-                    <span class="text-xs font-bold opacity-40">${d}</span>
-                    ${totalToday > 0 ? `<span class="text-xs font-bold \( {takenToday === totalToday ? 'text-green-500' : 'text-orange-500'}"> \){takenToday}/${totalToday}</span>` : ''}
+                    <span class="opacity-40">${d}</span>
+                    \( {totalToday > 0 ? `<span class=" \){takenToday === totalToday ? 'text-green-500' : 'text-orange-500'}">\( {takenToday}/ \){totalToday}</span>` : ''}
                 `;
                 cal.appendChild(cell);
             }
@@ -335,12 +337,13 @@
                         const [taken, total] = r.split('/').map(Number);
                         if (taken < total) perfect = false;
                     }
-                } else perfect = false;
+                } else if (medications.length > 0) perfect = false;
 
                 if (perfect) streak++;
                 else break;
 
                 tempDate.setDate(tempDate.getDate() - 1);
+                if (streak > 365) break; // sécurité
             }
             document.getElementById('streakCount').innerText = streak + (streak > 0 ? " 🔥" : "");
         }
@@ -366,32 +369,35 @@
                 Notification.requestPermission().then(perm => {
                     if (perm === "granted") scheduleDailyReminder();
                 });
+            } else {
+                showToast("Notifications bloquées dans le navigateur");
             }
         };
 
         function scheduleDailyReminder() {
             const now = new Date();
-            const reminderTime = new Date();
+            let reminderTime = new Date();
             reminderTime.setHours(reminderHour, 0, 0, 0);
-            if (reminderTime < now) reminderTime.setDate(reminderTime.getDate() + 1);
+            if (reminderTime <= now) reminderTime.setDate(reminderTime.getDate() + 1);
 
             const delay = reminderTime - now;
             setTimeout(() => {
-                new Notification("🔔 MedTracker", { body: "N'oubliez pas vos médicaments aujourd'hui !" });
-                scheduleDailyReminder(); // reprogramme pour demain
+                new Notification("🔔 MedTracker", { body: "Pensez à prendre vos médicaments aujourd'hui !" });
+                scheduleDailyReminder();
             }, delay);
-            showToast("Rappels activés pour " + reminderHour + "h");
+            showToast(`Rappels activés à ${reminderHour}h`);
         }
 
-        // Langue & thème
+        // Langue
         window.setLang = (l) => {
             document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
             localStorage.setItem('lang', l);
-            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('opacity-100'));
-            document.getElementById(`btn-${l}`).classList.add('opacity-100');
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.replace('opacity-100', 'opacity-50'));
+            document.getElementById(`btn-${l}`).classList.replace('opacity-50', 'opacity-100');
             renderCalendar();
         };
 
+        // Thème
         window.toggleTheme = () => {
             document.body.classList.toggle('dark');
             localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
