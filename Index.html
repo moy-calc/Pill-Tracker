@@ -8,14 +8,29 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@500;700&display=swap');
         
-        :root { --bg: #f8fafc; --card: rgba(255, 255, 255, 0.9); --text: #1e293b; --accent: #6366f1; --border: rgba(148, 163, 184, 0.2); --accent-glow: rgba(99, 102, 241, 0.3); }
-        .dark { --bg: #0f172a; --card: rgba(30, 41, 59, 0.8); --text: #f1f5f9; --accent: #818cf8; --border: rgba(255, 255, 255, 0.1); --accent-glow: rgba(129, 140, 248, 0.2); }
+        :root { 
+            --bg: #f8fafc; 
+            --card: rgba(255, 255, 255, 0.95); 
+            --text: #1e293b; 
+            --accent: #10b981; /* Default Green */
+            --accent-glow: rgba(16, 185, 129, 0.3);
+            --border: rgba(148, 163, 184, 0.2); 
+        }
+        .dark { 
+            --bg: #0f172a; 
+            --card: rgba(30, 41, 59, 0.9); 
+            --text: #f1f5f9; 
+            --accent: #10b981; 
+            --accent-glow: rgba(16, 185, 129, 0.2); 
+            --border: rgba(255, 255, 255, 0.1); 
+        }
 
         body { 
             background: var(--bg); color: var(--text); 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             transition: background 0.4s ease;
             min-height: 100vh;
+            overflow-x: hidden; 
         }
 
         .glass { 
@@ -24,15 +39,38 @@
             border-radius: 24px; box-shadow: 0 10px 50px -12px rgba(0,0,0,0.05);
         }
 
+        /* --- Drawers --- */
+        .drawer {
+            position: fixed; top: 0; bottom: 0; width: 280px; 
+            background: var(--bg); z-index: 60; 
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .drawer-left { left: 0; transform: translateX(-100%); border-right: 1px solid var(--border); }
+        .drawer-right { right: 0; transform: translateX(100%); border-left: 1px solid var(--border); }
+        .drawer.open { transform: translateX(0); }
+        .drawer-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 55;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            backdrop-filter: blur(2px);
+        }
+        .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+
+        /* --- UI Components --- */
         .fade-in { animation: fadeIn 0.4s ease-out forwards; opacity: 0; transform: translateY(10px); }
         @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
 
+        .stagger-in { animation: staggerIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: scale(0.9); }
+        @keyframes staggerIn { to { opacity: 1; transform: scale(1); } }
+
+        /* Dose Buttons */
         .dose-btn { 
-            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); 
             background: rgba(148, 163, 184, 0.08); 
             border-radius: 12px; 
-            position: relative;
-            overflow: hidden;
+            position: relative; overflow: hidden; cursor: pointer;
         }
         .dose-btn.active { 
             background: var(--accent); 
@@ -41,60 +79,47 @@
             transform: scale(1.05); 
             border-color: transparent;
         }
-        .dose-btn:active { transform: scale(0.92); }
-
-        .progress-bar { height: 8px; border-radius: 99px; background: rgba(148, 163, 184, 0.1); overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--accent); transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 15px var(--accent); }
-
-        .cal-cell { aspect-ratio: 1/1.15; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.2s; cursor: pointer; border: 1px solid transparent; }
-        .cal-cell:hover { background: rgba(148, 163, 184, 0.05); }
-        .ratio-tag { background: var(--accent); color: white; font-size: 0.5rem; padding: 2px 6px; border-radius: 4px; margin-top: 4px; font-weight: 800; }
-
-        /* Med Tabs */
-        .med-tab { 
-            padding: 8px 14px; 
-            border-radius: 14px; 
-            font-size: 0.85rem; 
-            font-weight: 700; 
-            transition: all 0.2s; 
-            cursor: pointer; 
-            border: 1px solid var(--border);
-            white-space: nowrap;
-            opacity: 0.7;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            user-select: none;
+        .dose-btn.locked {
+            opacity: 0.3; pointer-events: none; filter: grayscale(1); cursor: not-allowed;
         }
-        .med-tab:hover { opacity: 1; }
-        .med-tab.active { 
-            background: var(--bg); 
-            color: var(--text); 
-            opacity: 1; 
-            border-color: var(--accent); 
-            box-shadow: 0 4px 12px -2px rgba(0,0,0,0.1);
-            transform: translateY(-1px);
-        }
-        .med-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-        .delete-med { 
-            width: 18px; height: 18px; 
-            border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 10px; 
-            background: rgba(0,0,0,0.05); 
-            color: #ef4444; 
-            opacity: 0; 
-            transition: 0.2s;
-            flex-shrink: 0;
-        }
-        .med-tab:hover .delete-med { opacity: 1; }
-        .med-tab.active .delete-med { opacity: 1; background: rgba(239, 68, 68, 0.1); }
+        
+        /* Progress Bar */
+        .progress-bar { height: 10px; border-radius: 99px; background: rgba(148, 163, 184, 0.1); overflow: hidden; position: relative; }
+        .progress-fill { height: 100%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.5s ease; box-shadow: 0 0 15px currentColor; }
 
-        /* Modals & Toasts */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 50; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
+        /* Dropdown */
+        .med-dropdown { position: relative; }
+        .med-dropdown-content {
+            position: absolute; top: 120%; left: 0; 
+            background: var(--card); border: 1px solid var(--border);
+            width: 200px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            display: none; flex-direction: column; padding: 8px; z-index: 50;
+            animation: fadeIn 0.2s ease;
+        }
+        .med-dropdown:hover .med-dropdown-content { display: flex; }
+        .dropdown-item { padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600; opacity: 0.7; transition: 0.2s; }
+        .dropdown-item:hover { background: rgba(0,0,0,0.05); opacity: 1; }
+        .dropdown-item.active { background: var(--accent); color: white; opacity: 1; }
+
+        /* Calendar */
+        .cal-cell { aspect-ratio: 1/1.15; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.2s; cursor: pointer; border: 1px solid transparent; opacity: 0; }
+        .cal-cell:hover { background: rgba(148, 163, 184, 0.05); transform: translateY(-2px); }
+        .ratio-tag { background: var(--accent); color: white; font-size: 0.45rem; padding: 1px 4px; border-radius: 4px; margin-top: 2px; font-weight: 800; }
+        .count-tag { background: rgba(0,0,0,0.05); color: var(--accent); font-size: 0.35rem; padding: 1px 4px; border-radius: 3px; margin-top: 1px; font-weight: 700; letter-spacing: 0.5px; }
+        .dark .count-tag { background: rgba(255,255,255,0.1); }
+
+        /* History List Items */
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-radius: 12px; margin-bottom: 8px; background: rgba(0,0,0,0.03); border: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
+        .history-item:hover { background: rgba(0,0,0,0.06); transform: translateX(2px); }
+        .history-item.active { border-color: var(--accent); background: var(--accent); color: white; }
+        .history-item.active * { color: white; }
+
+        /* Modals */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 70; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
         .modal-overlay.open { display: flex; opacity: 1; }
         
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--text); color: var(--bg); padding: 12px 24px; border-radius: 50px; font-weight: 600; z-index: 100; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 8px;}
+        /* Toast */
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--text); color: var(--bg); padding: 12px 24px; border-radius: 50px; font-weight: 600; z-index: 100; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 8px; width: max-content; max-width: 90%;}
         .toast.show { transform: translateX(-50%) translateY(0); }
 
         .spinner { width: 20px; height: 20px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 0.75s linear infinite; }
@@ -109,28 +134,57 @@
         <span id="toastMsg">Sauvegardé</span>
     </div>
 
-    <!-- Modal Add Med -->
+    <!-- Drawers Overlay -->
+    <div id="drawerOverlay" class="drawer-overlay" onclick="closeDrawers()"></div>
+
+    <!-- Left Drawer: Languages -->
+    <div id="leftDrawer" class="drawer drawer-left">
+        <h2 class="text-xl font-extrabold mb-6 flex items-center gap-2">🌐 <span id="langTitle">Langue</span></h2>
+        <div class="flex flex-col gap-3">
+            <button onclick="setLang('fr')" class="text-left p-3 rounded-xl hover:bg-slate-500/10 font-bold flex items-center gap-3">🇫🇷 Français</button>
+            <button onclick="setLang('en')" class="text-left p-3 rounded-xl hover:bg-slate-500/10 font-bold flex items-center gap-3">🇬🇧 English</button>
+            <button onclick="setLang('ar')" class="text-left p-3 rounded-xl hover:bg-slate-500/10 font-bold flex items-center gap-3">🇸🇦 العربية</button>
+        </div>
+    </div>
+
+    <!-- Right Drawer: Global History -->
+    <div id="rightDrawer" class="drawer drawer-right">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-extrabold flex items-center gap-2">🕒 <span id="histTitle">Historique</span></h2>
+            <button onclick="closeDrawers()" class="p-2 hover:bg-slate-500/10 rounded-lg">✕</button>
+        </div>
+        <p id="loadingHistory" class="text-xs opacity-50 uppercase tracking-widest mb-4">Chargement...</p>
+        <div id="globalHistoryList" class="flex flex-col gap-2">
+            <!-- List inserted here -->
+        </div>
+    </div>
+
+    <!-- Modal Add/Edit Med -->
     <div id="addMedModal" class="modal-overlay" onclick="closeModal('addMedModal')">
         <div class="glass p-6 w-full max-w-xs text-center transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
-            <h3 class="font-bold text-lg mb-4">Nouveau Médicament</h3>
+            <h3 class="font-bold text-lg mb-4" id="modalAddTitle">Nouveau Médicament</h3>
             <input type="text" id="newMedName" placeholder="Nom (ex: Doliprane)" class="w-full bg-slate-500/10 border border-slate-500/20 rounded-xl p-3 text-center font-bold outline-none focus:border-indigo-500 mb-3">
-            <input type="number" id="newMedSize" placeholder="Taille (ex: 10)" class="w-full bg-slate-500/10 border border-slate-500/20 rounded-xl p-3 text-center font-bold outline-none focus:border-indigo-500 mb-3">
+            
+            <div class="grid grid-cols-2 gap-2 mb-3">
+                <input type="number" id="newMedPieces" placeholder="Pièces/Plaque" class="bg-slate-500/10 border border-slate-500/20 rounded-xl p-3 text-center font-bold outline-none focus:border-indigo-500">
+                <input type="number" id="newMedPlates" placeholder="Plaques/Boîte" class="bg-slate-500/10 border border-slate-500/20 rounded-xl p-3 text-center font-bold outline-none focus:border-indigo-500">
+            </div>
             
             <p class="text-xs font-bold uppercase opacity-50 mb-2 text-left">Couleur</p>
             <div class="flex justify-between gap-2 mb-6" id="colorPicker"></div>
 
-            <button onclick="confirmAddMed()" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg active:scale-95 transition-transform">Ajouter</button>
+            <button onclick="confirmAddMed()" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg active:scale-95 transition-transform" id="btnAddMed">Ajouter</button>
         </div>
     </div>
 
     <!-- Modal Edit History -->
     <div id="editModal" class="modal-overlay" onclick="closeModal('editModal')">
         <div class="glass p-6 w-80 text-center transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
-            <h3 class="font-bold text-lg mb-1">Modifier</h3>
+            <h3 class="font-bold text-lg mb-1" id="modalEditTitle">Modifier</h3>
             <p id="modalDateDisplay" class="text-xs opacity-50 mb-4">Date</p>
             <input type="text" id="modalInput" class="w-full bg-slate-500/10 border border-slate-500/20 rounded-xl p-3 text-center font-bold text-xl outline-none focus:border-indigo-500 transition-colors mb-4">
             <div class="flex gap-2">
-                <button onclick="saveHistoryModal()" class="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl active:scale-95 transition-transform">OK</button>
+                <button onclick="saveHistoryModal()" class="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl active:scale-95 transition-transform" id="btnEditSave">OK</button>
                 <button onclick="deleteHistoryEntry()" class="px-4 py-3 bg-red-500/10 text-red-500 font-bold rounded-xl active:scale-95 transition-transform">✕</button>
             </div>
         </div>
@@ -140,27 +194,41 @@
     <div id="finishModal" class="modal-overlay" onclick="closeModal('finishModal')">
         <div class="glass p-6 w-80 text-center transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
             <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">✓</div>
-            <h3 class="font-bold text-lg mb-2">Boîte Terminée !</h3>
-            <p class="text-sm opacity-60 mb-6">Voulez-vous commencer une nouvelle boîte ? L'historique de la précédente sera conservé.</p>
+            <h3 class="font-bold text-lg mb-2" id="modalFinishTitle">Boîte Terminée !</h3>
+            <p class="text-sm opacity-60 mb-6" id="modalFinishText">Voulez-vous commencer une nouvelle boîte ? L'historique de la précédente sera conservé.</p>
             <div class="flex gap-2">
-                <button onclick="confirmFinishPack()" class="flex-1 py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg active:scale-95 transition-transform">Oui, Recharger</button>
+                <button onclick="confirmFinishPack()" class="flex-1 py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg active:scale-95 transition-transform" id="btnFinishRecharge">Oui, Recharger</button>
                 <button onclick="closeModal('finishModal')" class="px-4 py-3 bg-slate-500/10 text-slate-500 font-bold rounded-xl active:scale-95 transition-transform">Non</button>
             </div>
         </div>
     </div>
 
-    <nav class="max-w-3xl mx-auto flex justify-between items-center p-4 glass mb-4 fade-in">
-        <h1 class="text-xl font-extrabold tracking-tight flex items-center gap-2">
-            <span class="text-indigo-500">●</span> MedTracker
-        </h1>
+    <!-- NAVBAR -->
+    <nav class="max-w-3xl mx-auto flex justify-between items-center p-4 glass mb-4 fade-in relative z-40">
         <div class="flex items-center gap-2">
-            <!-- Bouton Changer de compte (visible seulement si connecté) -->
-            <button id="navLogoutBtn" onclick="doLogout()" class="hidden px-3 py-1 text-xs font-bold bg-slate-500/10 text-slate-500 rounded-lg hover:bg-slate-500/20 transition-colors">
-                Changer de compte
-            </button>
-            
+            <button onclick="openLeftDrawer()" class="w-9 h-9 rounded-xl flex items-center justify-center bg-slate-500/5 hover:bg-slate-500/10 transition-colors">🌐</button>
+            <h1 class="text-xl font-extrabold tracking-tight flex items-center gap-2">
+                <span class="text-indigo-500">●</span> MedTracker
+            </h1>
+        </div>
+
+        <!-- Med Selector Dropdown -->
+        <div id="appNavbarCenter" class="hidden absolute left-1/2 transform -translate-x-1/2">
+            <div class="med-dropdown">
+                <button id="navbarMedBtn" class="flex items-center gap-2 font-bold bg-slate-500/5 px-4 py-2 rounded-xl hover:bg-slate-500/10 transition-colors border border-slate-500/10">
+                    <span id="navbarMedName">Médicament</span>
+                    <span class="text-xs opacity-50">▼</span>
+                </button>
+                <div id="navbarDropdown" class="med-dropdown-content">
+                    <!-- Med Items -->
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <button id="btnHistory" onclick="openRightDrawer()" class="hidden w-9 h-9 rounded-xl flex items-center justify-center bg-slate-500/5 hover:bg-slate-500/10 transition-colors text-lg">🕒</button>
+            <button id="btnLogout" onclick="doLogout()" class="hidden px-3 py-1 text-xs font-bold bg-slate-500/10 text-slate-500 rounded-lg hover:bg-slate-500/20 transition-colors">X</button>
             <button onclick="toggleTheme()" class="w-9 h-9 rounded-xl flex items-center justify-center bg-slate-500/5 hover:bg-slate-500/10 transition-colors">🌓</button>
-            <button onclick="setLang()" class="w-9 h-9 rounded-xl flex items-center justify-center bg-slate-500/5 hover:bg-slate-500/10 transition-colors font-bold text-xs">🌐</button>
         </div>
     </nav>
 
@@ -177,7 +245,7 @@
                 <input type="password" id="passInput" placeholder="Mot de passe" class="w-full bg-slate-500/10 border border-slate-500/20 rounded-xl p-4 pr-12 text-center text-lg outline-none focus:border-indigo-500 transition-all font-bold">
                 <button onclick="togglePasswordVisibility()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-500 transition-colors">
                     <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                    <svg id="eyeOffIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 10.05 0 011.574-2.59M5.22 5.22a10.057 10.057 0 013.226-1.832C9.586 2.832 10.774 2.75 12 2.75c4.478 0 8.268 2.943 9.542 7a10.05 10.05 0 01-1.575 2.59m-4.97 4.97a3 3 0 11-4.243-4.243m0 0L3 3m18 18l-3.75-3.75" /></svg>
+                    <svg id="eyeOffIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 0 011.574-2.59M5.22 5.22a10.057 10.057 0 013.226-1.832C9.586 2.832 10.774 2.75 12 2.75c4.478 0 8.268 2.943 9.542 7a10.05 0 01-1.575 2.59m-4.97 4.97a3 3 0 11-4.243-4.243m0 0L3 3m18 18l-3.75-3.75" /></svg>
                 </button>
             </div>
 
@@ -190,37 +258,36 @@
         <!-- APP -->
         <div id="appBody" class="hidden space-y-4">
             
-            <!-- Med Selector (Tabs) -->
-            <div class="glass p-4 fade-in">
-                <div class="flex items-center justify-between mb-3">
-                    <h2 class="text-xs font-bold uppercase opacity-50 tracking-widest">Mes Traitements</h2>
-                    <button onclick="openModal('addMedModal')" class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-500 font-bold flex items-center justify-center hover:bg-indigo-500 hover:text-white transition-colors">+</button>
+            <!-- Med Controls (Add/Config/Edit) -->
+            <div class="glass p-4 fade-in flex justify-between items-center">
+                <div class="text-[10px] font-bold uppercase opacity-50 tracking-widest">
+                    <span id="lblConfig">Configuration</span>
                 </div>
-                <div id="medTabs" class="flex gap-2 overflow-x-auto pb-2 scroll-smooth no-scrollbar">
-                    <!-- Tabs inserted here -->
+                <div class="flex gap-2">
+                    <button id="btnEditConfig" onclick="openEditMedModal()" class="hidden w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 font-bold flex items-center justify-center hover:bg-amber-500 hover:text-white transition-colors" title="Modifier la configuration">✏️</button>
+                    <button onclick="openModal('addMedModal')" class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-500 font-bold flex items-center justify-center hover:bg-indigo-500 hover:text-white transition-colors">+</button>
                 </div>
             </div>
 
             <!-- Grid Section -->
             <div class="glass p-6 fade-in">
-                <div class="flex justify-between items-end mb-5">
+                <div class="flex justify-between items-end mb-4">
                     <div>
-                        <span class="text-[10px] font-bold uppercase opacity-60 tracking-widest">Progression</span>
+                        <span class="text-[10px] font-bold uppercase opacity-60 tracking-widest" id="lblProgress">Progression Boîte</span>
                         <h2 id="currentMedNameDisplay" class="text-2xl font-black mt-1">...</h2>
                     </div>
                     <div class="text-right">
-                         <span id="percentText" class="text-3xl font-black" style="color: var(--accent)">0%</span>
+                         <span id="percentText" class="text-3xl font-black">0%</span>
                     </div>
                 </div>
                 
-                <div class="progress-bar mb-6"><div id="progressFill" class="progress-fill" style="width: 0%"></div></div>
+                <div class="progress-bar mb-6"><div id="progressFill" class="progress-fill" style="width: 0%; background-color: var(--accent)"></div></div>
 
-                <div class="flex justify-between items-center mb-4 px-1">
-                    <span class="text-xs font-bold opacity-50">PLAQUE ACTUELLE</span>
-                    <input type="number" id="gridSizeInput" onchange="updatePackSize()" class="bg-slate-500/10 border-none rounded-lg p-1 w-14 text-center font-bold outline-none focus:ring-1 ring-indigo-500/50">
-                </div>
-                
-                <div id="grid" class="grid grid-cols-5 sm:grid-cols-5 md:grid-cols-10 gap-2"></div>
+                <!-- Plate Tabs -->
+                <div id="plateTabs" class="flex justify-center gap-2 mb-6"></div>
+
+                <!-- Grid -->
+                <div id="grid" class="grid grid-cols-5 sm:grid-cols-5 md:grid-cols-5 gap-2"></div>
             </div>
 
             <!-- Calendar -->
@@ -254,13 +321,124 @@
 
         const MED_COLORS = ["#6366f1", "#ef4444", "#10b981", "#f59e0b", "#ec4899", "#06b6d4"];
         let selectedColor = MED_COLORS[0];
+        let isEditingMed = false; // Track if we are editing or creating
 
         let user = "";
         let currentMedId = null;
+        let currentPlateIndex = 0; 
         let medsList = [];
         let currentDate = new Date();
         let unsubscribeGrid = null;
         let unsubscribeHistory = null;
+        let lowStockNotified = false;
+
+        // --- I18n ---
+        const i18n = {
+            fr: { title: "MedTracker", add: "Ajouter", edit: "Modifier", editConfig: "Modifier Config", finish: "Boîte Terminée !", finishText: "Voulez-vous commencer une nouvelle boîte ?", recharge: "Oui, Recharger", placeholder: "Mot de passe", config: "Configuration", progress: "Progression Boîte", history: "Historique", lang: "Langue", pieces: "Pièces/Plaque", plates: "Plaques/Boîte", empty: "Aucun traitement", loading: "Chargement..." },
+            en: { title: "MedTracker", add: "Add", edit: "Edit", editConfig: "Edit Config", finish: "Box Finished!", finishText: "Start a new box?", recharge: "Yes, Recharge", placeholder: "Password", config: "Config", progress: "Box Progress", history: "History", lang: "Language", pieces: "Pieces/Plate", plates: "Plates/Box", empty: "No treatments", loading: "Loading..." },
+            ar: { title: "المتتبع", add: "إضافة", edit: "تعديل", editConfig: "تعديل الإعدادات", finish: "انتهت العلبة !", finishText: "هل تريد بدء علبة جديدة؟", recharge: "نعم، إعادة تعبئة", placeholder: "كلمة المرور", config: "الإعدادات", progress: "تقدم العلبة", history: "السجل", lang: "اللغة", pieces: "قطعة/لوحة", plates: "لوحة/علبة", empty: "لا علاج", loading: "جاري التحميل..." }
+        };
+        let curLang = 'fr';
+
+        function applyLang(l) {
+            curLang = l;
+            const txt = i18n[l];
+            document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+            document.getElementById('langTitle').innerText = txt.lang;
+            document.getElementById('histTitle').innerText = txt.history;
+            document.getElementById('modalAddTitle').innerText = isEditingMed ? txt.editConfig : txt.add;
+            document.getElementById('btnAddMed').innerText = isEditingMed ? "Mettre à jour" : txt.add;
+            document.getElementById('modalEditTitle').innerText = txt.edit;
+            document.getElementById('btnEditSave').innerText = "OK";
+            document.getElementById('modalFinishTitle').innerText = txt.finish;
+            document.getElementById('modalFinishText').innerText = txt.finishText;
+            document.getElementById('btnFinishRecharge').innerText = txt.recharge;
+            document.getElementById('passInput').placeholder = txt.placeholder;
+            document.getElementById('lblConfig').innerText = txt.config;
+            document.getElementById('lblProgress').innerText = txt.progress;
+            document.getElementById('newMedName').placeholder = "Nom / Name";
+            document.getElementById('newMedPieces').placeholder = txt.pieces;
+            document.getElementById('newMedPlates').placeholder = txt.plates;
+            document.getElementById('loadingHistory').innerText = txt.loading;
+            renderCalendar();
+            renderNavbarMed();
+        }
+
+        window.setLang = (l) => {
+            localStorage.setItem('medLang', l);
+            applyLang(l);
+            closeDrawers();
+        };
+
+        // --- Drawers ---
+        window.openLeftDrawer = () => { document.getElementById('leftDrawer').classList.add('open'); document.getElementById('drawerOverlay').classList.add('open'); };
+        window.openRightDrawer = async () => { 
+            document.getElementById('rightDrawer').classList.add('open'); 
+            document.getElementById('drawerOverlay').classList.add('open');
+            await loadGlobalHistory();
+        };
+        window.closeDrawers = () => {
+            document.querySelectorAll('.drawer').forEach(d => d.classList.remove('open'));
+            document.getElementById('drawerOverlay').classList.remove('open');
+        };
+
+        // --- Navbar Dropdown ---
+        function renderNavbarMed() {
+            const dd = document.getElementById('navbarDropdown');
+            dd.innerHTML = '';
+            medsList.forEach(med => {
+                const item = document.createElement('div');
+                item.className = `dropdown-item ${med.id === currentMedId ? 'active' : ''}`;
+                item.innerHTML = `<span class="w-2 h-2 rounded-full" style="background:${med.color}"></span> ${med.name}`;
+                item.onclick = () => {
+                    switchMed(med.id);
+                    closeDrawers();
+                };
+                dd.appendChild(item);
+            });
+            if(medsList.length > 0) {
+                const cur = medsList.find(m => m.id === currentMedId);
+                if(cur) document.getElementById('navbarMedName').innerText = cur.name;
+            }
+        }
+
+        // --- Global History Logic ---
+        async function loadGlobalHistory() {
+            const list = document.getElementById('globalHistoryList');
+            list.innerHTML = '';
+            const snap = await getDocs(collection(db, "users", user, "medications"));
+            const allMeds = [];
+            snap.forEach(d => allMeds.push({ id: d.id, ...d.data() }));
+
+            for (const med of allMeds) {
+                const histSnap = await getDocs(collection(db, "users", user, "medications", med.id, "history"));
+                let lastDate = null;
+                let maxRatio = 0;
+                histSnap.forEach(d => {
+                    if(!lastDate || d.id > lastDate) {
+                        lastDate = d.id;
+                        maxRatio = parseInt(d.data().ratio.split('/')[0]) || 0;
+                    }
+                });
+
+                const item = document.createElement('div');
+                item.className = `history-item ${med.id === currentMedId ? 'active' : ''}`;
+                const dateStr = lastDate ? new Date(lastDate).toLocaleDateString(curLang, { day: 'numeric', month: 'short' }) : "Jamais";
+                
+                item.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full" style="background:${med.color}"></span>
+                        <span class="font-bold text-sm">${med.name}</span>
+                    </div>
+                    <div class="text-xs opacity-60">${lastDate ? `Fin: ${dateStr}` : i18n[curLang].empty}</div>
+                `;
+                item.onclick = () => {
+                    switchMed(med.id);
+                    closeDrawers();
+                };
+                list.appendChild(item);
+            }
+        }
 
         // --- Password Toggle ---
         window.togglePasswordVisibility = () => {
@@ -299,11 +477,7 @@
             
             status.innerText = exists ? "Compte existant" : "Nouveau compte";
             status.style.color = exists ? "var(--accent)" : "#10b981";
-            
-            if(passContainer.classList.contains('hidden')) {
-                passContainer.classList.remove('hidden');
-                document.getElementById('passInput').focus();
-            }
+            // REMOVED AUTO-FOCUS AND AUTO-SHOW TO FIX USER ISSUE
         };
 
         window.handleAuth = async () => {
@@ -311,16 +485,24 @@
             const pass = document.getElementById('passInput').value;
             const btn = document.getElementById('btnLogin');
             const errorMsg = document.getElementById('loginError');
+            const passContainer = document.getElementById('passContainer');
 
             if (name.length < 3) {
                 errorMsg.innerText = "Identifiant trop court";
                 errorMsg.style.opacity = 1;
                 return;
             }
+
+            // If password is hidden, show it first (User wants to enter pass)
+            if(passContainer.classList.contains('hidden')) {
+                passContainer.classList.remove('hidden');
+                document.getElementById('passInput').focus();
+                return;
+            }
+
             if (!pass) {
                 errorMsg.innerText = "Mot de passe requis";
                 errorMsg.style.opacity = 1;
-                document.getElementById('passContainer').classList.remove('hidden');
                 document.getElementById('passInput').focus();
                 return;
             }
@@ -340,11 +522,13 @@
             } else {
                 await setDoc(userRef, { password: pass, created: new Date().toISOString() });
                 success = true;
+                // Create default med
                 const newMedRef = doc(collection(db, "users", name, "medications"));
                 await setDoc(newMedRef, {
                     name: "Mon Traitement",
                     color: MED_COLORS[0],
-                    size: 10
+                    piecesPerPlate: 10,
+                    platesPerBox: 3
                 });
             }
 
@@ -356,30 +540,24 @@
             }
         };
 
-        // --- Logout / Switch Account ---
         window.doLogout = async () => {
-            if(confirm("Voulez-vous vous déconnecter et changer de compte ?")) {
-                // Stop Listeners
+            if(confirm("Voulez-vous vous déconnecter ?")) {
                 if (unsubscribeGrid) unsubscribeGrid();
                 if (unsubscribeHistory) unsubscribeHistory();
-                
-                // Clear Data
                 user = "";
                 currentMedId = null;
                 medsList = [];
                 localStorage.removeItem('medUser');
-                
-                // Reset UI
                 document.getElementById('appBody').classList.add('hidden');
-                document.getElementById('navLogoutBtn').classList.add('hidden');
+                document.getElementById('appNavbarCenter').classList.add('hidden');
+                document.getElementById('btnHistory').classList.add('hidden');
+                document.getElementById('btnLogout').classList.add('hidden');
                 document.getElementById('loginBox').classList.remove('hidden');
                 document.getElementById('userInput').value = '';
                 document.getElementById('passInput').value = '';
                 document.getElementById('passContainer').classList.add('hidden');
                 document.getElementById('btnLogin').innerText = "Connexion / Inscription";
-                
-                // Reset Styles
-                document.documentElement.style.setProperty('--accent', '#6366f1');
+                document.documentElement.style.setProperty('--accent', '#10b981');
             }
         }
 
@@ -387,7 +565,9 @@
             user = name;
             document.getElementById('loginBox').classList.add('hidden');
             document.getElementById('appBody').classList.remove('hidden');
-            document.getElementById('navLogoutBtn').classList.remove('hidden'); // Show logout button
+            document.getElementById('appNavbarCenter').classList.remove('hidden');
+            document.getElementById('btnHistory').classList.remove('hidden');
+            document.getElementById('btnLogout').classList.remove('hidden');
             loadMeds();
         }
 
@@ -397,193 +577,262 @@
             medsList = [];
             snap.forEach(d => medsList.push({ id: d.id, ...d.data() }));
             
-            renderMedTabs();
+            renderNavbarMed();
             
             if (medsList.length > 0) {
-                // Try to restore selection or default to 0
                 if (currentMedId && medsList.find(m => m.id === currentMedId)) {
                     switchMed(currentMedId);
                 } else {
                     switchMed(medsList[0].id);
                 }
+                document.getElementById('btnEditConfig').classList.remove('hidden');
             } else {
-                // No meds
                 currentMedId = null;
+                document.getElementById('btnEditConfig').classList.add('hidden');
                 const grid = document.getElementById('grid');
-                grid.innerHTML = '<div class="col-span-full text-center opacity-40 py-10 text-sm">Aucun traitement.<br>Cliquez sur + pour en ajouter un.</div>';
+                grid.innerHTML = `<div class="col-span-full text-center opacity-40 py-10 text-sm">${i18n[curLang].empty}.<br>Cliquez sur +.</div>`;
                 document.getElementById('progressFill').style.width = '0%';
                 document.getElementById('percentText').innerText = '0%';
                 document.getElementById('currentMedNameDisplay').innerText = "";
-                document.documentElement.style.setProperty('--accent', '#6366f1');
             }
         }
 
-        function renderMedTabs() {
-            const container = document.getElementById('medTabs');
-            container.innerHTML = '';
-            medsList.forEach(med => {
-                const btn = document.createElement('button');
-                btn.className = `med-tab ${med.id === currentMedId ? 'active' : ''}`;
-                btn.style.borderColor = med.id === currentMedId ? med.color : 'var(--border)';
-                
-                // Inner HTML with Name and Delete Button
-                btn.innerHTML = `
-                    <span class="med-dot" style="background:${med.color}"></span>
-                    <span class="truncate max-w-[100px]">${med.name}</span>
-                    <span class="delete-med" onclick="window.deleteMed('${med.id}')">✕</span>
-                `;
-                
-                btn.onclick = () => switchMed(med.id);
-                container.appendChild(btn);
-            });
-        }
+        // Open Edit Modal with current data
+        window.openEditMedModal = () => {
+            if(!currentMedId) return;
+            const med = medsList.find(m => m.id === currentMedId);
+            if(!med) return;
 
-        // --- FIXED DELETION LOGIC ---
-        window.deleteMed = async (id) => {
-            // Prevent clicking the tab when clicking delete
-            event.stopPropagation();
+            isEditingMed = true;
+            document.getElementById('newMedName').value = med.name;
+            document.getElementById('newMedPieces').value = med.piecesPerPlate;
+            document.getElementById('newMedPlates').value = med.platesPerBox;
+            selectedColor = med.color;
             
-            if(confirm("Voulez-vous vraiment supprimer ce traitement et tout son historique ?")) {
-                try {
-                    await deleteDoc(doc(db, "users", user, "medications", id));
-                    
-                    // Reload list immediately
-                    await loadMeds();
-                    
-                    // If we deleted the active one, the logic in loadMeds() handles switching to index 0 or showing empty state.
-                    
-                    showToast("Traitement supprimé");
-                } catch (e) {
-                    console.error(e);
-                    alert("Erreur lors de la suppression.");
-                }
+            // Update UI for Edit Mode
+            document.getElementById('modalAddTitle').innerText = i18n[curLang].editConfig;
+            document.getElementById('btnAddMed').innerText = "Mettre à jour";
+            renderColorPicker();
+            
+            openModal('addMedModal');
+        };
+
+        // Create or Update
+        window.confirmAddMed = async () => {
+            const name = document.getElementById('newMedName').value;
+            const pieces = parseInt(document.getElementById('newMedPieces').value) || 10;
+            const plates = parseInt(document.getElementById('newMedPlates').value) || 3;
+            
+            if (!name) return alert("Nom requis");
+
+            if(isEditingMed && currentMedId) {
+                // UPDATE EXISTING
+                await updateDoc(doc(db, "users", user, "medications", currentMedId), {
+                    name: name,
+                    color: selectedColor,
+                    piecesPerPlate: pieces,
+                    platesPerBox: plates
+                });
+                closeModal('addMedModal');
+                loadMeds(); // Reload to refresh UI with new config
+                showToast("Configuration mise à jour");
+                isEditingMed = false;
+            } else {
+                // CREATE NEW
+                const newMedRef = doc(collection(db, "users", user, "medications"));
+                await setDoc(newMedRef, {
+                    name: name,
+                    color: selectedColor,
+                    piecesPerPlate: pieces,
+                    platesPerBox: plates
+                });
+                
+                closeModal('addMedModal');
+                loadMeds();
+                switchMed(newMedRef.id);
+                showToast("Médicament ajouté");
+                isEditingMed = false;
             }
-        }
+        };
 
         function switchMed(id) {
             if (unsubscribeGrid) unsubscribeGrid();
             if (unsubscribeHistory) unsubscribeHistory();
-            
             currentMedId = id;
             const med = medsList.find(m => m.id === id);
+            if(!med) return;
             
-            if(!med) return; // Safety check
+            currentPlateIndex = 0; 
+            lowStockNotified = false; 
 
-            // Update UI
             document.getElementById('currentMedNameDisplay').innerText = med.name;
             document.getElementById('currentMedNameDisplay').style.color = med.color;
-            document.getElementById('gridSizeInput').value = med.size;
             document.documentElement.style.setProperty('--accent', med.color);
             document.documentElement.style.setProperty('--accent-glow', med.color + '4D');
             
-            renderMedTabs();
+            renderNavbarMed();
+            renderPlateTabs(med);
             syncGrid();
             syncHistory();
         }
 
-        window.confirmAddMed = async () => {
-            const name = document.getElementById('newMedName').value;
-            const size = parseInt(document.getElementById('newMedSize').value) || 10;
+        function renderPlateTabs(med) {
+            const container = document.getElementById('plateTabs');
+            container.innerHTML = '';
+            const totalPlates = med.platesPerBox || 1;
             
-            if (!name) return alert("Nom requis");
-
-            const newMedRef = doc(collection(db, "users", user, "medications"));
-            await setDoc(newMedRef, {
-                name: name,
-                color: selectedColor,
-                size: size
-            });
-            
-            closeModal('addMedModal');
-            loadMeds();
-            switchMed(newMedRef.id);
-            showToast("Médicament ajouté");
-        };
-
-        window.updatePackSize = async () => {
-            const newSize = parseInt(document.getElementById('gridSizeInput').value);
-            if (newSize > 0 && currentMedId) {
-                await updateDoc(doc(db, "users", user, "medications", currentMedId), { size: newSize });
-                loadMeds();
-                syncGrid();
+            for(let i=0; i<totalPlates; i++) {
+                const btn = document.createElement('button');
+                const isActive = (i === currentPlateIndex);
+                btn.className = `text-xs font-bold px-3 py-1 rounded-lg transition-colors ${isActive ? 'bg-slate-500/20 text-indigo-500' : 'opacity-50 hover:opacity-100'}`;
+                btn.innerText = `Plaque ${i+1}`;
+                btn.onclick = () => {
+                    currentPlateIndex = i;
+                    renderPlateTabs(med);
+                    renderGridUI(); 
+                };
+                container.appendChild(btn);
             }
-        };
+        }
 
-        // --- Grid Logic ---
+        // --- Grid Logic (Multi-Plate) ---
         function syncGrid() {
             if(!currentMedId) return;
             const colRef = collection(db, "users", user, "medications", currentMedId, "current_doses");
             unsubscribeGrid = onSnapshot(colRef, (snap) => {
-                const grid = document.getElementById('grid');
-                const sizeInput = document.getElementById('gridSizeInput');
                 const currentMed = medsList.find(m => m.id === currentMedId);
-                const size = currentMed ? currentMed.size : 10;
+                // Refresh med data in case of edits
+                if(!currentMed) return;
                 
-                sizeInput.value = size; 
-                grid.innerHTML = '';
-                
+                const piecesPerPlate = currentMed.piecesPerPlate || 10;
+                const platesPerBox = currentMed.platesPerBox || 1;
+                const totalSize = piecesPerPlate * platesPerBox;
+
                 let activeSet = new Set();
                 snap.forEach(d => activeSet.add(parseInt(d.id)));
 
-                // Check if full
-                if (activeSet.size === size && size > 0) {
+                const progress = (activeSet.size / totalSize) * 100;
+                const progressFill = document.getElementById('progressFill');
+                progressFill.style.width = `${Math.min(progress, 100)}%`;
+                document.getElementById('percentText').innerText = `${Math.round(progress)}%`;
+
+                // Dynamic Color & Notification
+                if(progress < 60) progressFill.style.backgroundColor = '#10b981'; 
+                else if(progress < 80) progressFill.style.backgroundColor = '#f59e0b'; 
+                else if(progress < 90) progressFill.style.backgroundColor = '#ef4444'; 
+                
+                if(progress >= 80 && progress < 85 && !lowStockNotified) {
+                    showToast("Attention: Stock faible (80%)");
+                    lowStockNotified = true;
+                }
+
+                if (activeSet.size === totalSize && totalSize > 0) {
                     if (!document.getElementById('finishModal').classList.contains('open')) {
                         openModal('finishModal');
                     }
                 }
 
-                const progress = Math.round((activeSet.size / size) * 100);
-                document.getElementById('progressFill').style.width = `${Math.min(progress, 100)}%`;
-                document.getElementById('percentText').innerText = `${progress}%`;
-
-                for(let i=1; i<=size; i++) {
-                    const btn = document.createElement('button');
-                    const isActive = activeSet.has(i);
-                    btn.className = `dose-btn aspect-square font-bold text-sm shadow-sm ${isActive ? 'active' : ''}`;
-                    btn.innerText = i;
-                    btn.onclick = () => toggleDose(i, isActive, size);
-                    grid.appendChild(btn);
-                }
+                window.gridData = { activeSet, piecesPerPlate, platesPerBox, totalSize };
+                renderGridUI();
             });
         }
 
-        async function toggleDose(n, isActive, size) {
+        function renderGridUI() {
+            if(!window.gridData) return;
+            const { activeSet, piecesPerPlate, platesPerBox, totalSize } = window.gridData;
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+
+            const start = (currentPlateIndex * piecesPerPlate) + 1;
+            const end = start + piecesPerPlate;
+
+            let maxTaken = 0;
+            activeSet.forEach(id => { if(id > maxTaken) maxTaken = id; });
+            let nextAvailable = maxTaken + 1;
+
+            for(let i=start; i<end; i++) {
+                const btn = document.createElement('button');
+                const isActive = activeSet.has(i);
+                const isNext = (i === nextAvailable);
+                
+                btn.className = `dose-btn aspect-square font-bold text-sm shadow-sm ${isActive ? 'active' : ''}`;
+                btn.innerText = i;
+
+                if (!isActive) {
+                    if (!isNext) btn.classList.add('locked');
+                } else {
+                    const isLastActive = (i === maxTaken);
+                    if(!isLastActive) btn.classList.add('locked');
+                }
+
+                btn.onclick = () => toggleDose(i, isActive, totalSize);
+                grid.appendChild(btn);
+            }
+        }
+
+        async function toggleDose(n, isActive, totalSize) {
             const colRef = collection(db, "users", user, "medications", currentMedId, "current_doses");
             const today = new Date().toISOString().split('T')[0];
             const histRef = doc(db, "users", user, "medications", currentMedId, "history", today);
 
             if (isActive) {
                 await deleteDoc(doc(colRef, n.toString()));
-                const snap = await getDocs(colRef);
-                if (snap.empty) {
-                    // Don't delete history to keep old pack data if needed, 
-                    // OR delete if it implies undoing the whole pack start.
-                    // Let's keep history intact unless user edits it manually.
-                } else {
-                    let max = 0; 
-                    snap.forEach(d => { if(parseInt(d.id) > max) max = parseInt(d.id); });
-                    await setDoc(histRef, { ratio: `${max}/${size}` }, { merge: true });
-                }
             } else {
                 await setDoc(doc(colRef, n.toString()), { taken: true });
-                const snap = await getDocs(colRef);
-                let max = n; 
-                snap.forEach(d => { if(parseInt(d.id) > max) max = parseInt(d.id); });
-                await setDoc(histRef, { ratio: `${max}/${size}` }, { merge: true });
+            }
+
+            const snap = await getDocs(colRef);
+            let currentMax = 0;
+            snap.forEach(d => { currentMax = Math.max(currentMax, parseInt(d.id)); });
+
+            // History Logic
+            const historySnap = await getDocs(collection(db, "users", user, "medications", currentMedId, "history"));
+            let lastKnownMax = 0;
+            let lastDate = "";
+            let entries = [];
+            historySnap.forEach(d => entries.push({ id: d.id, ...d.data() }));
+            entries.sort((a,b) => a.id.localeCompare(b.id));
+
+            for(let i = entries.length - 1; i >= 0; i--) {
+                if(entries[i].id < today) {
+                    lastDate = entries[i].id;
+                    const val = parseInt(entries[i].ratio.split('/')[0]);
+                    if(!isNaN(val)) lastKnownMax = val;
+                    break;
+                }
+            }
+
+            if(isActive) {
+                // Undo Logic
+                if(lastEntry && prevVal === n) {
+                    await deleteDoc(doc(db, "users", user, "medications", currentMedId, "history", lastDate));
+                    let newPrevVal = 0;
+                    for(let i = entries.length - 2; i >= 0; i--) {
+                        if(entries[i].id < today) {
+                            newPrevVal = parseInt(entries[i].ratio.split('/')[0]);
+                            break;
+                        }
+                    }
+                    if (currentMax <= newPrevVal) await deleteDoc(histRef);
+                    else await setDoc(histRef, { ratio: `${currentMax}/${totalSize}` }, { merge: true });
+                } else {
+                    if (currentMax <= lastKnownMax) await deleteDoc(histRef);
+                    else await setDoc(histRef, { ratio: `${currentMax}/${totalSize}` }, { merge: true });
+                }
+            } else {
+                await setDoc(histRef, { ratio: `${currentMax}/${totalSize}` }, { merge: true });
             }
         }
 
         window.confirmFinishPack = async () => {
-            // Only clear the current grid
             const colRef = collection(db, "users", user, "medications", currentMedId, "current_doses");
             const snap = await getDocs(colRef);
-            
             snap.forEach(async (d) => {
                 await deleteDoc(doc(colRef, d.id));
             });
-
             closeModal('finishModal');
             showToast("Nouvelle boîte commencée");
+            lowStockNotified = false;
         }
 
         // --- History & Calendar ---
@@ -606,13 +855,15 @@
             const cal = document.getElementById('calendar');
             cal.innerHTML = '';
             const y = currentDate.getFullYear(), m = currentDate.getMonth();
-            document.getElementById('calMonth').innerText = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(currentDate);
+            document.getElementById('calMonth').innerText = new Intl.DateTimeFormat(curLang, { month: 'long', year: 'numeric' }).format(currentDate);
 
             const first = new Date(y, m, 1).getDay();
             const days = new Date(y, m + 1, 0).getDate();
             const offset = (first === 0 ? 6 : first - 1);
 
             for(let i=0; i < offset; i++) cal.innerHTML += '<div></div>';
+
+            let prevVal = 0;
 
             for(let d=1; d<=days; d++) {
                 const key = `${y}-${String(m+1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
@@ -623,10 +874,28 @@
                 const isToday = key === todayStr;
 
                 cell.className = `cal-cell text-xs ${isToday ? 'bg-indigo-500/10' : ''}`;
-                cell.innerHTML = `
-                    <span class="font-bold opacity-40 ${isToday ? 'text-indigo-500' : ''}">${d}</span>
-                    ${data ? `<div class="ratio-tag">${data.ratio}</div>` : ''}
-                `;
+                cell.classList.add('stagger-in');
+                cell.style.animationDelay = `${d * 0.03}s`;
+
+                let htmlContent = `<span class="font-bold opacity-40 ${isToday ? 'text-indigo-500' : ''}">${d}</span>`;
+
+                if(data) {
+                    const curVal = parseInt(data.ratio.split('/')[0]);
+                    let increment = curVal - prevVal;
+                    if (increment < 0) increment = curVal;
+                    
+                    if (increment > 0) {
+                         htmlContent += `
+                            <div class="ratio-tag">${data.ratio}</div>
+                            <div class="count-tag">+${increment}</div>
+                        `;
+                    } else {
+                         htmlContent += `<div class="ratio-tag">${data.ratio}</div>`;
+                    }
+                    prevVal = curVal;
+                }
+
+                cell.innerHTML = htmlContent;
                 
                 cell.onclick = () => openEditModal(key, data ? data.ratio : "");
                 cal.appendChild(cell);
@@ -645,10 +914,8 @@
             if (!currentMedId || !selectedDateKey) return;
             const val = document.getElementById('modalInput').value.trim();
             const docRef = doc(db, "users", user, "medications", currentMedId, "history", selectedDateKey);
-            
             if (val === "") await deleteDoc(docRef);
             else await setDoc(docRef, { ratio: val });
-            
             closeModal('editModal');
             showToast("Historique mis à jour");
         };
@@ -664,20 +931,14 @@
             localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
         };
 
-        window.setLang = () => {
-            const current = localStorage.getItem('lang') || 'fr';
-            const next = current === 'fr' ? 'en' : 'fr';
-            localStorage.setItem('lang', next);
-            location.reload(); 
-        };
-
         window.openModal = (id) => {
             const m = document.getElementById(id);
             m.classList.remove('hidden');
             requestAnimationFrame(() => m.classList.add('open'));
-            if(id === 'addMedModal') {
+            if(id === 'addMedModal' && !isEditingMed) {
                 document.getElementById('newMedName').value = '';
-                document.getElementById('newMedSize').value = '10';
+                document.getElementById('newMedPieces').value = '10';
+                document.getElementById('newMedPlates').value = '3';
                 renderColorPicker();
             }
         };
@@ -707,11 +968,17 @@
             setTimeout(() => t.classList.remove('show'), 3000);
         };
 
+        // Init
         renderColorPicker();
-
         const savedUser = localStorage.getItem('medUser');
+        const savedLang = localStorage.getItem('medLang') || 'fr';
+        applyLang(savedLang);
+        
+        // Auto-login logic fix
         if(savedUser) {
             document.getElementById('userInput').value = savedUser;
+            // We proceed immediately, assuming valid session. 
+            // If we want to be stricter, we'd verify password again, but for UX let's trust local storage if exists.
             proceed(savedUser);
         }
     </script>
