@@ -70,9 +70,6 @@
         </div>
     </main>
 
-    <!-- Tous tes modals restent identiques (accountModal, editDayModal, addMedModal, rightDrawer) -->
-    <!-- Je les garde inchangés pour ne pas alourdir, tu les as déjà -->
-
     <div id="accountModal" class="modal-overlay" onclick="closeModal('accountModal')">
         <div class="glass p-6 w-full max-w-sm" onclick="event.stopPropagation()">
             <h3 class="font-bold mb-6 text-center uppercase text-sm">Profil</h3>
@@ -120,31 +117,42 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, getDocs, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyAx7c0bFNXuBxadAUItyP6h0U", authDomain: "pilltracker-59495.firebaseapp.com", projectId: "pilltracker-59495", storageBucket: "pilltracker-59495.appspot.com", messagingSenderId: "72228771158", appId: "1:72228771158:web:a03f36b13f23f" };
-        const db = getFirestore(initializeApp(firebaseConfig));
+        const firebaseConfig = {
+            apiKey: "AIzaSyAx7c0bFNXuBxadAUItyP6h0U",
+            authDomain: "pilltracker-59495.firebaseapp.com",
+            projectId: "pilltracker-59495",
+            storageBucket: "pilltracker-59495.appspot.com",
+            messagingSenderId: "72228771158",
+            appId: "1:72228771158:web:a03f36b13f23f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
         let user = localStorage.getItem('medUser') || "";
-        let medsData = {}, currentDate = new Date();
+        let medsData = {};
+        let currentDate = new Date();
 
-        // SERVICE WORKER
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').then(() => console.log("SW OK"));
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log("SW OK"))
+                .catch(err => console.error("SW error:", err));
         }
 
-        // === NOUVELLES FONCTIONS NOTIFICATIONS ===
+        // Fonctions notifications de test
         window.requestNotificationPermission = async () => {
             if (Notification.permission === "granted") {
-                alert("Notifications déjà autorisées ! Tu peux tester avec le bouton 🧪");
+                alert("Notifications déjà autorisées ! Tu peux tester avec 🧪");
                 return;
             }
             if (Notification.permission === "denied") {
-                alert("Tu as bloqué les notifications.\nRéactive-les dans les paramètres du navigateur (clique sur le cadenas à gauche de l'URL).");
+                alert("Notifications bloquées. Va dans les paramètres du navigateur (cadenas dans la barre d'adresse) pour les réactiver.");
                 return;
             }
 
             const permission = await Notification.requestPermission();
             if (permission === "granted") {
-                alert("Notifications autorisées ! 🎉\nTeste maintenant avec le bouton 🧪");
+                alert("Notifications autorisées ! 🎉 Clique sur 🧪 pour tester");
             } else {
                 alert("Notifications refusées 😔");
             }
@@ -152,71 +160,117 @@
 
         window.testNotification = () => {
             if (Notification.permission !== "granted") {
-                alert("Autorise d’abord les notifications en cliquant sur le bouton 🔔");
+                alert("Autorise d'abord les notifications avec 🔔");
                 return;
             }
 
-            new Notification('MedTracker Pro', {
-                body: 'Test réussi ! 🎉\nLes notifications fonctionnent correctement.',
-                icon: 'icon.png',
-                badge: 'icon.png',
-                tag: 'test-notification',
-                renotify: true
+            new Notification("MedTracker Pro", {
+                body: "Test réussi ! 🎉\nLes notifications fonctionnent parfaitement.",
+                icon: "icon.png",
+                badge: "icon.png",
+                tag: "test-notif"
             });
         };
-        // === FIN DES NOUVELLES FONCTIONS ===
 
-        // Le reste de ton code reste exactement le même
+        // Fonctions principales
         window.updateKey = () => {
-            const ln = document.getElementById('lastName').value.trim(), fn = document.getElementById('firstName').value.trim(), bd = document.getElementById('birthDate').value;
-            if(ln && fn && bd) { document.getElementById('passInput').classList.remove('hidden'); document.getElementById('authBtn').classList.remove('opacity-50', 'pointer-events-none'); }
+            const ln = document.getElementById('lastName').value.trim();
+            const fn = document.getElementById('firstName').value.trim();
+            const bd = document.getElementById('birthDate').value;
+            if (ln && fn && bd) {
+                document.getElementById('passInput').classList.remove('hidden');
+                document.getElementById('authBtn').classList.remove('opacity-50', 'pointer-events-none');
+            }
         };
 
         window.handleAuth = async () => {
-            const ln = document.getElementById('lastName').value.trim().toLowerCase(), fn = document.getElementById('firstName').value.trim().toLowerCase(), bd = document.getElementById('birthDate').value, pw = document.getElementById('passInput').value.trim();
-            const key = `\( {ln}_ \){fn}_${bd.replace(/-/g, '')}`, credRef = doc(db, "credentials", key), snap = await getDoc(credRef);
-            if(snap.exists() && snap.data().pw !== pw) return alert("Mot de passe incorrect");
-            if(!snap.exists()) await setDoc(credRef, { pw, info: {ln, fn, bd} });
-            user = key; localStorage.setItem('medUser', user); location.reload();
-        };
+            const ln = document.getElementById('lastName').value.trim().toLowerCase();
+            const fn = document.getElementById('firstName').value.trim().toLowerCase();
+            const bd = document.getElementById('birthDate').value;
+            const pw = document.getElementById('passInput').value.trim();
 
-        // ... (tout le reste de ton code JavaScript original reste inchangé jusqu'à la fin)
+            const key = `\( {ln}_ \){fn}_${bd.replace(/-/g, '')}`;
+            const credRef = doc(db, "credentials", key);
+            const snap = await getDoc(credRef);
+
+            if (snap.exists() && snap.data().pw !== pw) {
+                return alert("Mot de passe incorrect");
+            }
+            if (!snap.exists()) {
+                await setDoc(credRef, { pw, info: { ln, fn, bd } });
+            }
+
+            user = key;
+            localStorage.setItem('medUser', user);
+            location.reload();
+        };
 
         window.updateAccount = async () => {
-            const oldP = document.getElementById('oldPassCheck').value, newP = document.getElementById('newPassSet').value, ln = document.getElementById('editLN').value, fn = document.getElementById('editFN').value, bd = document.getElementById('editBD').value;
+            const oldP = document.getElementById('oldPassCheck').value;
+            const newP = document.getElementById('newPassSet').value;
+            const ln = document.getElementById('editLN').value.trim().toLowerCase();
+            const fn = document.getElementById('editFN').value.trim().toLowerCase();
+            const bd = document.getElementById('editBD').value;
+
             const uSnap = await getDoc(doc(db, "credentials", user));
-            if(uSnap.data().pw !== oldP) return alert("Ancien mot de passe requis.");
-            const newKey = `\( {ln.toLowerCase()}_ \){fn.toLowerCase()}_${bd.replace(/-/g, '')}`;
-            await setDoc(doc(db, "credentials", newKey), { pw: newP || oldP, info: {ln, fn, bd} });
-            if(newKey !== user) { handleLogout(); } else { alert("Profil mis à jour !"); closeModal('accountModal'); }
+            if (uSnap.data().pw !== oldP) {
+                return alert("Ancien mot de passe requis.");
+            }
+
+            const newKey = `\( {ln}_ \){fn}_${bd.replace(/-/g, '')}`;
+            await setDoc(doc(db, "credentials", newKey), { pw: newP || oldP, info: { ln, fn, bd } });
+
+            if (newKey !== user) {
+                handleLogout();
+            } else {
+                alert("Profil mis à jour !");
+                closeModal('accountModal');
+            }
         };
 
-        window.deleteAccount = async () => { if(confirm("Supprimer le compte ?")) { await deleteDoc(doc(db, "credentials", user)); handleLogout(); } };
+        window.handleLogout = () => {
+            localStorage.removeItem('medUser');
+            location.reload();
+        };
+
+        window.deleteAccount = async () => {
+            if (confirm("Supprimer définitivement le compte ?")) {
+                await deleteDoc(doc(db, "credentials", user));
+                handleLogout();
+            }
+        };
+
+        // Tu peux maintenant ajouter ici toutes tes autres fonctions : renderMedCard, changeDose, renderCalendar, etc.
+        // (elles sont identiques à ton code original – je ne les recopie pas pour ne pas alourdir, mais garde-les telles quelles)
 
         async function initApp() {
-            if(!user) return;
+            if (!user) return;
+
             document.getElementById('loginBox').classList.add('hidden');
             document.getElementById('appBody').classList.remove('hidden');
             document.getElementById('accBtn').classList.remove('hidden');
+
             const uSnap = await getDoc(doc(db, "credentials", user));
             const i = uSnap.data().info;
-            document.getElementById('editLN').value = i.ln; document.getElementById('editFN').value = i.fn; document.getElementById('editBD').value = i.bd;
+            document.getElementById('editLN').value = i.ln;
+            document.getElementById('editFN').value = i.fn;
+            document.getElementById('editBD').value = i.bd;
+
             onSnapshot(collection(db, "users", user, "medications"), (snap) => {
                 medsData = {};
-                const grid = document.getElementById('medsGrid'); grid.innerHTML = "";
+                const grid = document.getElementById('medsGrid');
+                grid.innerHTML = "";
                 snap.forEach(d => {
-                    const med = {id: d.id, ...d.data()}; medsData[med.id] = med;
-                    if(med.active !== false) renderMedCard(med);
+                    const med = { id: d.id, ...d.data() };
+                    medsData[med.id] = med;
+                    if (med.active !== false) renderMedCard(med);
                 });
                 renderCalendar();
                 renderHistory();
             });
         }
 
-        // Toutes les autres fonctions (renderMedCard, changeDose, renderCalendar, etc.) restent exactement comme avant
-        // Je ne les recopie pas ici pour ne pas alourdir, mais garde-les telles quelles dans ton code
-
-        if(user) initApp();
+        if (user) initApp();
     </script>
 </body>
 </html>
