@@ -18,79 +18,25 @@
         .dark { --bg: #0f172a; --card: rgba(30, 41, 59, 0.9); --text: #f1f5f9; }
         body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.4s; min-height: 100vh; }
         .glass { background: var(--card); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 24px; }
-        .progress-bar { height: 6px; width: 100%; background: rgba(148, 163, 184, 0.1); border-radius: 10px; overflow: hidden; }
-        .cal-cell { min-height: 95px; border-radius: 12px; display: flex; flex-direction: column; padding: 4px; border: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
-        .ratio-badge { font-size: 0.52rem; padding: 1px 3px; border-radius: 4px; color: white; margin-bottom: 2px; font-weight: 800; text-align: center; }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 5000; display: none; align-items: center; justify-content: center; padding: 20px; }
-        .modal-overlay.open { display: flex; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .alert-stock { animation: pulse 1.5s infinite; font-size: 8px; font-weight: 900; padding: 2px 6px; border-radius: 6px; }
     </style>
 </head>
 <body class="p-3 antialiased">
-    <div id="drawerOverlay" class="fixed inset-0 bg-black/40 z-[1500] hidden" onclick="closeDrawers()"></div>
 
-    <nav class="max-w-4xl mx-auto flex justify-between items-center p-4 glass mb-6 relative z-[2000]">
-        <button onclick="openModal('accountModal')" id="accBtn" class="w-10 h-10 rounded-xl bg-slate-500/5 flex items-center justify-center hidden">👤</button>
-        <h1 class="text-xl font-black text-indigo-500 italic">MEDTRACKER PRO</h1>
-        <div class="flex gap-2">
-            <button onclick="testNotification()" class="w-10 h-10 rounded-xl bg-green-500/5 flex items-center justify-center">🧪</button>
-            <button onclick="requestNotificationPermission()" id="notifBtn" class="w-10 h-10 rounded-xl bg-slate-500/5 flex items-center justify-center">🔔</button>
-            <button onclick="openRightDrawer()" class="w-10 h-10 rounded-xl bg-slate-500/5 flex items-center justify-center">🕒</button>
-            <button onclick="toggleTheme()" class="w-10 h-10 rounded-xl bg-slate-500/5 flex items-center justify-center">🌓</button>
-        </div>
-    </nav>
+    <h1 class="text-center text-xl font-black text-indigo-500 mb-6">MEDTRACKER PRO</h1>
 
-    <main class="max-w-4xl mx-auto space-y-6">
-        <div id="loginBox" class="glass p-8 text-center space-y-4 max-w-sm mx-auto">
-            <div class="space-y-3">
-                <input type="text" id="lastName" oninput="updateKey()" placeholder="Nom" class="w-full bg-slate-500/10 rounded-xl p-4 font-bold outline-none">
-                <input type="text" id="firstName" oninput="updateKey()" placeholder="Prénom" class="w-full bg-slate-500/10 rounded-xl p-4 font-bold outline-none">
-                <input type="date" id="birthDate" oninput="updateKey()" class="w-full bg-slate-500/10 rounded-xl p-4 font-bold outline-none">
-                <input type="password" id="passInput" placeholder="Mot de passe" class="w-full bg-slate-500/10 rounded-xl p-4 text-center font-bold outline-none hidden">
-            </div>
-            <button id="authBtn" onclick="handleAuth()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl opacity-50 pointer-events-none">VÉRIFIER</button>
-        </div>
-
-        <div id="appBody" class="hidden space-y-6">
-            <div class="flex justify-between items-center px-2">
-                <h2 class="font-black text-[10px] uppercase opacity-40">Mes Médicaments</h2>
-                <button onclick="openModal('addMedModal')" class="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold text-[10px] uppercase">+ AJOUTER</button>
-            </div>
-            <div id="medsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
-            
-            <div class="glass p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <button onclick="changeMonth(-1)" class="font-black">←</button>
-                    <h3 id="calMonth" class="font-black uppercase text-xs tracking-widest text-indigo-500"></h3>
-                    <button onclick="changeMonth(1)" class="font-black">→</button>
-                </div>
-                <div id="calendar" class="grid grid-cols-7 gap-1 md:gap-2"></div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Modals et autres contenus restent identiques -->
+    <!-- Boutons test notifications et SW -->
+    <div class="flex justify-center gap-4 mb-6">
+        <button onclick="requestNotificationPermission()" class="px-4 py-2 bg-slate-500/10 rounded-xl">🔔 Autoriser Notifications</button>
+        <button onclick="testNotification()" class="px-4 py-2 bg-green-500/10 rounded-xl">🧪 Tester Notification</button>
+        <button onclick="checkSW()" class="px-4 py-2 bg-blue-500/10 rounded-xl">🔍 Vérifier SW</button>
+    </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, getDocs, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        // --- Firebase imports si besoin
+        // import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        // import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAx7c0bFNXuBxadAUItyP6h0U",
-            authDomain: "pilltracker-59495.firebaseapp.com",
-            projectId: "pilltracker-59495",
-            storageBucket: "pilltracker-59495.appspot.com",
-            messagingSenderId: "72228771158",
-            appId: "1:72228771158:web:a03f36b13f23f"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        let user = localStorage.getItem('medUser') || "";
-        let medsData = {};
-        let currentDate = new Date();
+        let user = ""; // pour test simple notifications/SW
 
         // --- ENREGISTREMENT SERVICE WORKER ---
         if ('serviceWorker' in navigator) {
@@ -99,26 +45,32 @@
                 .catch(err => console.error("SW erreur:", err));
         }
 
+        // --- Vérifier Service Worker ---
+        function checkSW() {
+            navigator.serviceWorker.getRegistrations().then(regs => {
+                if (regs.length > 0) {
+                    alert("Service Worker actif ✅ Scope : " + regs[0].scope);
+                } else {
+                    alert("Aucun Service Worker trouvé ❌");
+                }
+            });
+        }
+
         // --- Notifications ---
-        window.requestNotificationPermission = async () => {
+        async function requestNotificationPermission() {
             if (Notification.permission === "granted") {
                 alert("Notifications déjà autorisées ! Tu peux tester avec 🧪");
                 return;
             }
-            if (Notification.permission === "denied") {
-                alert("Notifications bloquées. Va dans les paramètres du navigateur pour les réactiver.");
-                return;
-            }
-
             const permission = await Notification.requestPermission();
             if (permission === "granted") {
                 alert("Notifications autorisées ! 🎉 Clique sur 🧪 pour tester");
             } else {
                 alert("Notifications refusées 😔");
             }
-        };
+        }
 
-        window.testNotification = () => {
+        function testNotification() {
             if (Notification.permission !== "granted") {
                 alert("Autorise d'abord les notifications avec 🔔");
                 return;
@@ -132,80 +84,7 @@
                     tag: "test-notif"
                 });
             });
-        };
-
-        // --- Fonctions principales (login, auth, meds, calendrier...) ---
-        window.updateKey = () => {
-            const ln = document.getElementById('lastName').value.trim();
-            const fn = document.getElementById('firstName').value.trim();
-            const bd = document.getElementById('birthDate').value;
-            if (ln && fn && bd) {
-                document.getElementById('passInput').classList.remove('hidden');
-                document.getElementById('authBtn').classList.remove('opacity-50', 'pointer-events-none');
-            }
-        };
-
-        window.handleAuth = async () => {
-            const ln = document.getElementById('lastName').value.trim().toLowerCase();
-            const fn = document.getElementById('firstName').value.trim().toLowerCase();
-            const bd = document.getElementById('birthDate').value;
-            const pw = document.getElementById('passInput').value.trim();
-
-            const key = `${ln}_${fn}_${bd.replace(/-/g, '')}`;
-            const credRef = doc(db, "credentials", key);
-            const snap = await getDoc(credRef);
-
-            if (snap.exists() && snap.data().pw !== pw) return alert("Mot de passe incorrect");
-            if (!snap.exists()) await setDoc(credRef, { pw, info: { ln, fn, bd } });
-
-            user = key;
-            localStorage.setItem('medUser', user);
-            location.reload();
-        };
-
-        window.updateAccount = async () => {
-            const oldP = document.getElementById('oldPassCheck').value;
-            const newP = document.getElementById('newPassSet').value;
-            const ln = document.getElementById('editLN').value.trim().toLowerCase();
-            const fn = document.getElementById('editFN').value.trim().toLowerCase();
-            const bd = document.getElementById('editBD').value;
-
-            const uSnap = await getDoc(doc(db, "credentials", user));
-            if (uSnap.data().pw !== oldP) return alert("Ancien mot de passe requis.");
-
-            const newKey = `${ln}_${fn}_${bd.replace(/-/g, '')}`;
-            await setDoc(doc(db, "credentials", newKey), { pw: newP || oldP, info: { ln, fn, bd } });
-
-            if (newKey !== user) handleLogout();
-            else alert("Profil mis à jour !");
-        };
-
-        window.handleLogout = () => {
-            localStorage.removeItem('medUser');
-            location.reload();
-        };
-
-        window.deleteAccount = async () => {
-            if (confirm("Supprimer définitivement le compte ?")) {
-                await deleteDoc(doc(db, "credentials", user));
-                handleLogout();
-            }
-        };
-
-        async function initApp() {
-            if (!user) return;
-
-            document.getElementById('loginBox').classList.add('hidden');
-            document.getElementById('appBody').classList.remove('hidden');
-
-            const uSnap = await getDoc(doc(db, "credentials", user));
-            const i = uSnap.data().info;
-            document.getElementById('editLN').value = i.ln;
-            document.getElementById('editFN').value = i.fn;
-            document.getElementById('editBD').value = i.bd;
         }
-
-        if (user) initApp();
     </script>
 </body>
 </html>
