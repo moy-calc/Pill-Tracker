@@ -10,18 +10,18 @@
         :root { --bg: #f8fafc; --card: rgba(255, 255, 255, 0.8); --text: #1e293b; --accent: #6366f1; }
         .dark { --bg: #0b0f1a; --card: rgba(22, 30, 46, 0.7); --text: #f1f5f9; --accent: #818cf8; }
         body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.6s ease; min-height: 100vh; }
-        .glass { background: var(--card); backdrop-filter: blur(16px); border: 1px solid rgba(148, 163, 184, 0.1); border-radius: 24px; }
+        .glass { background: var(--card); backdrop-filter: blur(16px); border: 1px solid rgba(148, 163, 184, 0.1); border-radius: 24px; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); }
         .text-anim { animation: reveal 0.5s ease both; }
         @keyframes reveal { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .pill-btn { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); background: rgba(148, 163, 184, 0.1); border-radius: 14px; }
-        .pill-btn.active { background: var(--accent); color: white; transform: scale(1.05); }
+        .pill-btn.active { background: var(--accent); color: white; transform: scale(1.05); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); }
         .progress-bar { height: 8px; border-radius: 4px; background: rgba(148, 163, 184, 0.1); overflow: hidden; }
         .progress-fill { height: 100%; background: var(--accent); transition: width 0.6s ease; }
-        .auth-status { font-size: 0.7rem; font-weight: 800; margin-top: 5px; }
         .theme-toggle { width: 42px; height: 42px; border-radius: 12px; cursor: pointer; background: var(--card); border: 1px solid rgba(148, 163, 184, 0.2); display: flex; align-items: center; justify-content: center; }
         .lang-btn { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.75rem; opacity: 0.5; }
         .lang-btn.active { opacity: 1; color: var(--accent); }
-        .cal-cell { aspect-ratio: 1/1.2; border-radius: 12px; background: rgba(148, 163, 184, 0.05); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
+        .cal-cell { aspect-ratio: 1/1.2; border-radius: 12px; background: rgba(148, 163, 184, 0.05); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+        .cal-cell:hover { background: rgba(148, 163, 184, 0.15); }
         .ratio-tag { background: var(--accent); color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 6px; margin-top: 4px; font-weight: 800; }
     </style>
 </head>
@@ -41,9 +41,9 @@
     <main class="max-w-md mx-auto space-y-6">
         <div id="loginBox" class="glass p-8 text-center space-y-5 text-anim">
             <input type="text" id="userInput" oninput="checkUserAvailability()" placeholder="Identifiant" class="w-full bg-transparent border-b-2 border-slate-300 focus:border-indigo-500 outline-none p-2 text-center text-xl transition-all">
-            <div id="userStatus" class="auth-status text-slate-400">...</div>
+            <div id="userStatus" class="auth-status text-slate-400 font-bold text-xs uppercase mt-2">...</div>
             <input type="password" id="passInput" placeholder="Mot de passe" class="hidden w-full bg-transparent border-b-2 border-slate-300 focus:border-indigo-500 outline-none p-2 text-center text-lg transition-all">
-            <button onclick="handleAuth()" id="btnLogin" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg uppercase tracking-widest">Vérifier</button>
+            <button onclick="handleAuth()" id="btnLogin" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg uppercase tracking-widest mt-4">Vérifier</button>
         </div>
 
         <div id="appBody" class="hidden space-y-6">
@@ -65,9 +65,9 @@
 
             <div class="glass p-6 text-anim">
                 <div class="flex justify-between items-center mb-4">
-                    <button onclick="changeMonth(-1)" class="p-2">←</button>
+                    <button onclick="changeMonth(-1)" class="p-2 hover:bg-slate-200 rounded-full">←</button>
                     <h3 id="calMonth" class="font-extrabold uppercase text-sm"></h3>
-                    <button onclick="changeMonth(1)" class="p-2">→</button>
+                    <button onclick="changeMonth(1)" class="p-2 hover:bg-slate-200 rounded-full">→</button>
                 </div>
                 <div id="calendar" class="grid grid-cols-7 gap-2"></div>
             </div>
@@ -101,13 +101,15 @@
         let historyData = {};
         let userExists = false;
 
+        // AUTHENTICATION
         window.checkUserAvailability = async () => {
             const name = document.getElementById('userInput').value.trim().toLowerCase();
             if (name.length < 3) return;
             const userDoc = await getDoc(doc(db, "users", name));
             userExists = userDoc.exists();
             const status = document.getElementById('userStatus');
-            status.innerText = userExists ? i18n[localStorage.getItem('lang')||'fr'].taken : i18n[localStorage.getItem('lang')||'fr'].available;
+            const l = localStorage.getItem('lang') || 'fr';
+            status.innerText = userExists ? i18n[l].taken : i18n[l].available;
             status.style.color = userExists ? "#818cf8" : "#4ade80";
             document.getElementById('passInput').classList.remove('hidden');
         };
@@ -119,7 +121,7 @@
             const userRef = doc(db, "users", name);
             if (userExists) {
                 const snap = await getDoc(userRef);
-                if (snap.data().password === pass) proceed(name); else alert("Pass Error");
+                if (snap.data().password === pass) proceed(name); else alert("Mot de passe incorrect");
             } else {
                 await setDoc(userRef, { password: pass }); proceed(name);
             }
@@ -133,6 +135,7 @@
             syncHistory();
         }
 
+        // SETTINGS & UI
         window.toggleTheme = () => {
             document.body.classList.toggle('dark');
             localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
@@ -147,17 +150,24 @@
             document.getElementById(`btn-${l}`).classList.add('active');
             localStorage.setItem('lang', l);
             renderCalendar();
+            if(document.getElementById('userInput').value) checkUserAvailability();
         };
 
+        // CORE LOGIC - PILLS
         function syncPills() {
             onSnapshot(collection(db, "users", user, "current_pack"), (snap) => {
                 const grid = document.getElementById('grid');
                 const size = parseInt(document.getElementById('gridSize').value);
                 grid.innerHTML = '';
+                let activeCount = 0;
                 let activeSet = new Set();
-                snap.forEach(d => activeSet.add(parseInt(d.id)));
+                
+                snap.forEach(d => {
+                    activeSet.add(parseInt(d.id));
+                    activeCount++;
+                });
 
-                const progress = (activeSet.size / size) * 100;
+                const progress = (activeCount / size) * 100;
                 document.getElementById('progressFill').style.width = `${progress}%`;
                 document.getElementById('percentText').innerText = `${Math.round(progress)}%`;
 
@@ -165,44 +175,68 @@
                     const btn = document.createElement('button');
                     btn.className = `pill-btn aspect-square font-bold ${activeSet.has(i) ? 'active' : ''}`;
                     btn.innerText = i;
+                    // On passe false si active, true si inactive
                     btn.onclick = () => togglePill(i, activeSet.has(i));
                     grid.appendChild(btn);
                 }
             });
         }
 
-        async function togglePill(n, isActive) {
-            const today = new Date().toISOString().split('T')[0];
+        async function togglePill(n, isCurrentlyActive) {
+            const today = new Date().toISOString().split('T')[0]; // ex: 2024-05-21
             const size = document.getElementById('gridSize').value;
             const packRef = collection(db, "users", user, "current_pack");
             const histRef = doc(db, "users", user, "history", today);
 
-            if(isActive) await deleteDoc(doc(packRef, n.toString()));
-            else await setDoc(doc(packRef, n.toString()), { taken: true });
+            // 1. Mettre à jour l'état de la pilule avec la DATE actuelle
+            if(isCurrentlyActive) {
+                await deleteDoc(doc(packRef, n.toString()));
+            } else {
+                await setDoc(doc(packRef, n.toString()), { 
+                    taken: true, 
+                    date: today // IMPORTANT: On stocke la date de prise
+                });
+            }
 
-            const snap = await getDocs(packRef);
-            const countToday = snap.size;
+            // 2. Recalculer le total pour aujourd'hui
+            const allPillsSnap = await getDocs(packRef);
+            let pillsTakenToday = 0;
+            
+            allPillsSnap.forEach(d => {
+                const data = d.data();
+                // On compte seulement si la date correspond à aujourd'hui
+                if(data.date === today) {
+                    pillsTakenToday++;
+                }
+            });
 
-            if(countToday === 0) {
+            // 3. Gestion de l'historique
+            if(pillsTakenToday === 0) {
+                // Si aucune pilule prise AUJOURD'HUI, on supprime l'entrée du calendrier d'aujourd'hui
                 await deleteDoc(histRef);
             } else {
-                // Trouver la dernière valeur enregistrée AVANT aujourd'hui
+                // Sinon, on cherche la valeur cumulée d'avant
                 const q = query(collection(db, "users", user, "history"), orderBy("__name__", "desc"));
-                const hSnaps = await getDocs(q);
-                let lastVal = 0;
+                const historySnap = await getDocs(q);
                 
-                for (let d of hSnaps.docs) {
-                    if (d.id < today) {
-                        lastVal = d.data().total || 0;
+                let lastTotal = 0;
+                for (let d of historySnap.docs) {
+                    if (d.id < today) { // Trouver la date la plus récente avant aujourd'hui
+                        lastTotal = d.data().total || 0;
                         break;
                     }
                 }
-                
-                const total = lastVal + countToday;
-                await setDoc(histRef, { ratio: `${total}/${size}`, total: total, count: countToday });
+
+                const newTotal = lastTotal + pillsTakenToday;
+                await setDoc(histRef, { 
+                    ratio: `${newTotal}/${size}`, 
+                    total: newTotal,
+                    dailyCount: pillsTakenToday 
+                });
             }
         }
 
+        // CALENDAR
         function syncHistory() {
             onSnapshot(collection(db, "users", user, "history"), (snap) => {
                 historyData = {};
@@ -229,21 +263,34 @@
             for(let d=1; d<=days; d++) {
                 const key = `${y}-${String(m+1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const data = historyData[key];
+                
                 const cell = document.createElement('div');
                 cell.className = "cal-cell";
-                cell.innerHTML = `<span class="text-[10px] font-bold opacity-30">${d}</span>${data ? `<div class="ratio-tag text-anim">${data.ratio}</div>` : ''}`;
+                cell.innerHTML = `
+                    <span class="text-[10px] font-bold opacity-30">${d}</span>
+                    ${data ? `<div class="ratio-tag text-anim">${data.ratio}</div>` : ''}
+                `;
                 
+                // Modification manuelle si besoin
                 cell.onclick = async () => {
-                    const newVal = prompt("Ratio manuel (ex: 5/10) :", data ? data.ratio : "");
+                    const currentVal = data ? data.ratio : "";
+                    const newVal = prompt("Valeur manuelle (ex: 5/10) :", currentVal);
                     if (newVal === null) return;
+                    
                     const docRef = doc(db, "users", user, "history", key);
-                    if (newVal.trim() === "") await deleteDoc(docRef);
-                    else await setDoc(docRef, { ratio: newVal.trim(), total: parseInt(newVal.split('/')[0]) });
+                    if (newVal.trim() === "") {
+                        await deleteDoc(docRef);
+                    } else {
+                        // On essaie d'extraire le chiffre pour maintenir la cohérence du total
+                        const num = parseInt(newVal.split('/')[0]) || 0;
+                        await setDoc(docRef, { ratio: newVal.trim(), total: num });
+                    }
                 };
                 cal.appendChild(cell);
             }
         }
 
+        // INIT
         if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
         setLang(localStorage.getItem('lang') || 'fr');
         window.updateGridSize = () => syncPills();
