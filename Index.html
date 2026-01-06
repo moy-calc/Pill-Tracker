@@ -1,1 +1,524 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PillTracker Sync Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@500;700&display=swap');
+        
+        :root { --bg: #f8fafc; --card: rgba(255, 255, 255, 0.85); --text: #1e293b; --accent: #6366f1; --border: rgba(148, 163, 184, 0.2); }
+        .dark { --bg: #0b0f1a; --card: rgba(22, 30, 46, 0.75); --text: #f1f5f9; --accent: #818cf8; --border: rgba(255, 255, 255, 0.1); }
 
+        body { 
+            background: var(--bg); color: var(--text); 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            transition: background 0.5s ease;
+            min-height: 100vh;
+        }
+
+        /* Glassmorphism */
+        .glass { 
+            background: var(--card); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border); 
+            border-radius: 24px; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05);
+        }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .pill-btn { 
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            background: rgba(148, 163, 184, 0.1); 
+            border-radius: 14px; 
+            position: relative;
+            overflow: hidden;
+        }
+        .pill-btn.active { background: var(--accent); color: white; box-shadow: 0 8px 20px -4px var(--accent); transform: scale(1.05); }
+        .pill-btn:active { transform: scale(0.95); }
+
+        /* Progress Bar */
+        .progress-bar { height: 10px; border-radius: 99px; background: rgba(148, 163, 184, 0.1); overflow: hidden; position: relative; }
+        .progress-fill { height: 100%; background: var(--accent); transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 20px var(--accent); }
+
+        /* Calendar */
+        .cal-cell { aspect-ratio: 1/1.2; border-radius: 12px; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.2s; cursor: pointer; border: 1px solid transparent; }
+        .cal-cell:hover { background: rgba(148, 163, 184, 0.1); }
+        .ratio-tag { background: var(--accent); color: white; font-size: 0.5rem; padding: 2px 6px; border-radius: 6px; margin-top: 4px; font-weight: 800; box-shadow: 0 4px 10px -2px var(--accent); }
+
+        /* UI Elements */
+        .nav-btn { transition: 0.3s; }
+        .nav-btn:hover { background: rgba(148, 163, 184, 0.2); border-radius: 8px; }
+        
+        /* Modal & Toast */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 50; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
+        .modal-overlay.open { display: flex; opacity: 1; }
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--text); color: var(--bg); padding: 12px 24px; border-radius: 50px; font-weight: 600; z-index: 100; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.2); font-size: 0.9rem; display: flex; align-items: center; gap: 8px;}
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* Loading Spinner */
+        .spinner { width: 20px; height: 20px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 0.75s linear infinite; display: none; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="p-4 md:p-8 antialiased selection:bg-indigo-500 selection:text-white">
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        <span id="toastMsg">Sauvegardé</span>
+    </div>
+
+    <!-- Modal Edition Historique -->
+    <div id="editModal" class="modal-overlay" onclick="closeModal(event)">
+        <div class="glass p-6 w-80 text-center transform scale-95 transition-transform duration-300" id="modalContent">
+            <h3 class="font-bold text-lg mb-2" id="modalTitle">Modifier</h3>
+            <p class="text-sm opacity-60 mb-4" id="modalDate">Date</p>
+            <input type="text" id="modalInput" class="w-full bg-slate-500/10 border border-slate-500/20 rounded-xl p-3 text-center font-bold text-xl outline-none focus:border-indigo-500 transition-colors mb-4" placeholder="ex: 5/10">
+            <div class="flex gap-2">
+                <button onclick="saveModal()" class="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/30 active:scale-95 transition-transform">OK</button>
+                <button onclick="deleteModalEntry()" class="px-4 bg-red-500/10 text-red-500 font-bold rounded-xl active:scale-95 transition-transform">✕</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="max-w-4xl mx-auto flex justify-between items-center p-4 glass mb-6 fade-in" style="animation-delay: 0.1s">
+        <h1 id="title" class="text-xl font-extrabold tracking-tight flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-indigo-500 block animate-pulse"></span>
+            PillTracker
+        </h1>
+        <div class="flex items-center gap-3">
+            <div class="flex gap-1 bg-slate-500/5 p-1 rounded-lg border border-slate-500/10">
+                <button onclick="setLang('ar')" id="btn-ar" class="lang-btn px-2 py-1 text-xs font-bold rounded-md transition-colors">AR</button>
+                <button onclick="setLang('fr')" id="btn-fr" class="lang-btn px-2 py-1 text-xs font-bold rounded-md transition-colors">FR</button>
+                <button onclick="setLang('en')" id="btn-en" class="lang-btn px-2 py-1 text-xs font-bold rounded-md transition-colors">EN</button>
+            </div>
+            <button onclick="toggleTheme()" class="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-500/5 hover:bg-slate-500/10 transition-colors border border-slate-500/10">
+                <span id="themeIcon">🌓</span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="max-w-md mx-auto space-y-6">
+        
+        <!-- Login Section -->
+        <div id="loginBox" class="glass p-8 text-center space-y-6 fade-in" style="animation-delay: 0.2s">
+            <div class="space-y-1">
+                <label class="text-xs font-bold uppercase tracking-wider opacity-50 text-left ml-1">Identifiant</label>
+                <div class="relative">
+                    <input type="text" id="userInput" oninput="checkUserAvailability()" placeholder="Votre pseudo..." class="w-full bg-slate-500/5 border border-slate-500/10 rounded-xl p-4 text-center text-lg outline-none focus:border-indigo-500 focus:bg-slate-500/10 transition-all font-bold">
+                    <div class="spinner absolute right-4 top-1/2 -translate-y-1/2 text-indigo-500" id="loginSpinner"></div>
+                </div>
+                <div id="userStatus" class="h-4 text-xs font-bold uppercase tracking-wide transition-all opacity-0">...</div>
+            </div>
+            
+            <div id="passContainer" class="space-y-1 hidden transform transition-all duration-300 origin-top">
+                <label class="text-xs font-bold uppercase tracking-wider opacity-50 text-left ml-1">Mot de passe</label>
+                <input type="password" id="passInput" placeholder="••••••••" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-xl p-4 text-center text-lg outline-none focus:border-indigo-500 focus:bg-slate-500/10 transition-all">
+            </div>
+
+            <button onclick="handleAuth()" id="btnLogin" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 active:scale-95 transition-all uppercase tracking-widest text-sm mt-4">
+                Commencer
+            </button>
+        </div>
+
+        <!-- App Section -->
+        <div id="appBody" class="hidden space-y-6">
+            <!-- Progress -->
+            <div class="glass p-6 fade-in">
+                <div class="flex justify-between items-end mb-3">
+                    <div>
+                        <span id="labelProgress" class="text-[10px] font-bold uppercase opacity-60 tracking-widest">Progression</span>
+                        <h2 class="text-2xl font-black mt-1">Pack en cours</h2>
+                    </div>
+                    <span id="percentText" class="text-3xl font-black text-indigo-500">0%</span>
+                </div>
+                <div class="progress-bar"><div id="progressFill" class="progress-fill" style="width: 0%"></div></div>
+            </div>
+
+            <!-- Grid -->
+            <div class="glass p-6 fade-in">
+                <div class="flex justify-between items-center mb-5">
+                    <span id="labelCount" class="text-xs font-bold uppercase opacity-60 tracking-widest">Plaque :</span>
+                    <div class="flex items-center gap-2">
+                         <span class="text-xs opacity-50">Pills</span>
+                        <input type="number" id="gridSize" value="10" onchange="updateGridSize()" class="bg-slate-500/10 border-none rounded-lg p-2 w-16 text-center font-black text-indigo-500 outline-none focus:ring-2 ring-indigo-500/20">
+                    </div>
+                </div>
+                <div id="grid" class="grid grid-cols-5 gap-3"></div>
+            </div>
+
+            <!-- Calendar -->
+            <div class="glass p-6 fade-in pb-8">
+                <div class="flex justify-between items-center mb-6 px-2">
+                    <button onclick="changeMonth(-1)" class="nav-btn p-2 rounded-lg text-slate-400 hover:text-indigo-500">←</button>
+                    <h3 id="calMonth" class="font-extrabold uppercase text-sm tracking-wide"></h3>
+                    <button onclick="changeMonth(1)" class="nav-btn p-2 rounded-lg text-slate-400 hover:text-indigo-500">→</button>
+                </div>
+                <div id="calendar" class="grid grid-cols-7 gap-2"></div>
+            </div>
+            
+            <!-- Logout -->
+            <div class="text-center pb-8 opacity-40 hover:opacity-100 transition-opacity">
+                <button onclick="logout()" class="text-xs font-bold uppercase tracking-widest hover:text-red-500">Déconnexion</button>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // --- Configuration Firebase (Tes clés actuelles) ---
+        // NOTE : Pour la prod, limite les règles Firestore et utilise Firebase Auth
+        const firebaseConfig = {
+            apiKey: "AIzaSyAx7c0bFNXuBxadAUItyP6h0U",
+            authDomain: "pilltracker-59495.firebaseapp.com",
+            projectId: "pilltracker-59495",
+            storageBucket: "pilltracker-59495.appspot.com",
+            messagingSenderId: "72228771158",
+            appId: "1:72228771158:web:a03f36b13f23f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- Internationalisation ---
+        const i18n = {
+            fr: { title: "PillTracker", label: "Taille :", login: "Commencer", available: "Nouveau compte", taken: "Compte existant", progress: "Progression", placeholder: "Mot de passe", saved: "Sauvegardé", deleted: "Supprimé", modalTitle: "Modifier ratio" },
+            en: { title: "PillTracker", label: "Size :", login: "Start", available: "New Account", taken: "Account found", progress: "Progress", placeholder: "Password", saved: "Saved", deleted: "Deleted", modalTitle: "Edit ratio" },
+            ar: { title: "متابع الأدوية", label: "حجم :", login: "دخول", available: "حساب جديد", taken: "الحساب موجود", progress: "التقدم", placeholder: "كلمة المرور", saved: "تم الحفظ", deleted: "تم الحذف", modalTitle: "تعديل النسبة" }
+        };
+
+        // --- State ---
+        let currentUser = "";
+        let currentDate = new Date();
+        let historyData = {};
+        let userExists = false;
+        let selectedDateKey = null;
+
+        // --- UI Functions ---
+        window.showToast = (msgKey) => {
+            const toast = document.getElementById('toast');
+            const lang = localStorage.getItem('lang') || 'fr';
+            const msg = i18n[lang][msgKey] || msgKey;
+            
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        };
+
+        window.toggleTheme = () => {
+            document.body.classList.toggle('dark');
+            const isDark = document.body.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.getElementById('themeIcon').innerText = isDark ? '☀️' : '🌙';
+        };
+
+        window.setLang = (l) => {
+            document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+            const data = i18n[l];
+            document.getElementById('title').innerHTML = `<span class="w-3 h-3 rounded-full bg-indigo-500 block animate-pulse"></span> ${data.title}`;
+            document.getElementById('labelCount').innerText = data.label;
+            document.getElementById('labelProgress').innerText = data.progress;
+            document.getElementById('btnLogin').innerText = data.login;
+            document.getElementById('passInput').placeholder = data.placeholder;
+            
+            // Active state logic
+            document.querySelectorAll('.lang-btn').forEach(b => {
+                b.classList.remove('bg-slate-500/20', 'text-indigo-500');
+                b.classList.add('opacity-50');
+            });
+            const activeBtn = document.getElementById(`btn-${l}`);
+            activeBtn.classList.add('bg-slate-500/20', 'text-indigo-500');
+            activeBtn.classList.remove('opacity-50');
+
+            localStorage.setItem('lang', l);
+            renderCalendar();
+            // Trigger check to update status text language
+            if(document.getElementById('userInput').value) checkUserAvailability();
+        };
+
+        // --- Modal Logic ---
+        window.openModal = (dateKey, currentVal) => {
+            selectedDateKey = dateKey;
+            const lang = localStorage.getItem('lang') || 'fr';
+            const modal = document.getElementById('editModal');
+            const content = document.getElementById('modalContent');
+            
+            document.getElementById('modalTitle').innerText = i18n[lang].modalTitle;
+            document.getElementById('modalDate').innerText = dateKey;
+            const input = document.getElementById('modalInput');
+            input.value = currentVal || "";
+            
+            modal.classList.remove('hidden');
+            // Small timeout to allow display:flex to apply before opacity transition
+            requestAnimationFrame(() => {
+                modal.classList.add('open');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            });
+            
+            input.focus();
+        };
+
+        window.closeModal = (e) => {
+            if (e && e.target.id !== 'editModal') return; // Only close if clicking overlay or close button
+            const modal = document.getElementById('editModal');
+            const content = document.getElementById('modalContent');
+            
+            modal.classList.remove('open');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                selectedDateKey = null;
+            }, 300);
+        };
+
+        window.saveModal = async () => {
+            if (!currentUser || !selectedDateKey) return;
+            const val = document.getElementById('modalInput').value.trim();
+            const docRef = doc(db, "users", currentUser, "history", selectedDateKey);
+            
+            if (val === "") {
+                await deleteDoc(docRef);
+                showToast('deleted');
+            } else {
+                await setDoc(docRef, { ratio: val });
+                showToast('saved');
+            }
+            closeModal({target: {id: 'editModal'}}); // Force close
+        };
+
+        window.deleteModalEntry = async () => {
+             document.getElementById('modalInput').value = "";
+             window.saveModal();
+        };
+
+        // --- Auth Logic ---
+        window.checkUserAvailability = async () => {
+            const name = document.getElementById('userInput').value.trim().toLowerCase();
+            const status = document.getElementById('userStatus');
+            const passContainer = document.getElementById('passContainer');
+            const spinner = document.getElementById('loginSpinner');
+            const lang = localStorage.getItem('lang') || 'fr';
+
+            if (name.length < 3) { 
+                status.classList.add('opacity-0'); 
+                passContainer.classList.add('hidden'); 
+                return; 
+            }
+
+            spinner.style.display = 'block';
+            status.classList.remove('opacity-0');
+            
+            const userDoc = await getDoc(doc(db, "users", name));
+            userExists = userDoc.exists();
+            
+            spinner.style.display = 'none';
+            status.innerText = userExists ? i18n[lang].taken : i18n[lang].available;
+            status.style.color = userExists ? "var(--accent)" : "#10b981"; // Indigo or Emerald
+            
+            // Animation reset
+            status.classList.remove('fade-in');
+            void status.offsetWidth; 
+            status.classList.add('fade-in');
+
+            if(userExists) {
+                passContainer.classList.remove('hidden');
+                document.getElementById('passInput').focus();
+            } else {
+                passContainer.classList.add('hidden');
+            }
+        };
+
+        window.handleAuth = async () => {
+            const name = document.getElementById('userInput').value.trim().toLowerCase();
+            const pass = document.getElementById('passInput').value;
+            const btn = document.getElementById('btnLogin');
+            
+            if (!name) return;
+
+            // Loading state
+            const originalText = btn.innerText;
+            btn.innerHTML = '<div class="spinner mx-auto border-white w-5 h-5"></div>';
+            
+            const userRef = doc(db, "users", name);
+            let success = false;
+
+            if (userExists) {
+                const docSnap = await getDoc(userRef);
+                if (docSnap.exists() && docSnap.data().password === pass) success = true;
+                else alert("Mot de passe incorrect (ou compte non trouvé)");
+            } else {
+                // Create user
+                await setDoc(userRef, { password: pass, created: new Date().toISOString() });
+                success = true;
+            }
+
+            if (success) {
+                proceed(name);
+                // Sauvegarder session simple (ne remplace pas un vrai token)
+                localStorage.setItem('pillUser', name); 
+            } else {
+                btn.innerText = originalText;
+            }
+        };
+        
+        window.logout = () => {
+            localStorage.removeItem('pillUser');
+            location.reload();
+        }
+
+        function proceed(name) {
+            currentUser = name;
+            document.getElementById('loginBox').classList.add('hidden');
+            document.getElementById('appBody').classList.remove('hidden');
+            syncPills();
+            syncHistory();
+        }
+
+        // --- Core Logic ---
+        function syncPills() {
+            onSnapshot(collection(db, "users", currentUser, "current_pack"), (snap) => {
+                const grid = document.getElementById('grid');
+                const size = parseInt(document.getElementById('gridSize').value) || 10;
+                grid.innerHTML = '';
+                let activeSet = new Set();
+                snap.forEach(d => activeSet.add(parseInt(d.id)));
+
+                const progress = Math.round((activeSet.size / size) * 100);
+                document.getElementById('progressFill').style.width = `${progress}%`;
+                document.getElementById('percentText').innerText = `${progress}%`;
+
+                // Animation delay for grid items
+                let delay = 0;
+                for(let i=1; i<=size; i++) {
+                    const btn = document.createElement('button');
+                    const isActive = activeSet.has(i);
+                    btn.className = `pill-btn aspect-square font-bold text-sm shadow-sm hover:shadow-md ${isActive ? 'active' : ''}`;
+                    btn.style.animation = `fadeIn 0.3s ease-out forwards ${delay}s`;
+                    btn.style.opacity = '0'; // Start hidden for anim
+                    btn.innerText = i;
+                    btn.onclick = () => togglePill(i, isActive);
+                    grid.appendChild(btn);
+                    delay += 0.02;
+                }
+            });
+        }
+
+        async function togglePill(n, isActive) {
+            const size = document.getElementById('gridSize').value;
+            const today = new Date().toISOString().split('T')[0];
+            const packRef = collection(db, "users", currentUser, "current_pack");
+            const histRef = doc(db, "users", currentUser, "history", today);
+
+            if(isActive) {
+                await deleteDoc(doc(packRef, n.toString()));
+                // Recalculate max if pack not empty
+                const snap = await getDocs(packRef);
+                if (snap.empty) await deleteDoc(histRef);
+                else {
+                    let max = 0; snap.forEach(d => { if(parseInt(d.id) > max) max = parseInt(d.id); });
+                    await setDoc(histRef, { ratio: `${max}/${size}` });
+                }
+            } else {
+                await setDoc(doc(packRef, n.toString()), { taken: true });
+                const snap = await getDocs(packRef);
+                let max = n; snap.forEach(d => { if(parseInt(d.id) > max) max = parseInt(d.id); });
+                await setDoc(histRef, { ratio: `${max}/${size}` });
+            }
+        }
+
+        function syncHistory() {
+            onSnapshot(collection(db, "users", currentUser, "history"), (snap) => {
+                historyData = {};
+                snap.forEach(d => { historyData[d.id] = d.data(); });
+                renderCalendar();
+            });
+        }
+
+        window.changeMonth = (dir) => { 
+            currentDate.setMonth(currentDate.getMonth() + dir); 
+            // Animation reset
+            const cal = document.getElementById('calendar');
+            cal.classList.remove('fade-in');
+            void cal.offsetWidth;
+            cal.classList.add('fade-in');
+            renderCalendar(); 
+        };
+
+        window.updateGridSize = () => syncPills();
+
+        function renderCalendar() {
+            const cal = document.getElementById('calendar');
+            cal.innerHTML = '';
+            const y = currentDate.getFullYear(), m = currentDate.getMonth();
+            const lang = localStorage.getItem('lang') || 'fr';
+            document.getElementById('calMonth').innerText = new Intl.DateTimeFormat(lang, { month: 'long', year: 'numeric' }).format(currentDate);
+
+            const first = new Date(y, m, 1).getDay();
+            const days = new Date(y, m + 1, 0).getDate();
+            const offset = (first === 0 ? 6 : first - 1); // Monday start
+
+            // Empty cells for offset
+            for(let i=0; i < offset; i++) {
+                const empty = document.createElement('div');
+                cal.appendChild(empty);
+            }
+
+            for(let d=1; d<=days; d++) {
+                const key = `${y}-${String(m+1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const data = historyData[key];
+                const cell = document.createElement('div');
+                
+                // Check if today
+                const todayStr = new Date().toISOString().split('T')[0];
+                const isToday = key === todayStr;
+                
+                cell.className = `cal-cell ${isToday ? 'bg-indigo-500/10 border-indigo-500/20' : ''}`;
+                cell.innerHTML = `
+                    <span class="text-[11px] font-bold opacity-40 ${isToday ? 'text-indigo-500' : ''}">${d}</span>
+                    ${data ? `<div class="ratio-tag text-indigo-500 bg-indigo-100 dark:bg-indigo-900/30">${data.ratio}</div>` : ''}
+                `;
+                
+                cell.onclick = () => openModal(key, data ? data.ratio : "");
+                cal.appendChild(cell);
+            }
+        }
+
+        // --- Init ---
+        (function init() {
+            if(localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark');
+                document.getElementById('themeIcon').innerText = '☀️';
+            }
+            setLang(localStorage.getItem('lang') || 'fr');
+            
+            // Auto login
+            const savedUser = localStorage.getItem('pillUser');
+            if(savedUser) {
+                document.getElementById('userInput').value = savedUser;
+                // Simuler le check
+                const status = document.getElementById('userStatus');
+                const btn = document.getElementById('btnLogin');
+                
+                btn.innerHTML = '<div class="spinner mx-auto border-white w-5 h-5"></div>';
+                
+                getDoc(doc(db, "users", savedUser)).then(snap => {
+                    btn.innerHTML = 'Commencer';
+                    if(snap.exists()) {
+                        proceed(savedUser);
+                    } else {
+                        localStorage.removeItem('pillUser');
+                        status.innerText = "Compte supprimé";
+                    }
+                });
+            }
+        })();
+    </script>
+</body>
+</html>
