@@ -2,89 +2,23 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MedTracker Pro</title>
-    
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#0f172a">
-
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        :root { --bg: #f8fafc; --card: rgba(255, 255, 255, 0.95); --text: #1e293b; --border: rgba(148, 163, 184, 0.1); }
-        .dark { --bg: #0f172a; --card: rgba(30, 41, 59, 0.9); --text: #f1f5f9; }
-        body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.4s; min-height: 100vh; }
-        .glass { background: var(--card); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 24px; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Boutons MedTracker</title>
 </head>
-<body class="p-3 antialiased">
+<body style="font-family:sans-serif; padding:20px;">
 
-    <h1 class="text-center text-xl font-black text-indigo-500 mb-6">MEDTRACKER PRO</h1>
+    <h1>Test des boutons</h1>
 
-    <!-- Boutons test notifications et SW -->
-    <div class="flex justify-center gap-4 mb-6">
-        <button onclick="requestNotificationPermission()" class="px-4 py-2 bg-slate-500/10 rounded-xl">🔔 Autoriser Notifications</button>
-        <button onclick="testNotification()" class="px-4 py-2 bg-green-500/10 rounded-xl">🧪 Tester Notification</button>
-        <button onclick="checkSW()" class="px-4 py-2 bg-blue-500/10 rounded-xl">🔍 Vérifier SW</button>
-    </div>
+    <!-- Boutons de test -->
+    <button onclick="alert('Bouton 🔔 cliqué !')">🔔 Autoriser Notifications</button>
+    <button onclick="alert('Bouton 🧪 cliqué !')">🧪 Tester Notification</button>
+    <button onclick="alert('Bouton 🔍 cliqué !')">🔍 Vérifier SW</button>
 
-    <script type="module">
-        // --- Firebase imports si besoin
-        // import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        // import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <!-- Bouton supplémentaire pour tester clic simple -->
+    <button onclick="alert('clic reçu !')">Test clic simple</button>
 
-        let user = ""; // pour test simple notifications/SW
-
-        // --- ENREGISTREMENT SERVICE WORKER ---
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js')
-                .then(() => console.log("Service Worker OK"))
-                .catch(err => console.error("SW erreur:", err));
-        }
-
-        // --- Vérifier Service Worker ---
-        function checkSW() {
-            navigator.serviceWorker.getRegistrations().then(regs => {
-                if (regs.length > 0) {
-                    alert("Service Worker actif ✅ Scope : " + regs[0].scope);
-                } else {
-                    alert("Aucun Service Worker trouvé ❌");
-                }
-            });
-        }
-
-        // --- Notifications ---
-        async function requestNotificationPermission() {
-            if (Notification.permission === "granted") {
-                alert("Notifications déjà autorisées ! Tu peux tester avec 🧪");
-                return;
-            }
-            const permission = await Notification.requestPermission();
-            if (permission === "granted") {
-                alert("Notifications autorisées ! 🎉 Clique sur 🧪 pour tester");
-            } else {
-                alert("Notifications refusées 😔");
-            }
-        }
-
-        function testNotification() {
-            if (Notification.permission !== "granted") {
-                alert("Autorise d'abord les notifications avec 🔔");
-                return;
-            }
-
-            navigator.serviceWorker.ready.then(reg => {
-                reg.showNotification("MedTracker Pro", {
-                    body: "Test réussi ! 🎉 Les notifications fonctionnent.",
-                    icon: "icon.png",
-                    badge: "icon.png",
-                    tag: "test-notif"
-                });
-            });
-        }
+    <script>
+        console.log("JS chargé, boutons devraient fonctionner.");
     </script>
 </body>
 </html>
