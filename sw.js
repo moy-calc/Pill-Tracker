@@ -1,6 +1,6 @@
 const CACHE_NAME = 'medtracker-v1';
 const ASSETS = [
-  'index.html',
+  'Index.html',
   'manifest.json',
   'https://cdn.tailwindcss.com'
 ];
