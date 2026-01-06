@@ -11,16 +11,8 @@
         .dark { --bg: #0f172a; --card: rgba(30, 41, 59, 0.9); --text: #f1f5f9; --border: rgba(255, 255, 255, 0.1); }
         body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.4s; min-height: 100vh; overflow-x: hidden; }
         .glass { background: var(--card); backdrop-filter: blur(24px); border: 1px solid var(--border); border-radius: 24px; }
-        
-        /* FIX Z-INDEX NAVIGATION */
-        .med-dropdown-content { 
-            position: absolute; top: 110%; left: 50%; transform: translateX(-50%); 
-            background: var(--card); border: 1px solid var(--border); width: 250px; 
-            border-radius: 20px; display: none; flex-direction: column; padding: 8px; 
-            z-index: 9999 !important; box-shadow: 0 20px 50px rgba(0,0,0,0.3); 
-        }
+        .med-dropdown-content { position: absolute; top: 110%; left: 50%; transform: translateX(-50%); background: var(--card); border: 1px solid var(--border); width: 250px; border-radius: 20px; display: none; flex-direction: column; padding: 8px; z-index: 9999 !important; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
         .med-dropdown-content.open { display: flex; }
-
         .dose-btn { aspect-ratio: 1/1; transition: 0.2s; background: rgba(148, 163, 184, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; cursor: pointer; }
         .dose-btn.active { background: var(--accent); color: white; transform: scale(1.05); }
         .dose-btn.locked { opacity: 0.15; pointer-events: none; filter: grayscale(1); }
@@ -46,22 +38,24 @@
     <main class="max-w-2xl mx-auto space-y-4">
         <div id="loginBox" class="glass p-8 text-center space-y-4">
             <div class="space-y-3">
-                <input type="text" id="userInput" oninput="checkUserAvailability()" placeholder="Nom d'utilisateur" class="w-full bg-slate-500/10 rounded-xl p-4 text-center font-bold outline-none">
-                <div id="authStatus" class="text-[10px] font-bold uppercase tracking-widest opacity-50">Saisissez un nom...</div>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="lastName" oninput="updateKey()" placeholder="Nom" class="bg-slate-500/10 rounded-xl p-4 font-bold outline-none">
+                    <input type="text" id="firstName" oninput="updateKey()" placeholder="Prénom" class="bg-slate-500/10 rounded-xl p-4 font-bold outline-none">
+                </div>
+                <input type="date" id="birthDate" oninput="updateKey()" class="w-full bg-slate-500/10 rounded-xl p-4 font-bold outline-none">
+                <div id="authStatus" class="text-[10px] font-bold uppercase tracking-widest opacity-50">Infos requises...</div>
                 <input type="password" id="passInput" placeholder="Mot de passe" class="w-full bg-slate-500/10 rounded-xl p-4 text-center font-bold outline-none hidden">
             </div>
-            <button id="authBtn" onclick="handleAuth()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl opacity-50 pointer-events-none">CONTINUER</button>
-            <p id="loginError" class="text-red-500 text-xs font-bold hidden"></p>
+            <button id="authBtn" onclick="handleAuth()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl opacity-50 pointer-events-none">VÉRIFIER</button>
+            <p id="loginError" class="text-red-500 text-xs font-bold hidden mt-2"></p>
         </div>
 
         <div id="appBody" class="hidden space-y-4">
             <div class="glass p-4 flex justify-center items-center relative z-[1000]">
-                <div class="relative">
-                    <button onclick="toggleDropdown()" id="navbarMedBtn" class="bg-slate-500/5 px-8 py-3 rounded-2xl font-black text-lg">
-                        <span id="navbarMedName">...</span> ▾
-                    </button>
-                    <div id="navbarDropdown" class="med-dropdown-content"></div>
-                </div>
+                <button onclick="toggleDropdown()" class="bg-slate-500/5 px-8 py-3 rounded-2xl font-black text-lg">
+                    <span id="navbarMedName">...</span> ▾
+                </button>
+                <div id="navbarDropdown" class="med-dropdown-content"></div>
                 <button onclick="openModal('addMedModal')" class="absolute right-4 w-10 h-10 rounded-xl bg-indigo-600 text-white font-bold">+</button>
             </div>
 
@@ -75,8 +69,8 @@
                 <div id="grid" class="grid grid-cols-5 gap-3"></div>
             </div>
 
-            <div class="glass p-6">
-                <div class="flex justify-between items-center mb-6">
+            <div class="glass p-6 text-center">
+                <div class="flex justify-between items-center mb-6 px-2">
                     <button onclick="changeMonth(-1)" class="font-bold">←</button>
                     <h3 id="calMonth" class="font-bold uppercase text-xs tracking-widest"></h3>
                     <button onclick="changeMonth(1)" class="font-bold">→</button>
@@ -86,9 +80,32 @@
         </div>
     </main>
 
-    <div id="rightDrawer" class="fixed top-0 right-0 bottom-0 width-[300px] bg-white dark:bg-slate-900 z-[2500] translate-x-full transition-transform duration-300 p-6 glass border-l border-white/10">
-        <h2 class="text-xl font-bold mb-6">Gestion</h2>
+    <div id="rightDrawer" class="fixed top-0 right-0 bottom-0 w-[300px] bg-white dark:bg-slate-900 z-[2500] translate-x-full transition-transform duration-300 p-6 glass border-l border-white/10">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold">Gestion</h2>
+            <button onclick="openModal('accountModal')" class="text-xs font-bold bg-indigo-500/10 text-indigo-500 px-3 py-2 rounded-lg">👤 COMPTE</button>
+        </div>
         <div id="globalHistoryList" class="space-y-4"></div>
+    </div>
+
+    <div id="accountModal" class="modal-overlay" onclick="closeModal('accountModal')">
+        <div class="glass p-6 w-[95%] max-w-sm" onclick="event.stopPropagation()">
+            <h3 class="font-bold mb-4 text-center">Mon Profil</h3>
+            <div class="space-y-3 mb-6">
+                <input type="text" id="editLastName" placeholder="Nom" class="w-full bg-slate-500/10 rounded-xl p-3 font-bold outline-none text-sm">
+                <input type="text" id="editFirstName" placeholder="Prénom" class="w-full bg-slate-500/10 rounded-xl p-3 font-bold outline-none text-sm">
+                <input type="date" id="editBirthDate" class="w-full bg-slate-500/10 rounded-xl p-3 font-bold outline-none text-sm">
+                <hr class="border-white/10 my-2">
+                <p class="text-[10px] font-bold opacity-50 uppercase">Sécurité</p>
+                <input type="password" id="oldPass" placeholder="Ancien mot de passe" class="w-full bg-slate-500/10 border border-indigo-500/20 rounded-xl p-3 font-bold outline-none text-sm">
+                <input type="password" id="newPass" placeholder="Nouveau mot de passe" class="w-full bg-slate-500/10 rounded-xl p-3 font-bold outline-none text-sm">
+            </div>
+            <div class="space-y-2">
+                <button onclick="updateAccount()" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl uppercase text-xs">Enregistrer</button>
+                <button onclick="deleteAccount()" class="w-full py-3 bg-red-500/10 text-red-500 font-bold rounded-xl uppercase text-xs">Supprimer le compte</button>
+            </div>
+            <p id="accountError" class="text-red-500 text-[10px] font-bold text-center mt-3 hidden"></p>
+        </div>
     </div>
 
     <div id="editCalModal" class="modal-overlay" onclick="closeModal('editCalModal')">
@@ -108,10 +125,10 @@
 
     <div id="addMedModal" class="modal-overlay" onclick="closeModal('addMedModal')">
         <div class="glass p-6 w-80" onclick="event.stopPropagation()">
-            <h3 class="font-bold mb-4">Nouveau Médicament</h3>
+            <h3 class="font-bold mb-4 text-center">Nouveau Médicament</h3>
             <input type="text" id="newMedName" placeholder="Nom" class="w-full p-3 bg-slate-500/10 rounded-xl mb-3 font-bold">
             <div class="grid grid-cols-2 gap-2 mb-4">
-                <input type="number" id="newMedPieces" placeholder="Pièces" class="p-3 bg-slate-500/10 rounded-xl">
+                <input type="number" id="newMedPieces" placeholder="Doses/Plq" class="p-3 bg-slate-500/10 rounded-xl">
                 <input type="number" id="newMedPlates" placeholder="Plaques" class="p-3 bg-slate-500/10 rounded-xl">
             </div>
             <button onclick="confirmAddMed()" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl uppercase">Ajouter</button>
@@ -129,46 +146,25 @@
         let currentMedId = null, medsList = [], currentPlateIndex = 0, currentDate = new Date();
         let unsubGrid = null, unsubHist = null;
 
-        // AUTH LOGIC
-        window.checkUserAvailability = async () => {
-            const id = document.getElementById('userInput').value.trim().toLowerCase();
-            const status = document.getElementById('authStatus');
-            const passField = document.getElementById('passInput');
-            const btn = document.getElementById('authBtn');
-            
-            if(id.length < 3) {
-                status.innerText = "Saisissez un nom..."; status.className = "text-[10px] font-bold uppercase opacity-50";
-                passField.classList.add('hidden'); btn.classList.add('opacity-50', 'pointer-events-none');
-                return;
-            }
-
-            const snap = await getDoc(doc(db, "credentials", id));
-            passField.classList.remove('hidden');
-            btn.classList.remove('opacity-50', 'pointer-events-none');
-            
-            if(snap.exists()) {
-                status.innerText = "COMPTE TROUVÉ - ENTRER MOT DE PASSE"; status.className = "text-[10px] font-bold text-green-500 uppercase";
-            } else {
-                status.innerText = "NOM DISPONIBLE - CHOISIR UN MOT DE PASSE"; status.className = "text-[10px] font-bold text-blue-500 uppercase";
-            }
+        // AUTH
+        window.updateKey = async () => {
+            const ln = document.getElementById('lastName').value.trim().toLowerCase(), fn = document.getElementById('firstName').value.trim().toLowerCase(), bd = document.getElementById('birthDate').value;
+            const status = document.getElementById('authStatus'), passField = document.getElementById('passInput'), btn = document.getElementById('authBtn');
+            if(!ln || !fn || !bd) { passField.classList.add('hidden'); btn.classList.add('opacity-50', 'pointer-events-none'); return; }
+            const uniqueKey = `${ln}_${fn}_${bd.replace(/-/g, '')}`;
+            const snap = await getDoc(doc(db, "credentials", uniqueKey));
+            passField.classList.remove('hidden'); btn.classList.remove('opacity-50', 'pointer-events-none');
+            if(snap.exists()) { status.innerText = "Compte trouvé"; status.className = "text-[10px] font-bold text-green-500 uppercase"; btn.innerText = "SE CONNECTER"; }
+            else { status.innerText = "Nouveau compte"; status.className = "text-[10px] font-bold text-blue-500 uppercase"; btn.innerText = "CRÉER"; }
         };
 
         window.handleAuth = async () => {
-            const id = document.getElementById('userInput').value.trim().toLowerCase();
-            const pw = document.getElementById('passInput').value.trim();
-            const err = document.getElementById('loginError');
-            if(!id || !pw) return;
-
-            const credRef = doc(db, "credentials", id);
-            const snap = await getDoc(credRef);
-
+            const ln = document.getElementById('lastName').value.trim().toLowerCase(), fn = document.getElementById('firstName').value.trim().toLowerCase(), bd = document.getElementById('birthDate').value, pw = document.getElementById('passInput').value.trim();
+            const uniqueKey = `${ln}_${fn}_${bd.replace(/-/g, '')}`, credRef = doc(db, "credentials", uniqueKey), snap = await getDoc(credRef);
             if(snap.exists()) {
-                if(snap.data().pw === pw) loginOk(id);
-                else { err.innerText = "Mot de passe incorrect"; err.classList.remove('hidden'); }
-            } else {
-                await setDoc(credRef, { pw: pw });
-                loginOk(id);
-            }
+                if(snap.data().pw === pw) loginOk(uniqueKey);
+                else { document.getElementById('loginError').innerText = "Mot de passe incorrect"; document.getElementById('loginError').classList.remove('hidden'); }
+            } else { await setDoc(credRef, { pw: pw, info: {ln, fn, bd} }); loginOk(uniqueKey); }
         };
 
         function loginOk(id) {
@@ -176,12 +172,61 @@
             document.getElementById('loginBox').classList.add('hidden');
             document.getElementById('appBody').classList.remove('hidden');
             document.getElementById('logoutBtn').classList.remove('hidden');
-            loadMeds();
+            loadMeds(); fillAccountFields();
         }
+
+        async function fillAccountFields() {
+            const snap = await getDoc(doc(db, "credentials", user));
+            if(snap.exists()){
+                const d = snap.data();
+                document.getElementById('editLastName').value = d.info.ln;
+                document.getElementById('editFirstName').value = d.info.fn;
+                document.getElementById('editBirthDate').value = d.info.bd;
+            }
+        }
+
+        // ACCOUNT MANAGEMENT
+        window.updateAccount = async () => {
+            const err = document.getElementById('accountError'); err.classList.add('hidden');
+            const ln = document.getElementById('editLastName').value.trim().toLowerCase(), fn = document.getElementById('editFirstName').value.trim().toLowerCase(), bd = document.getElementById('editBirthDate').value;
+            const oldPwInput = document.getElementById('oldPass').value.trim(), newPwInput = document.getElementById('newPass').value.trim();
+            const newKey = `${ln}_${fn}_${bd.replace(/-/g, '')}`;
+
+            const credRef = doc(db, "credentials", user);
+            const snap = await getDoc(credRef);
+            const currentPw = snap.data().pw;
+
+            if(oldPwInput !== currentPw) {
+                err.innerText = "L'ancien mot de passe est incorrect"; err.classList.remove('hidden'); return;
+            }
+
+            const finalPw = newPwInput || currentPw;
+
+            if(newKey !== user) {
+                if(confirm("Changer vos infos créera un nouvel identifiant. Vos données de médicaments ne seront pas transférées automatiquement. Continuer ?")){
+                    await setDoc(doc(db, "credentials", newKey), { pw: finalPw, info: {ln, fn, bd} });
+                    await deleteDoc(credRef);
+                    handleLogout();
+                }
+            } else {
+                await updateDoc(credRef, { pw: finalPw });
+                alert("Compte mis à jour !");
+                closeModal('accountModal');
+            }
+        };
+
+        window.deleteAccount = async () => {
+            if(confirm("ATTENTION : Supprimer votre compte ?")){
+                if(confirm("ACTION IRRÉVERSIBLE : Êtes-vous vraiment sûr ?")){
+                    await deleteDoc(doc(db, "credentials", user));
+                    handleLogout();
+                }
+            }
+        };
 
         window.handleLogout = () => { localStorage.removeItem('medUser'); location.reload(); };
 
-        // APP LOGIC
+        // CORE APP
         async function loadMeds() {
             const snap = await getDocs(collection(db, "users", user, "medications"));
             medsList = []; snap.forEach(d => medsList.push({id: d.id, ...d.data()}));
@@ -194,15 +239,14 @@
             currentMedId = id; const med = medsList.find(m => m.id === id);
             document.getElementById('navbarMedName').innerText = med.name;
             document.getElementById('currentMedNameDisplay').innerText = med.name;
-            syncGrid(med); syncHistory();
+            currentPlateIndex = 0; syncGrid(med); syncHistory();
             document.getElementById('navbarDropdown').classList.remove('open');
         };
 
         function syncGrid(med) {
             unsubGrid = onSnapshot(collection(db, "users", user, "medications", currentMedId, "current_doses"), (snap) => {
                 const taken = new Set(); snap.forEach(d => taken.add(parseInt(d.id)));
-                const total = med.piecesPerPlate * med.platesPerBox;
-                const max = taken.size > 0 ? Math.max(...Array.from(taken)) : 0;
+                const total = med.piecesPerPlate * med.platesPerBox, max = taken.size > 0 ? Math.max(...Array.from(taken)) : 0;
                 document.getElementById('progressFill').style.width = (taken.size / total) * 100 + "%";
                 document.getElementById('percentText').innerText = Math.round((taken.size / total) * 100) + "%";
                 renderGridUI(med, taken, max); renderPlateTabs(med);
@@ -223,30 +267,21 @@
         }
 
         async function toggleDose(n, isTaken, med) {
-            const today = new Date().toISOString().split('T')[0];
-            const dRef = doc(db, "users", user, "medications", currentMedId, "current_doses", n.toString());
-            const hRef = doc(db, "users", user, "medications", currentMedId, "history", today);
-            const total = med.piecesPerPlate * med.platesPerBox;
+            const today = new Date().toISOString().split('T')[0], dRef = doc(db, "users", user, "medications", currentMedId, "current_doses", n.toString()), hRef = doc(db, "users", user, "medications", currentMedId, "history", today), total = med.piecesPerPlate * med.platesPerBox;
             isTaken ? await deleteDoc(dRef) : await setDoc(dRef, { t: Date.now() });
-            const snap = await getDocs(collection(db, "users", user, "medications", currentMedId, "current_doses"));
-            const currentMax = snap.size > 0 ? Math.max(...snap.docs.map(d => parseInt(d.id))) : 0;
-            const hSnap = await getDoc(hRef);
+            const snap = await getDocs(collection(db, "users", user, "medications", currentMedId, "current_doses")), currentMax = snap.size > 0 ? Math.max(...snap.docs.map(d => parseInt(d.id))) : 0, hSnap = await getDoc(hRef);
             let hData = hSnap.exists() ? hSnap.data().ratio : "";
             if (currentMax > 0) {
                 let newRatio = `${currentMax}/${total}`;
                 if (hData && hData.includes(`${total}/${total}`) && currentMax < total) hData = `${total}/${total} ${newRatio}`;
                 else hData = newRatio;
                 await setDoc(hRef, { ratio: hData.trim() });
-            } else {
-                if (hData && hData.includes(`${total}/${total}`)) await setDoc(hRef, { ratio: `${total}/${total}` });
-                else await deleteDoc(hRef);
-            }
+            } else { if (hData && hData.includes(`${total}/${total}`)) await setDoc(hRef, { ratio: `${total}/${total}` }); else await deleteDoc(hRef); }
         }
 
         function syncHistory() {
             unsubHist = onSnapshot(query(collection(db, "users", user, "medications", currentMedId, "history"), orderBy("__name__")), (snap) => {
-                const data = {}; snap.forEach(d => data[d.id] = d.data());
-                renderCalendar(data);
+                const data = {}; snap.forEach(d => data[d.id] = d.data()); renderCalendar(data);
             });
         }
 
@@ -258,58 +293,30 @@
             for(let i=0; i<firstDay; i++) cal.innerHTML += '<div></div>';
             const sortedDates = Object.keys(hist).sort();
             for(let d=1; d<=new Date(y, m + 1, 0).getDate(); d++) {
-                const key = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                const entry = hist[key]; const cell = document.createElement('div');
+                const key = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`, entry = hist[key], cell = document.createElement('div');
                 cell.className = "cal-cell"; cell.onclick = () => openEditCal(key, entry?.ratio || "");
                 cell.innerHTML = `<span class="text-[10px] opacity-30 font-bold">${d}</span>`;
                 if(entry && entry.ratio) {
-                    const ratios = entry.ratio.split(' ');
-                    const prevDate = sortedDates.filter(dt => dt < key).pop();
-                    const lastValPrevDay = prevDate ? parseInt(hist[prevDate].ratio.split(' ').pop().split('/').shift()) : 0;
+                    const ratios = entry.ratio.split(' '), prevDate = sortedDates.filter(dt => dt < key).pop(), lastValPrevDay = prevDate ? parseInt(hist[prevDate].ratio.split(' ').pop().split('/').shift()) : 0;
                     let diff = (ratios.length > 1) ? (parseInt(ratios[0].split('/').shift()) - lastValPrevDay) + parseInt(ratios[1].split('/').shift()) : parseInt(ratios[0].split('/').shift()) - lastValPrevDay;
-                    if (diff > 0 || ratios[0].startsWith('1/')) {
-                        ratios.forEach(r => cell.innerHTML += `<div class="ratio-tag">${r}</div>`);
-                        cell.innerHTML += `<div class="count-tag">+${diff < 0 ? ratios[0].split('/').shift() : diff}</div>`;
-                    }
+                    if (diff > 0 || ratios[0].startsWith('1/')) { ratios.forEach(r => cell.innerHTML += `<div class="ratio-tag">${r}</div>`); cell.innerHTML += `<div class="count-tag">+${diff < 0 ? ratios[0].split('/').shift() : diff}</div>`; }
                 }
                 cal.appendChild(cell);
             }
         }
 
         window.openEditCal = (date, val) => { window.editingDate = date; document.getElementById('editCalInput').value = val; openModal('editCalModal'); };
-        window.saveCalEdit = async () => {
-            const v = document.getElementById('editCalInput').value.trim();
-            const hRef = doc(db, "users", user, "medications", currentMedId, "history", window.editingDate);
-            v ? await setDoc(hRef, { ratio: v }) : await deleteDoc(hRef);
-            closeModal('editCalModal');
-        };
-
-        window.confirmFinishBox = async () => {
-            const medRef = doc(db, "users", user, "medications", currentMedId); 
-            const medSnap = await getDoc(medRef);
-            const total = medSnap.data().piecesPerPlate * medSnap.data().platesPerBox;
-            const today = new Date().toISOString().split('T')[0];
-            await setDoc(doc(db, "users", user, "medications", currentMedId, "history", today), { ratio: `${total}/${total}` }, { merge: true });
-            await updateDoc(medRef, { boxCount: (medSnap.data().boxCount || 1) + 1 });
-            const doses = await getDocs(collection(db, "users", user, "medications", currentMedId, "current_doses"));
-            for(const d of doses.docs) await deleteDoc(d.ref);
-            closeModal('finishModal');
-        };
-
+        window.saveCalEdit = async () => { const v = document.getElementById('editCalInput').value.trim(), hRef = doc(db, "users", user, "medications", currentMedId, "history", window.editingDate); v ? await setDoc(hRef, { ratio: v }) : await deleteDoc(hRef); closeModal('editCalModal'); };
+        window.confirmFinishBox = async () => { const medRef = doc(db, "users", user, "medications", currentMedId), medSnap = await getDoc(medRef), total = medSnap.data().piecesPerPlate * medSnap.data().platesPerBox, today = new Date().toISOString().split('T')[0]; await setDoc(doc(db, "users", user, "medications", currentMedId, "history", today), { ratio: `${total}/${total}` }, { merge: true }); await updateDoc(medRef, { boxCount: (medSnap.data().boxCount || 1) + 1 }); const doses = await getDocs(collection(db, "users", user, "medications", currentMedId, "current_doses")); for(const d of doses.docs) await deleteDoc(d.ref); closeModal('finishModal'); };
         window.openRightDrawer = async () => {
-            const list = document.getElementById('globalHistoryList'); list.innerHTML = "";
-            const snap = await getDocs(collection(db, "users", user, "medications"));
+            const list = document.getElementById('globalHistoryList'); list.innerHTML = ""; const snap = await getDocs(collection(db, "users", user, "medications"));
             snap.forEach(d => {
-                const m = d.data(); const div = document.createElement('div'); div.className = "p-4 glass space-y-2";
-                div.innerHTML = `<div class="flex justify-between font-bold"><span>${m.name}</span><input type="number" value="${m.boxCount||1}" onchange="updateBoxCount('${d.id}', this.value)" class="w-12 bg-slate-500/10 rounded text-center"></div>
-                    <div class="flex gap-2"><button onclick="toggleActive('${d.id}', ${m.active})" class="flex-1 glass text-[10px] p-2 font-bold">${m.active !== false ? 'ARCHIVE' : 'ACTIVER'}</button>
-                    <button onclick="deleteMed('${d.id}')" class="bg-red-500/10 text-red-500 p-2 rounded text-[10px] font-bold">DEL</button></div>`;
+                const m = d.data(), div = document.createElement('div'); div.className = "p-4 glass space-y-2";
+                div.innerHTML = `<div class="flex justify-between font-bold text-sm"><span>${m.name}</span><input type="number" value="${m.boxCount||1}" onchange="updateBoxCount('${d.id}', this.value)" class="w-10 bg-slate-500/10 rounded text-center"></div><div class="flex gap-2"><button onclick="toggleActive('${d.id}', ${m.active})" class="flex-1 glass text-[10px] p-2 font-bold">${m.active !== false ? 'ARCHIVE' : 'ACTIVER'}</button><button onclick="deleteMed('${d.id}')" class="bg-red-500/10 text-red-500 p-2 rounded text-[10px] font-bold">DEL</button></div>`;
                 list.appendChild(div);
             });
-            document.getElementById('rightDrawer').classList.remove('translate-x-full'); 
-            document.getElementById('drawerOverlay').classList.remove('hidden');
+            document.getElementById('rightDrawer').classList.remove('translate-x-full'); document.getElementById('drawerOverlay').classList.remove('hidden');
         };
-
         window.updateBoxCount = async (id, val) => await updateDoc(doc(db, "users", user, "medications", id), { boxCount: parseInt(val) });
         window.toggleActive = async (id, status) => { await updateDoc(doc(db, "users", user, "medications", id), { active: status === false }); loadMeds(); closeDrawers(); };
         window.deleteMed = async (id) => { if(confirm("Supprimer ?")) { await deleteDoc(doc(db, "users", user, "medications", id)); loadMeds(); closeDrawers(); } };
@@ -318,24 +325,9 @@
         window.openModal = (id) => document.getElementById(id).classList.add('open');
         window.closeModal = (id) => document.getElementById(id).classList.remove('open');
         window.changeMonth = (v) => { currentDate.setMonth(currentDate.getMonth() + v); syncHistory(); };
-        window.renderPlateTabs = (med) => {
-            const tabs = document.getElementById('plateTabs'); tabs.innerHTML = "";
-            for(let i=0; i<med.platesPerBox; i++) {
-                const b = document.createElement('button'); b.className = `px-4 py-2 rounded-xl text-xs font-bold shrink-0 ${i === currentPlateIndex ? 'bg-indigo-600 text-white' : 'bg-slate-500/10'}`;
-                b.innerText = "Plaque " + (i+1); b.onclick = () => { currentPlateIndex = i; syncGrid(med); }; tabs.appendChild(b);
-            }
-        };
-        window.renderDropdown = () => {
-            const dd = document.getElementById('navbarDropdown'); dd.innerHTML = "";
-            medsList.filter(m => m.active !== false).forEach(m => {
-                const b = document.createElement('button'); b.className = "p-4 font-bold hover:bg-slate-500/10 rounded-xl text-left";
-                b.innerText = m.name; b.onclick = () => switchMed(m.id); dd.appendChild(b);
-            });
-        };
-        window.confirmAddMed = async () => {
-            const name = document.getElementById('newMedName').value, pieces = parseInt(document.getElementById('newMedPieces').value), plates = parseInt(document.getElementById('newMedPlates').value);
-            if(name && pieces) { await setDoc(doc(collection(db, "users", user, "medications")), { name, piecesPerPlate: pieces, platesPerBox: plates, boxCount: 1, active: true }); closeModal('addMedModal'); loadMeds(); }
-        };
+        window.renderPlateTabs = (med) => { const tabs = document.getElementById('plateTabs'); tabs.innerHTML = ""; for(let i=0; i<med.platesPerBox; i++) { const b = document.createElement('button'); b.className = `px-4 py-2 rounded-xl text-[10px] font-bold shrink-0 ${i === currentPlateIndex ? 'bg-indigo-600 text-white' : 'bg-slate-500/10'}`; b.innerText = "Plaque " + (i+1); b.onclick = () => { currentPlateIndex = i; syncGrid(med); }; tabs.appendChild(b); } };
+        window.renderDropdown = () => { const dd = document.getElementById('navbarDropdown'); dd.innerHTML = ""; medsList.filter(m => m.active !== false).forEach(m => { const b = document.createElement('button'); b.className = "p-4 font-bold hover:bg-slate-500/10 rounded-xl text-left text-sm"; b.innerText = m.name; b.onclick = () => switchMed(m.id); dd.appendChild(b); }); };
+        window.confirmAddMed = async () => { const name = document.getElementById('newMedName').value, pieces = parseInt(document.getElementById('newMedPieces').value), plates = parseInt(document.getElementById('newMedPlates').value); if(name && pieces) { await setDoc(doc(collection(db, "users", user, "medications")), { name, piecesPerPlate: pieces, platesPerBox: plates, boxCount: 1, active: true }); closeModal('addMedModal'); loadMeds(); } };
         window.toggleTheme = () => document.body.classList.toggle('dark');
         if(user) loginOk(user);
     </script>
