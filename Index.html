@@ -6,1119 +6,314 @@
     <title>MedTracker Sync Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@500;700&display=swap');
-        
-        :root { 
-            --bg: #f8fafc; 
-            --card: rgba(255, 255, 255, 0.95); 
-            --text: #1e293b; 
-            --accent: #10b981; 
-            --accent-glow: rgba(16, 185, 129, 0.3);
-            --border: rgba(148, 163, 184, 0.2); 
-        }
-        .dark { 
-            --bg: #0f172a; 
-            --card: rgba(30, 41, 59, 0.9); 
-            --text: #f1f5f9; 
-            --accent: #10b981; 
-            --accent-glow: rgba(16, 185, 129, 0.2); 
-            --border: rgba(255, 255, 255, 0.1); 
-        }
-
-        body { 
-            background: var(--bg); color: var(--text); 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            transition: background 0.4s ease;
-            min-height: 100vh;
-            overflow-x: hidden; 
-        }
-
-        .glass { 
-            background: var(--card); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            border: 1px solid var(--border); 
-            border-radius: 24px; box-shadow: 0 10px 50px -12px rgba(0,0,0,0.05);
-        }
-
-        /* --- Drawers --- */
-        .drawer {
-            position: fixed; top: 0; bottom: 0; width: 280px; 
-            background: var(--bg); z-index: 60; 
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 10px 0 30px rgba(0,0,0,0.1);
-            padding: 20px;
-            overflow-y: auto;
-        }
-        .drawer-left { left: 0; transform: translateX(-100%); border-right: 1px solid var(--border); }
-        .drawer-right { right: 0; transform: translateX(100%); border-left: 1px solid var(--border); }
-        .drawer.open { transform: translateX(0); }
-        .drawer-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 55;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s;
-            backdrop-filter: blur(2px);
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        :root { --bg: #f8fafc; --card: rgba(255, 255, 255, 0.95); --text: #1e293b; --accent: #6366f1; --border: rgba(148, 163, 184, 0.2); }
+        .dark { --bg: #0f172a; --card: rgba(30, 41, 59, 0.9); --text: #f1f5f9; --border: rgba(255, 255, 255, 0.1); }
+        body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.4s; min-height: 100vh; overflow-x: hidden; }
+        .glass { background: var(--card); backdrop-filter: blur(24px); border: 1px solid var(--border); border-radius: 24px; }
+        .drawer { position: fixed; top: 0; bottom: 0; width: 300px; background: var(--bg); z-index: 2000; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 20px; }
+        .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1500; opacity: 0; pointer-events: none; transition: 0.3s; backdrop-filter: blur(2px); }
         .drawer-overlay.open { opacity: 1; pointer-events: auto; }
-
-        /* --- UI Components --- */
-        .fade-in { animation: fadeIn 0.4s ease-out forwards; opacity: 0; transform: translateY(10px); }
-        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
-
-        .stagger-in { animation: staggerIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: scale(0.9); }
-        @keyframes staggerIn { to { opacity: 1; transform: scale(1); } }
-
-        /* Dose Buttons */
-        .dose-btn { 
-            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); 
-            background: rgba(148, 163, 184, 0.08); 
-            border-radius: 12px; 
-            position: relative; overflow: hidden; cursor: pointer;
-        }
-        .dose-btn.active { 
-            background: var(--accent); 
-            color: white; 
-            box-shadow: 0 8px 25px -4px var(--accent-glow); 
-            transform: scale(1.05); 
-            border-color: transparent;
-        }
-        .dose-btn.locked {
-            opacity: 0.3; pointer-events: none; filter: grayscale(1); cursor: not-allowed;
-        }
-        
-        /* Progress Bar */
-        .progress-bar { height: 10px; border-radius: 99px; background: rgba(148, 163, 184, 0.1); overflow: hidden; position: relative; }
-        .progress-fill { height: 100%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.5s ease; box-shadow: 0 0 15px currentColor; }
-
-        /* Dropdown */
-        .med-dropdown { position: relative; }
-        .med-dropdown-content {
-            position: absolute; top: 140%; left: 0; 
-            background: var(--card); border: 1px solid var(--border);
-            width: 220px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            display: none; flex-direction: column; padding: 8px; z-index: 100;
-            animation: fadeIn 0.2s ease;
-        }
-        .med-dropdown:hover .med-dropdown-content { display: flex; }
+        .med-dropdown-content { position: absolute; top: 110%; left: 50%; transform: translateX(-50%); background: var(--card); border: 1px solid var(--border); width: 220px; border-radius: 20px; display: none; flex-direction: column; padding: 8px; z-index: 1000 !important; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
         .med-dropdown-content.open { display: flex; }
-        .dropdown-item { padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600; opacity: 0.7; transition: 0.2s; }
-        .dropdown-item:hover { background: rgba(0,0,0,0.05); opacity: 1; }
-        .dropdown-item.active { background: var(--accent); color: white; opacity: 1; }
-
-        /* Calendar */
-        .cal-cell { aspect-ratio: 1/1.15; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.2s; cursor: pointer; border: 1px solid transparent; opacity: 0; }
-        .cal-cell:hover { background: rgba(148, 163, 184, 0.05); transform: translateY(-2px); }
-        .ratio-tag { background: var(--accent); color: white; font-size: 0.45rem; padding: 1px 4px; border-radius: 4px; margin-top: 2px; font-weight: 800; }
-        .count-tag { background: rgba(0,0,0,0.05); color: var(--accent); font-size: 0.35rem; padding: 1px 4px; border-radius: 3px; margin-top: 1px; font-weight: 700; letter-spacing: 0.5px; }
-        .dark .count-tag { background: rgba(255,255,255,0.1); }
-
-        /* History List Items */
-        .history-item { display: flex; flex-direction: column; padding: 12px; border-radius: 12px; margin-bottom: 8px; background: rgba(0,0,0,0.03); border: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
-        .history-item:hover { background: rgba(0,0,0,0.06); transform: translateX(2px); }
-        .history-item.active { border-color: var(--accent); background: var(--accent); color: white; }
-        .history-item.active * { color: white; }
-        
-        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-        .history-details { display: flex; justify-content: space-between; align-items: center; }
-        
-        /* Box Control in History */
-        .box-control { display: flex; align-items: center; gap: 4px; }
-        .box-btn { width: 20px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.1); cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .box-btn:hover { background: rgba(0,0,0,0.2); }
-        .history-item.active .box-btn { background: rgba(255,255,255,0.2); color: white; }
-        .history-item.active .box-btn:hover { background: rgba(255,255,255,0.3); }
-
-        /* Modals */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 70; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
-        .modal-overlay.open { display: flex; opacity: 1; }
-        
-        /* Toast */
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--text); color: var(--bg); padding: 12px 24px; border-radius: 50px; font-weight: 600; z-index: 100; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 8px; width: max-content; max-width: 90%;}
-        .toast.show { transform: translateX(-50%) translateY(0); }
-
-        .spinner { width: 20px; height: 20px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 0.75s linear infinite; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .dose-btn { aspect-ratio: 1/1; transition: 0.2s; background: rgba(148, 163, 184, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; cursor: pointer; }
+        .dose-btn.active { background: var(--accent); color: white; transform: scale(1.05); }
+        .dose-btn.locked { opacity: 0.15; pointer-events: none; filter: grayscale(1); }
+        .cal-cell { aspect-ratio: 1/1.5; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border: 1px solid transparent; padding: 2px; }
+        .ratio-tag { background: var(--accent); color: white; font-size: 0.55rem; padding: 1px 4px; border-radius: 4px; margin-top: 1px; font-weight: 800; }
+        .count-tag { color: var(--accent); font-size: 0.75rem; font-weight: 900; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 3000; display: none; align-items: center; justify-content: center; }
+        .modal-overlay.open { display: flex; }
     </style>
 </head>
-<body class="p-3 md:p-6 antialiased selection:bg-indigo-500 selection:text-white">
-
-    <!-- Toast -->
-    <div id="toast" class="toast">
-        <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-        <span id="toastMsg">Sauvegardé</span>
-    </div>
-
-    <!-- Drawers Overlay -->
+<body class="p-3 md:p-6 antialiased">
     <div id="drawerOverlay" class="drawer-overlay" onclick="closeDrawers()"></div>
 
-    <!-- Left Drawer: Languages -->
-    <div id="leftDrawer" class="drawer drawer-left">
-        <h2 class="text-xl font-extrabold mb-6 flex items-center gap-2">🌐 <span id="langTitle">Langue</span></h2>
-        <div class="flex flex-col gap-3">
-            <button onclick="setLang('fr')" class="text-left p-3 rounded-xl hover:bg-slate-500/10 font-bold flex items-center gap-3">🇫🇷 Français</button>
-            <button onclick="setLang('en')" class="text-left p-3 rounded-xl hover:bg-slate-500/10 font-bold flex items-center gap-3">🇬🇧 English</button>
-            <button onclick="setLang('ar')" class="text-left p-3 rounded-xl hover:bg-slate-500/10 font-bold flex items-center gap-3">🇸🇦 العربية</button>
-        </div>
+    <div id="rightDrawer" class="drawer right-0 translate-x-full">
+        <h2 class="text-xl font-bold mb-6">Gestion / History</h2>
+        <div id="globalHistoryList" class="space-y-4"></div>
     </div>
 
-    <!-- Right Drawer: Global History -->
-    <div id="rightDrawer" class="drawer drawer-right">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-extrabold flex items-center gap-2">🕒 <span id="histTitle">Historique</span></h2>
-            <button onclick="closeDrawers()" class="p-2 hover:bg-slate-500/10 rounded-lg">✕</button>
-        </div>
-        <p id="loadingHistory" class="text-xs opacity-50 uppercase tracking-widest mb-4">Chargement...</p>
-        <div id="globalHistoryList" class="flex flex-col gap-2">
-            <!-- List inserted here -->
-        </div>
-    </div>
-
-    <!-- Modal Add/Edit Med -->
-    <div id="addMedModal" class="modal-overlay" onclick="closeModal('addMedModal')">
-        <div class="glass p-6 w-full max-w-xs text-center transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
-            <h3 class="font-bold text-lg mb-4" id="modalAddTitle">Nouveau Médicament</h3>
-            <input type="text" id="newMedName" placeholder="Nom (ex: Doliprane)" class="w-full bg-slate-500/10 border border-slate-500/20 rounded-xl p-3 text-center font-bold outline-none focus:border-indigo-500 mb-3">
-            
-            <div class="grid grid-cols-2 gap-2 mb-3">
-                <input type="number" id="newMedPieces" placeholder="Pièces/Plaque" class="bg-slate-500/10 border border-slate-500/20 rounded-xl p-3 text-center font-bold outline-none focus:border-indigo-500">
-                <input type="number" id="newMedPlates" placeholder="Plaques/Boîte" class="bg-slate-500/10 border border-slate-500/20 rounded-xl p-3 text-center font-bold outline-none focus:border-indigo-500">
-            </div>
-            
-            <p class="text-xs font-bold uppercase opacity-50 mb-2 text-left">Couleur</p>
-            <div class="flex justify-between gap-2 mb-6" id="colorPicker"></div>
-
-            <button onclick="confirmAddMed()" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg active:scale-95 transition-transform" id="btnAddMed">Ajouter</button>
-        </div>
-    </div>
-
-    <!-- Modal Edit History -->
-    <div id="editModal" class="modal-overlay" onclick="closeModal('editModal')">
-        <div class="glass p-6 w-80 text-center transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
-            <h3 class="font-bold text-lg mb-1" id="modalEditTitle">Modifier</h3>
-            <p id="modalDateDisplay" class="text-xs opacity-50 mb-4">Date</p>
-            <input type="text" id="modalInput" class="w-full bg-slate-500/10 border border-slate-500/20 rounded-xl p-3 text-center font-bold text-xl outline-none focus:border-indigo-500 transition-colors mb-4">
-            <div class="flex gap-2">
-                <button onclick="saveHistoryModal()" class="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl active:scale-95 transition-transform" id="btnEditSave">OK</button>
-                <button onclick="deleteHistoryEntry()" class="px-4 py-3 bg-red-500/10 text-red-500 font-bold rounded-xl active:scale-95 transition-transform">✕</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Confirm Finish -->
-    <div id="finishModal" class="modal-overlay" onclick="closeModal('finishModal')">
-        <div class="glass p-6 w-80 text-center transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
-            <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">✓</div>
-            <h3 class="font-bold text-lg mb-2" id="modalFinishTitle">Boîte Terminée !</h3>
-            <p class="text-sm opacity-60 mb-6" id="modalFinishText">Voulez-vous commencer une nouvelle boîte ? L'historique de la précédente sera conservé.</p>
-            <div class="flex gap-2">
-                <button onclick="confirmFinishPack()" class="flex-1 py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg active:scale-95 transition-transform" id="btnFinishRecharge">Oui, Recharger</button>
-                <button onclick="closeModal('finishModal')" class="px-4 py-3 bg-slate-500/10 text-slate-500 font-bold rounded-xl active:scale-95 transition-transform">Non</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Confirm Delete -->
-    <div id="deleteMedModal" class="modal-overlay" onclick="closeModal('deleteMedModal')">
-        <div class="glass p-6 w-80 text-center transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
-            <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">🗑️</div>
-            <h3 class="font-bold text-lg mb-2">Supprimer ?</h3>
-            <p class="text-sm opacity-60 mb-6">Voulez-vous vraiment supprimer ce médicament et tout son historique ?<br>Cette action est irréversible.</p>
-            <div class="flex gap-2">
-                <button onclick="closeModal('deleteMedModal')" class="flex-1 py-3 bg-slate-500 text-white font-bold rounded-xl active:scale-95 transition-transform">Non</button>
-                <button onclick="confirmDeleteMed()" class="flex-1 py-3 bg-red-600 text-white font-bold rounded-xl shadow-lg active:scale-95 transition-transform">Oui, Supprimer</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- NAVBAR -->
-    <nav class="max-w-3xl mx-auto flex justify-between items-center p-4 glass mb-4 fade-in relative z-40">
-        <div class="flex items-center gap-2">
-            <button onclick="openLeftDrawer()" class="w-9 h-9 rounded-xl flex items-center justify-center bg-slate-500/5 hover:bg-slate-500/10 transition-colors">🌐</button>
-            <h1 class="text-xl font-extrabold tracking-tight flex items-center gap-2">
-                <span class="text-indigo-500">●</span> MedTracker
-            </h1>
-        </div>
-
-        <!-- Right Side Buttons -->
-        <div class="flex items-center gap-2">
-            <button id="btnHistory" onclick="openRightDrawer()" class="hidden w-9 h-9 rounded-xl flex items-center justify-center bg-slate-500/5 hover:bg-slate-500/10 transition-colors text-lg">🕒</button>
-            <button id="btnLogout" onclick="doLogout()" class="hidden px-3 py-1 text-xs font-bold bg-slate-500/10 text-slate-500 rounded-lg hover:bg-slate-500/20 transition-colors">X</button>
-            <button onclick="toggleTheme()" class="w-9 h-9 rounded-xl flex items-center justify-center bg-slate-500/5 hover:bg-slate-500/10 transition-colors">🌓</button>
+    <nav class="max-w-2xl mx-auto flex justify-between items-center p-4 glass mb-4 relative z-50">
+        <div class="w-10"></div>
+        <h1 class="text-xl font-black text-indigo-500 tracking-tighter italic">MEDTRACKER</h1>
+        <div class="flex gap-2">
+            <button onclick="openRightDrawer()" class="w-10 h-10 rounded-xl bg-slate-500/5 flex items-center justify-center">🕒</button>
+            <button onclick="toggleTheme()" class="w-10 h-10 rounded-xl bg-slate-500/5 flex items-center justify-center">🌓</button>
         </div>
     </nav>
 
-    <main class="max-w-3xl mx-auto space-y-4">
-        
-        <!-- LOGIN -->
-        <div id="loginBox" class="glass p-8 text-center space-y-5 fade-in">
-            <div class="space-y-2">
-                <input type="text" id="userInput" oninput="checkUserAvailability()" placeholder="Identifiant" class="w-full bg-slate-500/10 border border-slate-500/20 rounded-xl p-4 text-center text-lg outline-none focus:border-indigo-500 transition-all font-bold">
-                <div id="userStatus" class="text-xs font-bold uppercase tracking-wide text-emerald-500 h-4 opacity-0 transition-opacity">Nouveau compte</div>
-            </div>
-            
-            <div id="passContainer" class="space-y-2 hidden transform transition-all duration-300 origin-top relative">
-                <input type="password" id="passInput" placeholder="Mot de passe" class="w-full bg-slate-500/10 border border-slate-500/20 rounded-xl p-4 pr-12 text-center text-lg outline-none focus:border-indigo-500 transition-all font-bold">
-                <button onclick="togglePasswordVisibility()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-500 transition-colors">
-                    <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                    <svg id="eyeOffIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 0 011.574-2.59M5.22 5.22a10.057 0 013.226-1.832C9.586 2.832 10.774 2.75 12 2.75c4.478 0 8.268 2.943 9.542 7a10.05 0 01-1.575 2.59m-4.97 4.97a3 3 0 11-4.243-4.243m0 0L3 3m18 18l-3.75-3.75" /></svg>
-                </button>
-            </div>
-
-            <button onclick="handleAuth()" id="btnLogin" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-xl shadow-indigo-500/20 active:scale-95 transition-all uppercase tracking-widest text-sm">
-                Connexion / Inscription
-            </button>
-            <p id="loginError" class="text-red-500 text-xs font-bold opacity-0 transition-opacity"></p>
+    <main class="max-w-2xl mx-auto space-y-4">
+        <div id="loginBox" class="glass p-8 text-center space-y-4">
+            <input type="text" id="userInput" placeholder="Identifiant" class="w-full bg-slate-500/10 rounded-xl p-4 text-center font-bold outline-none">
+            <button onclick="handleAuth()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl">ENTRER</button>
         </div>
 
-        <!-- APP -->
         <div id="appBody" class="hidden space-y-4">
-            
-            <!-- Med Controls -->
-            <div class="glass p-4 fade-in flex justify-between items-center relative z-10">
-                <div class="text-[10px] font-bold uppercase opacity-50 tracking-widest">
-                    <span id="lblConfig">Configuration</span>
+            <div class="glass p-4 flex justify-center items-center relative" style="z-index: 100;">
+                <div class="relative w-full text-center">
+                    <button onclick="toggleDropdown()" id="navbarMedBtn" class="bg-slate-500/5 px-8 py-3 rounded-2xl font-black text-lg">
+                        <span id="navbarMedName">...</span> ▾
+                    </button>
+                    <div id="navbarDropdown" class="med-dropdown-content"></div>
                 </div>
-                <div class="flex gap-2 items-center">
-                    <!-- Archive Button -->
-                    <button id="btnArchive" onclick="archiveMed()" class="hidden w-8 h-8 rounded-lg bg-slate-500/10 text-slate-500 font-bold flex items-center justify-center hover:bg-slate-500 hover:text-white transition-colors" title="Archiver (Garder dans l'historique)">📦</button>
-                    
-                    <!-- Delete Button -->
-                    <button id="btnDeleteMed" onclick="openDeleteMedModal()" class="hidden w-8 h-8 rounded-lg bg-red-500/10 text-red-500 font-bold flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors" title="Supprimer tout">🗑️</button>
-
-                    <!-- Edit Button -->
-                    <button id="btnEditConfig" onclick="openEditMedModal()" class="hidden w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 font-bold flex items-center justify-center hover:bg-amber-500 hover:text-white transition-colors" title="Modifier la configuration">✏️</button>
-                    
-                    <!-- Add Button -->
-                    <button onclick="openModal('addMedModal')" class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-500 font-bold flex items-center justify-center hover:bg-indigo-500 hover:text-white transition-colors">+</button>
-
-                    <!-- Med Dropdown Container -->
-                    <div class="med-dropdown">
-                        <button id="navbarMedBtn" onclick="window.toggleMedDropdown()" class="flex items-center gap-2 font-bold bg-slate-500/5 px-4 py-2 rounded-xl hover:bg-slate-500/10 transition-colors border border-slate-500/10 shadow-sm">
-                            <span id="navbarMedName">Médicament</span>
-                            <span class="text-xs opacity-50">▼</span>
-                        </button>
-                        <div id="navbarDropdown" class="med-dropdown-content">
-                            <!-- Med Items -->
-                        </div>
-                    </div>
-                </div>
+                <button onclick="openModal('addMedModal')" class="absolute right-4 w-10 h-10 rounded-xl bg-indigo-600 text-white font-bold">+</button>
             </div>
 
-            <!-- Grid Section -->
-            <div class="glass p-6 fade-in">
+            <div class="glass p-6">
                 <div class="flex justify-between items-end mb-4">
-                    <div>
-                        <span class="text-[10px] font-bold uppercase opacity-60 tracking-widest" id="lblProgress">Progression Boîte</span>
-                        <h2 id="currentMedNameDisplay" class="text-2xl font-black mt-1">...</h2>
-                    </div>
-                    <div class="text-right">
-                         <span id="percentText" class="text-3xl font-black">0%</span>
-                    </div>
+                    <h2 id="currentMedNameDisplay" class="text-2xl font-black">---</h2>
+                    <span id="percentText" class="text-3xl font-black opacity-30">0%</span>
                 </div>
-                
-                <div class="progress-bar mb-6"><div id="progressFill" class="progress-fill" style="width: 0%; background-color: var(--accent)"></div></div>
-
-                <!-- Plate Tabs -->
-                <div id="plateTabs" class="flex justify-center gap-2 mb-6"></div>
-
-                <!-- Grid -->
-                <div id="grid" class="grid grid-cols-5 sm:grid-cols-5 md:grid-cols-5 gap-2"></div>
+                <div class="h-2 w-full bg-slate-500/10 rounded-full overflow-hidden mb-6">
+                    <div id="progressFill" class="h-full bg-indigo-500 transition-all duration-700" style="width: 0%;"></div>
+                </div>
+                <div id="plateTabs" class="flex gap-2 mb-6 overflow-x-auto pb-2"></div>
+                <div id="grid" class="grid grid-cols-5 gap-3"></div>
             </div>
 
-            <!-- Calendar -->
-            <div class="glass p-6 fade-in">
+            <div class="glass p-6">
                 <div class="flex justify-between items-center mb-6">
-                    <button onclick="changeMonth(-1)" class="p-2 rounded-lg hover:bg-slate-500/10 transition-colors">←</button>
-                    <h3 id="calMonth" class="font-extrabold uppercase text-sm tracking-wide"></h3>
-                    <button onclick="changeMonth(1)" class="p-2 rounded-lg hover:bg-slate-500/10 transition-colors">→</button>
+                    <button onclick="changeMonth(-1)" class="font-bold">←</button>
+                    <h3 id="calMonth" class="font-bold uppercase text-xs tracking-widest text-center"></h3>
+                    <button onclick="changeMonth(1)" class="font-bold">→</button>
                 </div>
-                <div id="calendar" class="grid grid-cols-7 gap-2 text-center text-sm"></div>
+                <div id="calendar" class="grid grid-cols-7 gap-1"></div>
             </div>
         </div>
     </main>
 
+    <div id="editCalModal" class="modal-overlay" onclick="closeModal('editCalModal')">
+        <div class="glass p-6 w-80" onclick="event.stopPropagation()">
+            <h3 class="font-bold mb-4">Modifier Prises</h3>
+            <p class="text-[10px] opacity-50 mb-2">Séparez par espace pour plusieurs (ex: 6/6 1/6)</p>
+            <input type="text" id="editCalInput" class="w-full p-4 bg-slate-500/10 rounded-xl mb-4 font-bold text-center" placeholder="Ex: 6/6 1/6">
+            <button onclick="saveCalEdit()" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl uppercase">Sauvegarder</button>
+        </div>
+    </div>
+
+    <div id="finishModal" class="modal-overlay" onclick="closeModal('finishModal')">
+        <div class="glass p-8 w-80 text-center" onclick="event.stopPropagation()">
+            <h3 class="font-black text-xl mb-6">Boîte terminée !</h3>
+            <button onclick="confirmFinishBox()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl">COMMENCER NOUVELLE BOÎTE</button>
+        </div>
+    </div>
+
+    <div id="addMedModal" class="modal-overlay" onclick="closeModal('addMedModal')">
+        <div class="glass p-6 w-80" onclick="event.stopPropagation()">
+            <h3 class="font-bold mb-4">Nouveau Médicament</h3>
+            <input type="text" id="newMedName" placeholder="Nom" class="w-full p-3 bg-slate-500/10 rounded-xl mb-3 font-bold">
+            <div class="grid grid-cols-2 gap-2 mb-4">
+                <input type="number" id="newMedPieces" placeholder="Pièces/Plq" class="p-3 bg-slate-500/10 rounded-xl">
+                <input type="number" id="newMedPlates" placeholder="Plaques" class="p-3 bg-slate-500/10 rounded-xl">
+            </div>
+            <button onclick="confirmAddMed()" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl">AJOUTER</button>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, getDocs, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, getDocs, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // --- Config ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyAx7c0bFNXuBxadAUItyP6h0U",
-            authDomain: "pilltracker-59495.firebaseapp.com",
-            projectId: "pilltracker-59495",
-            storageBucket: "pilltracker-59495.appspot.com",
-            messagingSenderId: "72228771158",
-            appId: "1:72228771158:web:a03f36b13f23f"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyAx7c0bFNXuBxadAUItyP6h0U", authDomain: "pilltracker-59495.firebaseapp.com", projectId: "pilltracker-59495", storageBucket: "pilltracker-59495.appspot.com", messagingSenderId: "72228771158", appId: "1:72228771158:web:a03f36b13f23f" };
+        const db = getFirestore(initializeApp(firebaseConfig));
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        let user = localStorage.getItem('medUser') || "";
+        let currentMedId = null, medsList = [], currentPlateIndex = 0, currentDate = new Date(), editingDate = null;
+        let unsubGrid = null, unsubHist = null;
 
-        const MED_COLORS = ["#6366f1", "#ef4444", "#10b981", "#f59e0b", "#ec4899", "#06b6d4"];
-        let selectedColor = MED_COLORS[0];
-        let isEditingMed = false;
-
-        let user = "";
-        let currentMedId = null;
-        let currentPlateIndex = 0; 
-        let medsList = []; 
-        let activeMedsList = []; 
-        let currentDate = new Date();
-        let unsubscribeGrid = null;
-        let unsubscribeHistory = null;
-        let lowStockNotified = false;
-
-        // --- I18n ---
-        const i18n = {
-            fr: { title: "MedTracker", add: "Ajouter", edit: "Modifier", editConfig: "Modifier Config", finish: "Boîte Terminée !", finishText: "Voulez-vous commencer une nouvelle boîte ?", recharge: "Oui, Recharger", placeholder: "Mot de passe", config: "Configuration", progress: "Progression Boîte", history: "Historique", lang: "Langue", pieces: "Pièces/Plaque", plates: "Plaques/Boîte", empty: "Aucun traitement", loading: "Chargement...", box: "Boîte" },
-            en: { title: "MedTracker", add: "Add", edit: "Edit", editConfig: "Edit Config", finish: "Box Finished!", finishText: "Start a new box?", recharge: "Yes, Recharge", placeholder: "Password", config: "Config", progress: "Box Progress", history: "History", lang: "Language", pieces: "Pieces/Plate", plates: "Plates/Box", empty: "No treatments", loading: "Loading...", box: "Box" },
-            ar: { title: "المتتبع", add: "إضافة", edit: "تعديل", editConfig: "تعديل الإعدادات", finish: "انتهت العلبة !", finishText: "هل تريد بدء علبة جديدة؟", recharge: "نعم، إعادة تعبئة", placeholder: "كلمة المرور", config: "الإعدادات", progress: "تقدم العلبة", history: "السجل", lang: "اللغة", pieces: "قطعة/لوحة", plates: "لوحة/علبة", empty: "لا علاج", loading: "جاري التحميل...", box: "علبة" }
-        };
-        let curLang = 'fr';
-
-        function applyLang(l) {
-            curLang = l;
-            const txt = i18n[l];
-            document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
-            document.getElementById('langTitle').innerText = txt.lang;
-            document.getElementById('histTitle').innerText = txt.history;
-            document.getElementById('modalAddTitle').innerText = isEditingMed ? txt.editConfig : txt.add;
-            document.getElementById('btnAddMed').innerText = isEditingMed ? "Mettre à jour" : txt.add;
-            document.getElementById('modalEditTitle').innerText = txt.edit;
-            document.getElementById('btnEditSave').innerText = "OK";
-            document.getElementById('modalFinishTitle').innerText = txt.finish;
-            document.getElementById('modalFinishText').innerText = txt.finishText;
-            document.getElementById('btnFinishRecharge').innerText = txt.recharge;
-            document.getElementById('passInput').placeholder = txt.placeholder;
-            document.getElementById('lblConfig').innerText = txt.config;
-            document.getElementById('lblProgress').innerText = txt.progress;
-            document.getElementById('newMedName').placeholder = "Nom / Name";
-            document.getElementById('newMedPieces').placeholder = txt.pieces;
-            document.getElementById('newMedPlates').placeholder = txt.plates;
-            document.getElementById('loadingHistory').innerText = txt.loading;
-            renderCalendar();
-            renderNavbarMed();
-        }
-
-        window.setLang = (l) => {
-            localStorage.setItem('medLang', l);
-            applyLang(l);
-            closeDrawers();
-        };
-
-        // --- Drawers ---
-        window.openLeftDrawer = () => { document.getElementById('leftDrawer').classList.add('open'); document.getElementById('drawerOverlay').classList.add('open'); };
-        window.openRightDrawer = async () => { 
-            document.getElementById('rightDrawer').classList.add('open'); 
-            document.getElementById('drawerOverlay').classList.add('open');
-            await loadGlobalHistory();
-        };
-        window.closeDrawers = () => {
-            document.querySelectorAll('.drawer').forEach(d => d.classList.remove('open'));
-            document.getElementById('drawerOverlay').classList.remove('open');
-        };
-
-        // --- Toggle Dropdown Logic ---
-        window.toggleMedDropdown = () => {
-            const dd = document.getElementById('navbarDropdown');
-            dd.classList.toggle('open');
-        };
-
-        // --- Navbar Dropdown (Only Active Meds) ---
-        function renderNavbarMed() {
-            const dd = document.getElementById('navbarDropdown');
-            dd.innerHTML = '';
-            activeMedsList.forEach(med => {
-                const item = document.createElement('div');
-                item.className = `dropdown-item ${med.id === currentMedId ? 'active' : ''}`;
-                item.innerHTML = `<span class="w-2 h-2 rounded-full" style="background:${med.color}"></span> ${med.name}`;
-                item.onclick = (e) => {
-                    e.stopPropagation();
-                    switchMed(med.id);
-                    closeDrawers(); 
-                    dd.classList.remove('open');
-                };
-                dd.appendChild(item);
-            });
-            if(activeMedsList.length > 0) {
-                const cur = activeMedsList.find(m => m.id === currentMedId);
-                if(cur) document.getElementById('navbarMedName').innerText = cur.name;
-            } else {
-                 document.getElementById('navbarMedName').innerText = "Aucun";
-            }
-        }
-
-        // --- Global History Logic (RESTORED FROM PERFECT CODE + BOX CONTROLS) ---
-        async function loadGlobalHistory() {
-            const list = document.getElementById('globalHistoryList');
-            list.innerHTML = '';
-            
-            // FIX: Fetch fresh data from DB exactly like the "Perfect Code" did
-            // This ensures the list always loads regardless of global state.
-            const snap = await getDocs(collection(db, "users", user, "medications"));
-            const allMeds = [];
-            snap.forEach(d => allMeds.push({ id: d.id, ...d.data() }));
-
-            if(allMeds.length === 0) {
-                list.innerHTML = `<div class="text-center text-sm opacity-50 mt-4">${i18n[curLang].empty}</div>`;
-                return;
-            }
-
-            for (const med of allMeds) {
-                const histSnap = await getDocs(collection(db, "users", user, "medications", med.id, "history"));
-                let lastDate = null;
-                let maxRatio = 0;
-                let boxCount = 1;
-                
-                let entries = [];
-                histSnap.forEach(d => entries.push({ id: d.id, ...d.data() }));
-                entries.sort((a,b) => a.id.localeCompare(b.id));
-
-                // Calculate Box Count (Restored logic)
-                let prevVal = 0;
-                entries.forEach(d => {
-                    const val = parseInt(d.data().ratio.split('/')[0]) || 0;
-                    if(val < prevVal) boxCount++;
-                    prevVal = val;
-                    if(!lastDate || d.id > lastDate) lastDate = d.id;
-                });
-
-                const item = document.createElement('div');
-                item.className = `history-item ${med.id === currentMedId ? 'active' : ''}`;
-                const dateStr = lastDate ? new Date(lastDate).toLocaleDateString(curLang, { day: 'numeric', month: 'short' }) : "Jamais";
-                
-                // Box Controls
-                const boxControlHTML = `
-                    <div class="box-control mt-1">
-                        <span class="text-[10px] uppercase font-bold opacity-50 mr-1">${i18n[curLang].box}</span>
-                        <button class="box-btn" onclick="event.stopPropagation(); adjustBoxCount('${med.id}', -1)">-</button>
-                        <span class="font-bold text-sm w-6 text-center">${boxCount}</span>
-                        <button class="box-btn" onclick="event.stopPropagation(); adjustBoxCount('${med.id}', 1)">+</button>
-                    </div>
-                `;
-
-                item.innerHTML = `
-                    <div class="history-header">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full" style="background:${med.color}"></span>
-                            <span class="font-bold text-sm">${med.name}</span>
-                        </div>
-                    </div>
-                    <div class="history-details">
-                        <div class="text-xs opacity-60">${lastDate ? `Fin: ${dateStr}` : i18n[curLang].empty}</div>
-                        ${boxControlHTML}
-                    </div>
-                `;
-                
-                item.onclick = (e) => {
-                    if(e.target.closest('.box-control')) return;
-                    switchMed(med.id);
-                    closeDrawers();
-                };
-                list.appendChild(item);
-            }
-        }
-
-        // --- Adjust Box Count Logic ---
-        window.adjustBoxCount = async (medId, delta) => {
-            const histSnap = await getDocs(collection(db, "users", user, "medications", medId, "history"));
-            if(histSnap.empty) return;
-
-            let entries = [];
-            histSnap.forEach(d => entries.push({ id: d.id, ...d.data() }));
-            entries.sort((a,b) => a.id.localeCompare(b.id));
-            
-            const lastEntry = entries[entries.length - 1];
-            const oldRatio = lastEntry.ratio;
-            const size = parseInt(oldRatio.split('/')[1]);
-            const oldMax = parseInt(oldRatio.split('/')[0]);
-            
-            const oldBox = Math.floor((oldMax - 1) / size) + 1;
-            const positionInBox = ((oldMax - 1) % size) + 1;
-            const newBox = oldBox + delta;
-            
-            if(newBox < 1) return; 
-
-            const newMax = ((newBox - 1) * size) + positionInBox;
-            const newRatio = `${newMax}/${size}`;
-            
-            await updateDoc(doc(db, "users", user, "medications", medId, "history", lastEntry.id), { ratio: newRatio });
-            loadGlobalHistory();
-        };
-
-        // --- Archive Logic (ROBUST FIX) ---
-        window.archiveMed = async () => {
-            if(!currentMedId) {
-                alert("Erreur: Aucun médicament sélectionné.");
-                return;
-            }
-
-            if(confirm("Archiver ce médicament ?\n\nIl sera retiré de la liste active mais restera dans l'historique.")) {
-                try {
-                    // 1. Update DB
-                    await updateDoc(doc(db, "users", user, "medications", currentMedId), { active: false });
-                    
-                    // 2. Reset UI State
-                    currentMedId = null; 
-                    
-                    // 3. Refresh All Lists
-                    await loadMeds(); 
-                    
-                    // 4. Force refresh history drawer to reflect change
-                    await loadGlobalHistory();
-                    
-                    showToast("Médicament archivé");
-                } catch (error) {
-                    console.error("Archive error:", error);
-                    alert("Erreur lors de l'archivage. Vérifiez votre connexion.");
-                }
-            }
-        };
-
-        // --- Password Toggle ---
-        window.togglePasswordVisibility = () => {
-            const input = document.getElementById('passInput');
-            const eyeIcon = document.getElementById('eyeIcon');
-            const eyeOffIcon = document.getElementById('eyeOffIcon');
-            if (input.type === "password") {
-                input.type = "text";
-                eyeIcon.classList.add('hidden');
-                eyeOffIcon.classList.remove('hidden');
-            } else {
-                input.type = "password";
-                eyeIcon.classList.remove('hidden');
-                eyeIcon.classList.add('hidden');
-            }
-        };
-
-        // --- Auth ---
-        window.checkUserAvailability = async () => {
+        window.handleAuth = () => {
             const name = document.getElementById('userInput').value.trim().toLowerCase();
-            const status = document.getElementById('userStatus');
-            const passContainer = document.getElementById('passContainer');
-            const loginError = document.getElementById('loginError');
-            
-            loginError.style.opacity = 0;
-
-            if (name.length < 3) { 
-                status.classList.remove('opacity-100'); 
-                passContainer.classList.add('hidden'); 
-                return; 
-            }
-
-            status.classList.remove('opacity-0');
-            const userDoc = await getDoc(doc(db, "users", name));
-            const exists = userDoc.exists();
-            
-            status.innerText = exists ? "Compte existant" : "Nouveau compte";
-            status.style.color = exists ? "var(--accent)" : "#10b981";
+            if(!name) return;
+            user = name; localStorage.setItem('medUser', user); proceed();
         };
 
-        window.handleAuth = async () => {
-            const name = document.getElementById('userInput').value.trim().toLowerCase();
-            const pass = document.getElementById('passInput').value;
-            const btn = document.getElementById('btnLogin');
-            const errorMsg = document.getElementById('loginError');
-            const passContainer = document.getElementById('passContainer');
-
-            if (name.length < 3) {
-                errorMsg.innerText = "Identifiant trop court";
-                errorMsg.style.opacity = 1;
-                return;
-            }
-
-            if(passContainer.classList.contains('hidden')) {
-                passContainer.classList.remove('hidden');
-                document.getElementById('passInput').focus();
-                return;
-            }
-
-            if (!pass) {
-                errorMsg.innerText = "Mot de passe requis";
-                errorMsg.style.opacity = 1;
-                document.getElementById('passInput').focus();
-                return;
-            }
-
-            btn.innerHTML = '<div class="spinner mx-auto border-white w-5 h-5"></div>';
-
-            const userRef = doc(db, "users", name);
-            const docSnap = await getDoc(userRef);
-            let success = false;
-
-            if (docSnap.exists()) {
-                if (docSnap.data().password === pass) success = true;
-                else {
-                    errorMsg.innerText = "Mot de passe incorrect";
-                    errorMsg.style.opacity = 1;
-                }
-            } else {
-                await setDoc(userRef, { password: pass, created: new Date().toISOString() });
-                success = true;
-                const newMedRef = doc(collection(db, "users", name, "medications"));
-                await setDoc(newMedRef, {
-                    name: "Mon Traitement",
-                    color: MED_COLORS[0],
-                    piecesPerPlate: 10,
-                    platesPerBox: 3,
-                    active: true 
-                });
-            }
-
-            if (success) {
-                proceed(name);
-                localStorage.setItem('medUser', name);
-            } else {
-                btn.innerText = "Connexion / Inscription";
-            }
-        };
-
-        window.doLogout = async () => {
-            if(confirm("Voulez-vous vous déconnecter ?")) {
-                if (unsubscribeGrid) unsubscribeGrid();
-                if (unsubscribeHistory) unsubscribeHistory();
-                user = "";
-                currentMedId = null;
-                medsList = [];
-                activeMedsList = [];
-                localStorage.removeItem('medUser');
-                document.getElementById('appBody').classList.add('hidden');
-                document.getElementById('btnHistory').classList.add('hidden');
-                document.getElementById('btnLogout').classList.add('hidden');
-                document.getElementById('loginBox').classList.remove('hidden');
-                document.getElementById('userInput').value = '';
-                document.getElementById('passInput').value = '';
-                document.getElementById('passContainer').classList.add('hidden');
-                document.getElementById('btnLogin').innerText = "Connexion / Inscription";
-                document.documentElement.style.setProperty('--accent', '#10b981');
-            }
-        }
-
-        function proceed(name) {
-            user = name;
+        async function proceed() {
             document.getElementById('loginBox').classList.add('hidden');
             document.getElementById('appBody').classList.remove('hidden');
-            document.getElementById('btnHistory').classList.remove('hidden');
-            document.getElementById('btnLogout').classList.remove('hidden');
             loadMeds();
         }
 
-        // --- Meds Management ---
         async function loadMeds() {
             const snap = await getDocs(collection(db, "users", user, "medications"));
-            medsList = [];
-            activeMedsList = [];
-            snap.forEach(d => {
-                const data = { id: d.id, ...d.data() };
-                medsList.push(data);
-                if(data.active !== false) activeMedsList.push(data); 
-            });
-            
-            renderNavbarMed();
-            
-            if (activeMedsList.length > 0) {
-                if (currentMedId && activeMedsList.find(m => m.id === currentMedId)) {
-                    switchMed(currentMedId);
-                } else {
-                    switchMed(activeMedsList[0].id);
-                }
-                document.getElementById('btnEditConfig').classList.remove('hidden');
-                document.getElementById('btnArchive').classList.remove('hidden');
-                document.getElementById('btnDeleteMed').classList.remove('hidden');
-            } else {
-                currentMedId = null;
-                document.getElementById('btnEditConfig').classList.add('hidden');
-                document.getElementById('btnArchive').classList.add('hidden');
-                document.getElementById('btnDeleteMed').classList.add('hidden');
-                const grid = document.getElementById('grid');
-                grid.innerHTML = `<div class="col-span-full text-center opacity-40 py-10 text-sm">${i18n[curLang].empty}.<br>Cliquez sur +.</div>`;
-                document.getElementById('progressFill').style.width = '0%';
-                document.getElementById('percentText').innerText = '0%';
-                document.getElementById('currentMedNameDisplay').innerText = "";
-            }
+            medsList = []; snap.forEach(d => medsList.push({id: d.id, ...d.data()}));
+            renderDropdown();
+            if(medsList.length > 0 && !currentMedId) switchMed(medsList.find(m => m.active !== false)?.id || medsList[0].id);
         }
 
-        window.openEditMedModal = () => {
-            if(!currentMedId) return;
-            const med = medsList.find(m => m.id === currentMedId);
-            if(!med) return;
-
-            isEditingMed = true;
-            document.getElementById('newMedName').value = med.name;
-            document.getElementById('newMedPieces').value = med.piecesPerPlate;
-            document.getElementById('newMedPlates').value = med.platesPerBox;
-            selectedColor = med.color;
-            
-            document.getElementById('modalAddTitle').innerText = i18n[curLang].editConfig;
-            document.getElementById('btnAddMed').innerText = "Mettre à jour";
-            renderColorPicker();
-            
-            openModal('addMedModal');
-        };
-
-        window.openDeleteMedModal = () => {
-             openModal('deleteMedModal');
-        };
-
-        window.confirmDeleteMed = async () => {
-            if(!currentMedId) return;
-            await deleteDoc(doc(db, "users", user, "medications", currentMedId));
-            closeModal('deleteMedModal');
-            currentMedId = null;
-            loadMeds();
-            showToast("Médicament supprimé");
-        };
-
-        window.confirmAddMed = async () => {
-            const name = document.getElementById('newMedName').value;
-            const pieces = parseInt(document.getElementById('newMedPieces').value) || 10;
-            const plates = parseInt(document.getElementById('newMedPlates').value) || 3;
-            
-            if (!name) return alert("Nom requis");
-
-            if(isEditingMed && currentMedId) {
-                await updateDoc(doc(db, "users", user, "medications", currentMedId), {
-                    name: name,
-                    color: selectedColor,
-                    piecesPerPlate: pieces,
-                    platesPerBox: plates
-                });
-                closeModal('addMedModal');
-                loadMeds();
-                showToast("Configuration mise à jour");
-                isEditingMed = false;
-            } else {
-                const newMedRef = doc(collection(db, "users", user, "medications"));
-                await setDoc(newMedRef, {
-                    name: name,
-                    color: selectedColor,
-                    piecesPerPlate: pieces,
-                    platesPerBox: plates,
-                    active: true
-                });
-                
-                closeModal('addMedModal');
-                loadMeds();
-                switchMed(newMedRef.id);
-                showToast("Médicament ajouté");
-                isEditingMed = false;
-            }
-        };
-
-        function switchMed(id) {
-            if (unsubscribeGrid) unsubscribeGrid();
-            if (unsubscribeHistory) unsubscribeHistory();
-            currentMedId = id;
-            const med = medsList.find(m => m.id === id);
-            if(!med) return;
-            
-            currentPlateIndex = 0; 
-            lowStockNotified = false; 
-
+        window.switchMed = (id) => {
+            if(unsubGrid) unsubGrid(); if(unsubHist) unsubHist();
+            currentMedId = id; const med = medsList.find(m => m.id === id);
+            document.getElementById('navbarMedName').innerText = med.name;
             document.getElementById('currentMedNameDisplay').innerText = med.name;
-            document.getElementById('currentMedNameDisplay').style.color = med.color;
-            document.documentElement.style.setProperty('--accent', med.color);
-            document.documentElement.style.setProperty('--accent-glow', med.color + '4D');
-            
-            renderNavbarMed();
-            renderPlateTabs(med);
-            syncGrid();
-            syncHistory();
-        }
+            syncGrid(med); syncHistory();
+            document.getElementById('navbarDropdown').classList.remove('open');
+        };
 
-        function renderPlateTabs(med) {
-            const container = document.getElementById('plateTabs');
-            container.innerHTML = '';
-            const totalPlates = med.platesPerBox || 1;
-            
-            for(let i=0; i<totalPlates; i++) {
-                const btn = document.createElement('button');
-                const isActive = (i === currentPlateIndex);
-                btn.className = `text-xs font-bold px-3 py-1 rounded-lg transition-colors ${isActive ? 'bg-slate-500/20 text-indigo-500' : 'opacity-50 hover:opacity-100'}`;
-                btn.innerText = `Plaque ${i+1}`;
-                btn.onclick = () => {
-                    currentPlateIndex = i;
-                    renderPlateTabs(med);
-                    renderGridUI(); 
-                };
-                container.appendChild(btn);
-            }
-        }
-
-        // --- Grid Logic ---
-        function syncGrid() {
-            if(!currentMedId) return;
-            const colRef = collection(db, "users", user, "medications", currentMedId, "current_doses");
-            unsubscribeGrid = onSnapshot(colRef, (snap) => {
-                const currentMed = medsList.find(m => m.id === currentMedId);
-                if(!currentMed) return;
-                
-                const piecesPerPlate = currentMed.piecesPerPlate || 10;
-                const platesPerBox = currentMed.platesPerBox || 1;
-                const totalSize = piecesPerPlate * platesPerBox;
-
-                let activeSet = new Set();
-                snap.forEach(d => activeSet.add(parseInt(d.id)));
-
-                const progress = (activeSet.size / totalSize) * 100;
-                const progressFill = document.getElementById('progressFill');
-                progressFill.style.width = `${Math.min(progress, 100)}%`;
-                document.getElementById('percentText').innerText = `${Math.round(progress)}%`;
-
-                if(progress < 60) progressFill.style.backgroundColor = '#10b981'; 
-                else if(progress < 80) progressFill.style.backgroundColor = '#f59e0b'; 
-                else if(progress < 90) progressFill.style.backgroundColor = '#ef4444'; 
-                
-                if(progress >= 80 && progress < 85 && !lowStockNotified) {
-                    showToast("Attention: Stock faible (80%)");
-                    lowStockNotified = true;
-                }
-
-                if (activeSet.size === totalSize && totalSize > 0) {
-                    if (!document.getElementById('finishModal').classList.contains('open')) {
-                        openModal('finishModal');
-                    }
-                }
-
-                window.gridData = { activeSet, piecesPerPlate, platesPerBox, totalSize };
-                renderGridUI();
+        function syncGrid(med) {
+            unsubGrid = onSnapshot(collection(db, "users", user, "medications", currentMedId, "current_doses"), (snap) => {
+                const taken = new Set(); snap.forEach(d => taken.add(parseInt(d.id)));
+                const total = med.piecesPerPlate * med.platesPerBox;
+                const max = taken.size > 0 ? Math.max(...Array.from(taken)) : 0;
+                document.getElementById('progressFill').style.width = (taken.size / total) * 100 + "%";
+                document.getElementById('percentText').innerText = Math.round((taken.size / total) * 100) + "%";
+                renderGridUI(med, taken, max); renderPlateTabs(med, max);
+                if(taken.size >= total && total > 0) openModal('finishModal');
             });
         }
 
-        function renderGridUI() {
-            if(!window.gridData) return;
-            const { activeSet, piecesPerPlate, platesPerBox, totalSize } = window.gridData;
-            const grid = document.getElementById('grid');
-            grid.innerHTML = '';
-
-            const start = (currentPlateIndex * piecesPerPlate) + 1;
-            const end = start + piecesPerPlate;
-
-            let maxTaken = 0;
-            activeSet.forEach(id => { if(id > maxTaken) maxTaken = id; });
-            let nextAvailable = maxTaken + 1;
-
-            for(let i=start; i<end; i++) {
+        function renderGridUI(med, taken, max) {
+            const grid = document.getElementById('grid'); grid.innerHTML = "";
+            const start = (currentPlateIndex * med.piecesPerPlate) + 1;
+            for(let i=start; i < start + med.piecesPerPlate; i++) {
                 const btn = document.createElement('button');
-                const isActive = activeSet.has(i);
-                const isNext = (i === nextAvailable);
-                
-                btn.className = `dose-btn aspect-square font-bold text-sm shadow-sm ${isActive ? 'active' : ''}`;
-                const visualNumber = i - (currentPlateIndex * piecesPerPlate);
-                btn.innerText = visualNumber;
-
-                if (!isActive) {
-                    if (!isNext) btn.classList.add('locked');
-                } else {
-                    const isLastActive = (i === maxTaken);
-                    if(!isLastActive) btn.classList.add('locked');
-                }
-
-                btn.onclick = () => toggleDose(i, isActive, totalSize);
+                btn.className = `dose-btn ${taken.has(i) ? 'active' : ''} ${(!taken.has(i) && i !== max + 1) || (taken.has(i) && i !== max) ? 'locked' : ''}`;
+                btn.innerText = i - (currentPlateIndex * med.piecesPerPlate);
+                btn.onclick = () => toggleDose(i, taken.has(i), med);
                 grid.appendChild(btn);
             }
         }
 
-        async function toggleDose(n, isActive, totalSize) {
-            const colRef = collection(db, "users", user, "medications", currentMedId, "current_doses");
+        async function toggleDose(n, isTaken, med) {
             const today = new Date().toISOString().split('T')[0];
-            const histRef = doc(db, "users", user, "medications", currentMedId, "history", today);
+            const dRef = doc(db, "users", user, "medications", currentMedId, "current_doses", n.toString());
+            const hRef = doc(db, "users", user, "medications", currentMedId, "history", today);
+            const total = med.piecesPerPlate * med.platesPerBox;
 
-            if (isActive) {
-                await deleteDoc(doc(colRef, n.toString()));
-            } else {
-                await setDoc(doc(colRef, n.toString()), { taken: true });
-            }
+            isTaken ? await deleteDoc(dRef) : await setDoc(dRef, { t: Date.now() });
 
-            // Calculate Current Max
-            const snap = await getDocs(colRef);
-            let currentMax = 0;
-            snap.forEach(d => { currentMax = Math.max(currentMax, parseInt(d.id)); });
+            const snap = await getDocs(collection(db, "users", user, "medications", currentMedId, "current_doses"));
+            const currentMax = snap.size > 0 ? Math.max(...snap.docs.map(d => parseInt(d.id))) : 0;
+            
+            const hSnap = await getDoc(hRef);
+            let hData = hSnap.exists() ? hSnap.data().ratio : "";
 
-            // Find Previous Max (History)
-            const historySnap = await getDocs(collection(db, "users", user, "medications", currentMedId, "history"));
-            let lastKnownMax = 0;
-            let lastDate = "";
-            let entries = [];
-            historySnap.forEach(d => entries.push({ id: d.id, ...d.data() }));
-            entries.sort((a,b) => a.id.localeCompare(b.id));
-
-            for(let i = entries.length - 1; i >= 0; i--) {
-                if(entries[i].id < today) {
-                    lastDate = entries[i].id;
-                    const val = parseInt(entries[i].ratio.split('/')[0]);
-                    if(!isNaN(val)) lastKnownMax = val;
-                    break;
+            if (currentMax > 0) {
+                // Gestion transition de boite : si on a déjà un ratio (ex: 6/6), on garde les deux
+                let newRatio = `${currentMax}/${total}`;
+                if (hData && !hData.includes(newRatio)) {
+                    // Si on commence une nouvelle boite (1/6) mais qu'on a déjà fini l'autre (6/6)
+                    if (hData.split(' ').length < 2) hData += " " + newRatio;
+                    else hData = hData.split(' ')[0] + " " + newRatio;
+                } else {
+                    hData = newRatio;
                 }
-            }
-
-            if (currentMax > lastKnownMax) {
-                await setDoc(histRef, { ratio: `${currentMax}/${totalSize}` }, { merge: true });
+                await setDoc(hRef, { ratio: hData.trim() });
             } else {
-                await deleteDoc(histRef);
+                await deleteDoc(hRef);
             }
         }
 
-        window.confirmFinishPack = async () => {
-            const colRef = collection(db, "users", user, "medications", currentMedId, "current_doses");
-            const snap = await getDocs(colRef);
-            snap.forEach(async (d) => {
-                await deleteDoc(doc(colRef, d.id));
-            });
-            closeModal('finishModal');
-            showToast("Nouvelle boîte commencée");
-            lowStockNotified = false;
-        }
-
-        // --- History & Calendar ---
         function syncHistory() {
-            if(!currentMedId) return;
-            const colRef = collection(db, "users", user, "medications", currentMedId, "history");
-            unsubscribeHistory = onSnapshot(colRef, (snap) => {
-                const historyData = {};
-                snap.forEach(d => historyData[d.id] = d.data());
-                renderCalendar(historyData);
+            unsubHist = onSnapshot(query(collection(db, "users", user, "medications", currentMedId, "history"), orderBy("__name__")), (snap) => {
+                const data = {}; snap.forEach(d => data[d.id] = d.data());
+                renderCalendar(data);
             });
         }
 
-        window.changeMonth = (dir) => { 
-            currentDate.setMonth(currentDate.getMonth() + dir); 
-            syncHistory();
-        };
-
-        function renderCalendar(historyData) {
-            const cal = document.getElementById('calendar');
-            cal.innerHTML = '';
+        function renderCalendar(hist) {
+            const cal = document.getElementById('calendar'); cal.innerHTML = "";
             const y = currentDate.getFullYear(), m = currentDate.getMonth();
-            document.getElementById('calMonth').innerText = new Intl.DateTimeFormat(curLang, { month: 'long', year: 'numeric' }).format(currentDate);
+            document.getElementById('calMonth').innerText = new Intl.DateTimeFormat('fr', { month: 'long', year: 'numeric' }).format(currentDate);
+            const firstDay = (new Date(y, m, 1).getDay() + 6) % 7;
+            for(let i=0; i<firstDay; i++) cal.innerHTML += '<div></div>';
 
-            const first = new Date(y, m, 1).getDay();
-            const days = new Date(y, m + 1, 0).getDate();
-            const offset = (first === 0 ? 6 : first - 1);
+            const sortedDates = Object.keys(hist).sort();
+            for(let d=1; d<=new Date(y, m + 1, 0).getDate(); d++) {
+                const key = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const entry = hist[key]; const cell = document.createElement('div');
+                cell.className = "cal-cell"; cell.onclick = () => openEditCal(key, entry?.ratio || "");
+                cell.innerHTML = `<span class="text-[10px] opacity-30 font-bold">${d}</span>`;
 
-            for(let i=0; i < offset; i++) cal.innerHTML += '<div></div>';
-
-            let prevVal = 0;
-
-            for(let d=1; d<=days; d++) {
-                const key = `${y}-${String(m+1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                const data = historyData[key];
-                const cell = document.createElement('div');
-                
-                const todayStr = new Date().toISOString().split('T')[0];
-                const isToday = key === todayStr;
-
-                cell.className = `cal-cell text-xs ${isToday ? 'bg-indigo-500/10' : ''}`;
-                cell.classList.add('stagger-in');
-                cell.style.animationDelay = `${d * 0.03}s`;
-
-                let htmlContent = `<span class="font-bold opacity-40 ${isToday ? 'text-indigo-500' : ''}">${d}</span>`;
-
-                if(data) {
-                    const curVal = parseInt(data.ratio.split('/')[0]);
-                    let increment = curVal - prevVal;
-                    if (increment < 0) increment = curVal;
+                if(entry && entry.ratio) {
+                    const ratios = entry.ratio.split(' ');
+                    const prevDate = sortedDates.filter(dt => dt < key).pop();
+                    const lastValPrevDay = prevDate ? parseInt(hist[prevDate].ratio.split(' ').pop().split('/').shift()) : 0;
                     
-                    if (increment > 0) {
-                         htmlContent += `
-                            <div class="ratio-tag">${data.ratio}</div>
-                            <div class="count-tag">+${increment}</div>
-                        `;
+                    let diff = 0;
+                    if (ratios.length > 1) {
+                        // (Fin de l'ancienne) + (Prises de la nouvelle)
+                        const oldEnd = parseInt(ratios[0].split('/').shift());
+                        const newStart = parseInt(ratios[1].split('/').shift());
+                        diff = (oldEnd - lastValPrevDay) + newStart;
                     } else {
-                         htmlContent += `<div class="ratio-tag">${data.ratio}</div>`;
+                        diff = parseInt(ratios[0].split('/').shift()) - lastValPrevDay;
                     }
-                    prevVal = curVal;
-                }
 
-                cell.innerHTML = htmlContent;
-                
-                cell.onclick = () => openEditModal(key, data ? data.ratio : "");
+                    if (diff > 0 || ratios[0].startsWith('1/')) {
+                        ratios.forEach(r => cell.innerHTML += `<div class="ratio-tag">${r}</div>`);
+                        cell.innerHTML += `<div class="count-tag">+${diff < 0 ? ratios[0].split('/').shift() : diff}</div>`;
+                    }
+                }
                 cal.appendChild(cell);
             }
         }
 
-        let selectedDateKey = null;
-        window.openEditModal = (dateKey, currentVal) => {
-            selectedDateKey = dateKey;
-            document.getElementById('modalDateDisplay').innerText = dateKey;
-            document.getElementById('modalInput').value = currentVal;
-            openModal('editModal');
+        window.openEditCal = (date, val) => { editingDate = date; document.getElementById('editCalInput').value = val; openModal('editCalModal'); };
+        window.saveCalEdit = async () => {
+            const v = document.getElementById('editCalInput').value.trim();
+            const hRef = doc(db, "users", user, "medications", currentMedId, "history", editingDate);
+            v ? await setDoc(hRef, { ratio: v }) : await deleteDoc(hRef);
+            closeModal('editCalModal');
         };
 
-        window.saveHistoryModal = async () => {
-            if (!currentMedId || !selectedDateKey) return;
-            const val = document.getElementById('modalInput').value.trim();
-            const docRef = doc(db, "users", user, "medications", currentMedId, "history", selectedDateKey);
-            if (val === "") await deleteDoc(docRef);
-            else await setDoc(docRef, { ratio: val });
-            closeModal('editModal');
-            showToast("Historique mis à jour");
+        window.confirmFinishBox = async () => {
+            const medRef = doc(db, "users", user, "medications", currentMedId); 
+            const medSnap = await getDoc(medRef);
+            const medData = medSnap.data();
+            const total = medData.piecesPerPlate * medData.platesPerBox;
+            const today = new Date().toISOString().split('T')[0];
+            
+            // On sature l'historique de ce jour à Max/Max avant de reset
+            await setDoc(doc(db, "users", user, "medications", currentMedId, "history", today), { ratio: `${total}/${total}` }, { merge: true });
+            
+            await updateDoc(medRef, { boxCount: (medData.boxCount || 1) + 1 });
+            const doses = await getDocs(collection(db, "users", user, "medications", currentMedId, "current_doses"));
+            for(const d of doses.docs) await deleteDoc(d.ref);
+            closeModal('finishModal');
         };
 
-        window.deleteHistoryEntry = async () => {
-             document.getElementById('modalInput').value = "";
-             window.saveHistoryModal();
-        };
-
-        // --- Utils ---
-        window.toggleTheme = () => {
-            document.body.classList.toggle('dark');
-            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
-        };
-
-        window.openModal = (id) => {
-            const m = document.getElementById(id);
-            m.classList.remove('hidden');
-            requestAnimationFrame(() => m.classList.add('open'));
-            if(id === 'addMedModal') {
-                document.getElementById('newMedName').value = '';
-                document.getElementById('newMedPieces').value = '10';
-                document.getElementById('newMedPlates').value = '3';
-                renderColorPicker();
-            }
-        };
-
-        window.closeModal = (id) => {
-            const m = document.getElementById(id);
-            m.classList.remove('open');
-            setTimeout(() => m.classList.add('hidden'), 300);
-        };
-
-        function renderColorPicker() {
-            const p = document.getElementById('colorPicker');
-            p.innerHTML = '';
-            MED_COLORS.forEach(c => {
-                const b = document.createElement('div');
-                b.className = `w-8 h-8 rounded-full cursor-pointer border-2 ${selectedColor === c ? 'scale-110 border-slate-400' : 'border-transparent'}`;
-                b.style.background = c;
-                b.onclick = () => { selectedColor = c; renderColorPicker(); };
-                p.appendChild(b);
+        window.openRightDrawer = async () => {
+            const list = document.getElementById('globalHistoryList'); list.innerHTML = "";
+            const snap = await getDocs(collection(db, "users", user, "medications"));
+            snap.forEach(d => {
+                const m = d.data(); const div = document.createElement('div'); div.className = "p-4 glass space-y-2";
+                div.innerHTML = `<div class="flex justify-between font-bold"><span>${m.name}</span><input type="number" value="${m.boxCount||1}" onchange="updateBoxCount('${d.id}', this.value)" class="w-12 bg-slate-500/10 rounded text-center"></div>
+                    <div class="flex gap-2"><button onclick="toggleActive('${d.id}', ${m.active})" class="flex-1 glass text-[10px] p-2 font-bold">${m.active !== false ? 'ARCHIVE' : 'ACTIVATE'}</button>
+                    <button onclick="deleteMed('${d.id}')" class="bg-red-500/10 text-red-500 p-2 rounded text-[10px] font-bold">DELETE</button></div>`;
+                list.appendChild(div);
             });
-        }
-
-        window.showToast = (msg) => {
-            const t = document.getElementById('toast');
-            document.getElementById('toastMsg').innerText = msg;
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
+            document.getElementById('rightDrawer').classList.remove('translate-x-full'); document.getElementById('drawerOverlay').classList.add('open');
         };
 
-        // Init
-        renderColorPicker();
-        const savedUser = localStorage.getItem('medUser');
-        const savedLang = localStorage.getItem('medLang') || 'fr';
-        applyLang(savedLang);
-        
-        // Auto-login logic
-        if(savedUser) {
-            document.getElementById('userInput').value = savedUser;
-            try {
-                proceed(savedUser);
-            } catch (e) {
-                console.error("Auto-login failed", e);
-                document.getElementById('appBody').classList.add('hidden');
-                document.getElementById('loginBox').classList.remove('hidden');
-                document.getElementById('passContainer').classList.add('hidden');
-                document.getElementById('btnLogin').innerText = "Connexion / Inscription";
+        window.updateBoxCount = async (id, val) => await updateDoc(doc(db, "users", user, "medications", id), { boxCount: parseInt(val) });
+        window.toggleActive = async (id, status) => { await updateDoc(doc(db, "users", user, "medications", id), { active: status === false }); loadMeds(); closeDrawers(); };
+        window.deleteMed = async (id) => { if(confirm("Supprimer ?")) { await deleteDoc(doc(db, "users", user, "medications", id)); loadMeds(); closeDrawers(); } };
+        window.closeDrawers = () => { document.getElementById('rightDrawer').classList.add('translate-x-full'); document.getElementById('drawerOverlay').classList.remove('open'); };
+        window.toggleDropdown = () => document.getElementById('navbarDropdown').classList.toggle('open');
+        window.openModal = (id) => document.getElementById(id).classList.add('open');
+        window.closeModal = (id) => document.getElementById(id).classList.remove('open');
+        window.changeMonth = (v) => { currentDate.setMonth(currentDate.getMonth() + v); syncHistory(); };
+        window.renderPlateTabs = (med, max) => {
+            const tabs = document.getElementById('plateTabs'); tabs.innerHTML = "";
+            for(let i=0; i<med.platesPerBox; i++) {
+                const b = document.createElement('button'); b.className = `px-4 py-2 rounded-xl text-xs font-bold shrink-0 ${i === currentPlateIndex ? 'bg-indigo-600 text-white' : 'bg-slate-500/10'}`;
+                b.innerText = "Plaque " + (i+1); b.onclick = () => { currentPlateIndex = i; syncGrid(med); }; tabs.appendChild(b);
             }
-        }
+        };
+        window.renderDropdown = () => {
+            const dd = document.getElementById('navbarDropdown'); dd.innerHTML = "";
+            medsList.filter(m => m.active !== false).forEach(m => {
+                const b = document.createElement('button'); b.className = "p-4 text-center font-bold hover:bg-slate-500/10 rounded-xl";
+                b.innerText = m.name; b.onclick = () => switchMed(m.id); dd.appendChild(b);
+            });
+        };
+        window.confirmAddMed = async () => {
+            const name = document.getElementById('newMedName').value, pieces = parseInt(document.getElementById('newMedPieces').value), plates = parseInt(document.getElementById('newMedPlates').value);
+            if(name && pieces) { await setDoc(doc(collection(db, "users", user, "medications")), { name, piecesPerPlate: pieces, platesPerBox: plates, boxCount: 1, active: true }); closeModal('addMedModal'); loadMeds(); }
+        };
+        window.toggleTheme = () => document.body.classList.toggle('dark');
+        if(user) proceed();
     </script>
 </body>
 </html>
