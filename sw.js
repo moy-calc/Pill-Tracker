@@ -25,8 +25,8 @@ self.addEventListener('push', (e) => {
   e.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
-      icon: 'https://cdn-icons-png.flaticon.com/512/822/822143.png',
-      badge: 'https://cdn-icons-png.flaticon.com/512/822/822143.png'
+      icon: 'icon.png',
+      badge: 'icon.png'
     })
   );
 });
