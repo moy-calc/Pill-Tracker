@@ -1,31 +1,42 @@
-// sw.js - Service Worker minimal pour test
+// Nom du cache et fichiers à mettre en cache
 const CACHE_NAME = 'medtracker-v1';
 const ASSETS = [
   'Index.html',
   'manifest.json',
-  'icon.png'
+  'icon.png',
+  'https://cdn.tailwindcss.com' // CDN CSS
 ];
 
-// Installation et mise en cache
+// INSTALLATION : mettre en cache tous les fichiers essentiels
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
   );
+  self.skipWaiting(); // Force l’activation du SW immédiatement
 });
 
-// Activation (optionnel mais recommandé)
+// ACTIVATION : nettoyer les anciens caches si nécessaire
 self.addEventListener('activate', event => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches.keys().then(keys => {
+      return Promise.all(
+        keys.map(key => {
+          if (key !== CACHE_NAME) return caches.delete(key);
+        })
+      );
+    })
+  );
+  self.clients.claim(); // Prendre le contrôle immédiat des pages
 });
 
-// Intercepter les requêtes pour le mode hors-ligne
+// FETCH : servir depuis le cache, sinon réseau
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request).then(res => res || fetch(event.request))
   );
 });
 
-// Gestion des notifications push (test)
+// NOTIFICATIONS PUSH
 self.addEventListener('push', event => {
   const data = event.data ? event.data.json() : {
     title: 'Rappel Médicament',
