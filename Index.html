@@ -15,14 +15,17 @@
 <button onclick="testNotification()">🧪 Tester Notification</button>
 <button onclick="checkSW()">🔍 Vérifier Service Worker</button>
 <button onclick="alert('Test clic simple !')">Test clic simple</button>
-<!-- Nouveau bouton pour forcer l'enregistrement SW -->
-<button onclick="
-navigator.serviceWorker.register('./sw.js')
-.then(() => alert('SW enregistré ✅'))
-.catch(err => alert('Erreur SW ❌ : ' + err));
-">Forcer enregistrement SW</button>
 
 <script>
+    // --- Installation automatique du Service Worker ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log("SW installé automatiquement ✅", reg.scope))
+            .catch(err => console.error("Erreur installation SW ❌", err));
+        });
+    }
+
     // --- Vérifier Service Worker ---
     function checkSW() {
         navigator.serviceWorker.getRegistrations().then(regs => {
