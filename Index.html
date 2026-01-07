@@ -34,7 +34,7 @@
         <button onclick="openModal('accountModal')" id="accBtn" class="w-10 h-10 rounded-xl bg-slate-500/5 flex items-center justify-center hidden">👤</button>
         <h1 class="text-xl font-black text-indigo-500 italic">MEDTRACKER PRO</h1>
         <div class="flex gap-2">
-            <button onclick="new Notification('MedTracker', {body: 'Notifications actives !', icon: 'icon.png'})" class="w-10 h-10 rounded-xl bg-green-500/5 flex items-center justify-center">🧪</button>
+            <button onclick="testNotification()" class="w-10 h-10 rounded-xl bg-green-500/5 flex items-center justify-center">🧪</button>
             <button onclick="requestNotificationPermission()" id="notifBtn" class="w-10 h-10 rounded-xl bg-slate-500/5 flex items-center justify-center">🔔</button>
             <button onclick="openRightDrawer()" class="w-10 h-10 rounded-xl bg-slate-500/5 flex items-center justify-center">🕒</button>
             <button onclick="toggleTheme()" class="w-10 h-10 rounded-xl bg-slate-500/5 flex items-center justify-center">🌓</button>
@@ -115,7 +115,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, getDocs, updateDoc, writeBatch, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, getDocs, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyAx7c0bFNXuBxadAUItyP6h0U", authDomain: "pilltracker-59495.firebaseapp.com", projectId: "pilltracker-59495", storageBucket: "pilltracker-59495.appspot.com", messagingSenderId: "72228771158", appId: "1:72228771158:web:a03f36b13f23f" };
         const db = getFirestore(initializeApp(firebaseConfig));
@@ -123,16 +123,40 @@
         let user = localStorage.getItem('medUser') || "";
         let medsData = {}, currentDate = new Date();
 
-        // SERVICE WORKER
+        // SERVICE WORKER & NOTIFICATIONS (INSPIRÉ DU CODE 1)
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').then(() => console.log("SW OK"));
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log("SW installé ✅", reg.scope))
+                .catch(err => console.error("Erreur SW ❌", err));
+            });
         }
 
         window.requestNotificationPermission = async () => {
+            if (Notification.permission === "granted") {
+                alert("Notifications déjà autorisées !");
+                return;
+            }
             const permission = await Notification.requestPermission();
-            if (permission === "granted") alert("Notifications autorisées !");
+            if (permission === "granted") alert("Notifications autorisées ! 🎉");
         };
 
+        window.testNotification = () => {
+            if (Notification.permission !== "granted") {
+                alert("Autorise d'abord les notifications avec 🔔");
+                return;
+            }
+            navigator.serviceWorker.ready.then(reg => {
+                reg.showNotification("MedTracker Pro", {
+                    body: "Test réussi ! 🎉 Les notifications fonctionnent.",
+                    icon: "icon.png",
+                    badge: "icon.png",
+                    tag: "test-notif"
+                });
+            });
+        };
+
+        // Reste de la logique applicative
         window.updateKey = () => {
             const ln = document.getElementById('lastName').value.trim(), fn = document.getElementById('firstName').value.trim(), bd = document.getElementById('birthDate').value;
             if(ln && fn && bd) { document.getElementById('passInput').classList.remove('hidden'); document.getElementById('authBtn').classList.remove('opacity-50', 'pointer-events-none'); }
@@ -206,7 +230,8 @@
                 }
                 const newTotal = snap.size + 1;
                 await setDoc(doc(dosesRef, newTotal.toString()), { t: Date.now() });
-                const cur = (await getDoc(histRef)).exists() ? (await getDoc(histRef)).data().count : 0;
+                const curSnap = await getDoc(histRef);
+                const cur = curSnap.exists() ? curSnap.data().count : 0;
                 await setDoc(histRef, { count: cur + 1, cumulative: newTotal, color: med.color });
             } else {
                 const s = await getDoc(histRef);
