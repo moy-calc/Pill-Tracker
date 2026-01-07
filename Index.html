@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedTracker Test</title>
+    <title>MedTracker Test SW & Notifications</title>
     <link rel="manifest" href="manifest.json">
 </head>
 <body style="font-family:sans-serif; padding:20px;">
@@ -15,15 +15,14 @@
 <button onclick="testNotification()">🧪 Tester Notification</button>
 <button onclick="checkSW()">🔍 Vérifier Service Worker</button>
 <button onclick="alert('Test clic simple !')">Test clic simple</button>
+<!-- Nouveau bouton pour forcer l'enregistrement SW -->
+<button onclick="
+navigator.serviceWorker.register('./sw.js')
+.then(() => alert('SW enregistré ✅'))
+.catch(err => alert('Erreur SW ❌ : ' + err));
+">Forcer enregistrement SW</button>
 
 <script>
-    // --- ENREGISTREMENT SERVICE WORKER ---
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js')
-        .then(() => console.log("Service Worker OK"))
-        .catch(err => console.error("SW erreur:", err));
-    }
-
     // --- Vérifier Service Worker ---
     function checkSW() {
         navigator.serviceWorker.getRegistrations().then(regs => {
