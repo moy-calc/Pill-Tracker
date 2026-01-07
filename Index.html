@@ -115,20 +115,28 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, getDocs, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, getDocs, updateDoc, writeBatch, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyAx7c0bFNXuBxadAUItyP6h0U", authDomain: "pilltracker-59495.firebaseapp.com", projectId: "pilltracker-59495", storageBucket: "pilltracker-59495.appspot.com", messagingSenderId: "72228771158", appId: "1:72228771158:web:a03f36b13f23f" };
-        const db = getFirestore(initializeApp(firebaseConfig));
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // 1. ACTIVATION DE LA PERSISTANCE (SYNCHRO AUTOMATIQUE CLOUD)
+        enableIndexedDbPersistence(db).catch((err) => {
+            if (err.code == 'failed-precondition') console.log("Persistence failed: Multi-tabs");
+            else if (err.code == 'unimplemented') console.log("Persistence not supported");
+        });
 
         let user = localStorage.getItem('medUser') || "";
         let medsData = {}, currentDate = new Date();
 
-        // SERVICE WORKER & NOTIFICATIONS (INSPIRÉ DU CODE 1)
+        // 2. SERVICE WORKER AVEC FORCE UPDATE (POUR SAMSUNG/OPERA)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log("SW installé ✅", reg.scope))
-                .catch(err => console.error("Erreur SW ❌", err));
+                navigator.serviceWorker.register('./sw.js?v=2').then(reg => {
+                    reg.update(); // Force la vérification
+                    console.log("SW OK");
+                });
             });
         }
 
@@ -156,7 +164,7 @@
             });
         };
 
-        // Reste de la logique applicative
+        // Logique métier (Inchangée)
         window.updateKey = () => {
             const ln = document.getElementById('lastName').value.trim(), fn = document.getElementById('firstName').value.trim(), bd = document.getElementById('birthDate').value;
             if(ln && fn && bd) { document.getElementById('passInput').classList.remove('hidden'); document.getElementById('authBtn').classList.remove('opacity-50', 'pointer-events-none'); }
