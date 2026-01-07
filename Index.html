@@ -115,30 +115,27 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, getDocs, updateDoc, writeBatch, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, getDocs, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyAx7c0bFNXuBxadAUItyP6h0U", authDomain: "pilltracker-59495.firebaseapp.com", projectId: "pilltracker-59495", storageBucket: "pilltracker-59495.appspot.com", messagingSenderId: "72228771158", appId: "1:72228771158:web:a03f36b13f23f" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // 1. ACTIVATION DE LA PERSISTANCE (SYNCHRO AUTOMATIQUE CLOUD)
-        enableIndexedDbPersistence(db).catch((err) => {
-            if (err.code == 'failed-precondition') console.log("Persistence failed: Multi-tabs");
-            else if (err.code == 'unimplemented') console.log("Persistence not supported");
-        });
+        const db = getFirestore(initializeApp(firebaseConfig));
 
         let user = localStorage.getItem('medUser') || "";
         let medsData = {}, currentDate = new Date();
 
-        // 2. SERVICE WORKER AVEC FORCE UPDATE (POUR SAMSUNG/OPERA)
+        // --- SECTION MODIFIÉE POUR FORCER SAMSUNG INTERNET ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=2').then(reg => {
+                // On ajoute un timestamp (?v=...) pour obliger le navigateur à voir un fichier "différent"
+                navigator.serviceWorker.register('./sw.js?v=' + new Date().getTime())
+                .then(reg => {
                     reg.update(); // Force la vérification
-                    console.log("SW OK");
-                });
+                    console.log("SW: Force Update Active ✅");
+                })
+                .catch(err => console.error("Erreur SW ❌", err));
             });
         }
+        // ----------------------------------------------------
 
         window.requestNotificationPermission = async () => {
             if (Notification.permission === "granted") {
@@ -164,7 +161,6 @@
             });
         };
 
-        // Logique métier (Inchangée)
         window.updateKey = () => {
             const ln = document.getElementById('lastName').value.trim(), fn = document.getElementById('firstName').value.trim(), bd = document.getElementById('birthDate').value;
             if(ln && fn && bd) { document.getElementById('passInput').classList.remove('hidden'); document.getElementById('authBtn').classList.remove('opacity-50', 'pointer-events-none'); }
