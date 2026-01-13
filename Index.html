@@ -99,10 +99,21 @@
         <div class="glass p-6 w-full max-w-sm" onclick="event.stopPropagation()">
             <h3 class="font-bold mb-4">Nouveau Médicament</h3>
             <input type="text" id="newMedName" placeholder="Nom" class="w-full p-4 bg-slate-500/10 rounded-xl mb-3 font-bold">
-            <div class="grid grid-cols-2 gap-3 mb-4">
+
+            <select id="newMedType" onchange="toggleMedTypeFields()" class="w-full p-4 bg-slate-500/10 rounded-xl mb-3 font-bold">
+                <option value="plaquette">Plaquettes</option>
+                <option value="pomade">Pomade/Liquide</option>
+            </select>
+
+            <div id="plaquetteFields" class="grid grid-cols-2 gap-3 mb-4">
                 <input type="number" id="newMedPieces" placeholder="Doses/Plq" class="p-4 bg-slate-500/10 rounded-xl font-bold">
                 <input type="number" id="newMedPlates" placeholder="Nb Plaques" class="p-4 bg-slate-500/10 rounded-xl font-bold">
             </div>
+
+            <div id="pomadeFields" class="hidden mb-4">
+                <input type="number" id="newMedTotal" placeholder="Doses totales" class="w-full p-4 bg-slate-500/10 rounded-xl font-bold">
+            </div>
+
             <input type="color" id="newMedColor" value="#6366f1" class="w-full h-12 mb-6 bg-transparent cursor-pointer">
             <button onclick="confirmAddMed()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl uppercase text-xs">Ajouter</button>
         </div>
@@ -133,27 +144,48 @@
         }
 
         window.requestNotificationPermission = async () => {
+            if (!("Notification" in window)) {
+                alert("Votre navigateur ne supporte pas les notifications.");
+                return;
+            }
             if (Notification.permission === "granted") {
                 alert("Notifications déjà autorisées !");
                 return;
             }
             const permission = await Notification.requestPermission();
-            if (permission === "granted") alert("Notifications autorisées ! 🎉");
+            if (permission === "granted") alert("Notifications autorisées !");
         };
 
         window.testNotification = () => {
+            if (!("Notification" in window)) {
+                alert("Votre navigateur ne supporte pas les notifications.");
+                return;
+            }
             if (Notification.permission !== "granted") {
                 alert("Autorise d'abord les notifications avec 🔔");
                 return;
             }
-            navigator.serviceWorker.ready.then(reg => {
-                reg.showNotification("MedTracker Pro", {
-                    body: "Test réussi ! 🎉 Les notifications fonctionnent.",
-                    icon: "icon.png",
-                    badge: "icon.png",
-                    tag: "test-notif"
+
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.ready.then(reg => {
+                    reg.showNotification("MedTracker Pro", {
+                        body: "Test réussi ! Les notifications fonctionnent.",
+                        icon: "icon.png",
+                        badge: "icon.png",
+                        tag: "test-notif"
+                    });
+                }).catch(() => {
+                    new Notification("MedTracker Pro", {
+                        body: "Test réussi ! Les notifications fonctionnent.",
+                        icon: "icon.png"
+                    });
                 });
-            });
+            } else {
+                new Notification("MedTracker Pro", {
+                    body: "Test réussi ! Les notifications fonctionnent.",
+                    icon: "icon.png"
+                });
+            }
         };
 
         // Reste de la logique applicative
@@ -204,26 +236,42 @@
         function renderMedCard(med) {
             const card = document.createElement('div'); card.className = "glass p-5 relative";
             document.getElementById('medsGrid').appendChild(card);
-            onSnapshot(collection(db, "users", user, "medications", med.id, "current_doses"), (snap) => {
-                const count = snap.size, total = med.piecesPerPlate * med.platesPerBox, prog = (count / total) * 100;
-                const plateIdx = Math.floor(count / med.piecesPerPlate) + 1;
-                let tag = prog >= 90 ? `<div class="alert-stock bg-red-500 text-white">URGENT</div>` : prog >= 80 ? `<div class="alert-stock bg-orange-500 text-white">STOCK BAS</div>` : "";
-                card.innerHTML = `<div class="flex justify-between items-start mb-2"><div class="font-black text-[10px] uppercase truncate" style="color:${med.color}">${med.name}</div>${tag}</div>
-                    <div class="progress-bar mb-3"><div class="h-full transition-all duration-700" style="width:${prog}%; background:${med.color}"></div></div>
-                    <div class="flex justify-between items-center mb-4"><span class="text-[9px] font-bold opacity-30">Plq ${plateIdx}</span><span class="text-[9px] font-black" style="color:${med.color}">${Math.round(prog)}%</span></div>
-                    <div class="flex items-center justify-center gap-6"><button onclick="changeDose('${med.id}', -1)" class="w-12 h-12 rounded-2xl bg-slate-500/10 font-black">-</button>
-                    <div class="text-center"><div class="text-3xl font-black">${count % med.piecesPerPlate}</div><div class="text-[9px] opacity-30 font-bold">/ ${med.piecesPerPlate}</div></div>
-                    <button onclick="changeDose('${med.id}', 1)" class="w-12 h-12 rounded-2xl bg-slate-500/10 font-black text-lg" style="color:${med.color}">+</button></div>`;
-            });
+
+            if (med.type === 'pomade') {
+                onSnapshot(collection(db, "users", user, "medications", med.id, "current_doses"), (snap) => {
+                    const count = snap.size, total = med.totalDoses || 100, prog = (count / total) * 100;
+                    let tag = prog >= 90 ? `<div class="alert-stock bg-red-500 text-white">URGENT</div>` : prog >= 80 ? `<div class="alert-stock bg-orange-500 text-white">STOCK BAS</div>` : "";
+                    card.innerHTML = `<div class="flex justify-between items-start mb-2"><div class="font-black text-[10px] uppercase truncate" style="color:${med.color}">${med.name}</div>${tag}</div>
+                        <div class="progress-bar mb-3"><div class="h-full transition-all duration-700" style="width:${prog}%; background:${med.color}"></div></div>
+                        <div class="flex justify-between items-center mb-4"><span class="text-[9px] font-bold opacity-30">POMADE</span><span class="text-[9px] font-black" style="color:${med.color}">${Math.round(prog)}%</span></div>
+                        <div class="flex items-center justify-center gap-6"><button onclick="changeDose('${med.id}', -1)" class="w-12 h-12 rounded-2xl bg-slate-500/10 font-black">-</button>
+                        <div class="text-center"><div class="text-3xl font-black">${count}</div><div class="text-[9px] opacity-30 font-bold">/ ${total}</div></div>
+                        <button onclick="changeDose('${med.id}', 1)" class="w-12 h-12 rounded-2xl bg-slate-500/10 font-black text-lg" style="color:${med.color}">+</button></div>`;
+                });
+            } else {
+                onSnapshot(collection(db, "users", user, "medications", med.id, "current_doses"), (snap) => {
+                    const count = snap.size, total = med.piecesPerPlate * med.platesPerBox, prog = (count / total) * 100;
+                    const plateIdx = Math.floor(count / med.piecesPerPlate) + 1;
+                    let tag = prog >= 90 ? `<div class="alert-stock bg-red-500 text-white">URGENT</div>` : prog >= 80 ? `<div class="alert-stock bg-orange-500 text-white">STOCK BAS</div>` : "";
+                    card.innerHTML = `<div class="flex justify-between items-start mb-2"><div class="font-black text-[10px] uppercase truncate" style="color:${med.color}">${med.name}</div>${tag}</div>
+                        <div class="progress-bar mb-3"><div class="h-full transition-all duration-700" style="width:${prog}%; background:${med.color}"></div></div>
+                        <div class="flex justify-between items-center mb-4"><span class="text-[9px] font-bold opacity-30">Plq ${plateIdx}</span><span class="text-[9px] font-black" style="color:${med.color}">${Math.round(prog)}%</span></div>
+                        <div class="flex items-center justify-center gap-6"><button onclick="changeDose('${med.id}', -1)" class="w-12 h-12 rounded-2xl bg-slate-500/10 font-black">-</button>
+                        <div class="text-center"><div class="text-3xl font-black">${count % med.piecesPerPlate}</div><div class="text-[9px] opacity-30 font-bold">/ ${med.piecesPerPlate}</div></div>
+                        <button onclick="changeDose('${med.id}', 1)" class="w-12 h-12 rounded-2xl bg-slate-500/10 font-black text-lg" style="color:${med.color}">+</button></div>`;
+                });
+            }
         }
 
         window.changeDose = async (id, val, date = null) => {
             const med = medsData[id], d = date || new Date().toISOString().split('T')[0];
             const dosesRef = collection(db, "users", user, "medications", id, "current_doses"), snap = await getDocs(dosesRef);
             const histRef = doc(db, "users", user, "medications", id, "history", d);
+            const maxTotal = med.type === 'pomade' ? med.totalDoses : (med.piecesPerPlate * med.platesPerBox);
+
             if(val > 0) {
-                if(snap.size >= (med.piecesPerPlate * med.platesPerBox)) {
-                    if(confirm("Boîte terminée. Nouvelle ?")) {
+                if(snap.size >= maxTotal) {
+                    if(confirm(med.type === 'pomade' ? "Pomade terminée. Nouvelle ?" : "Boîte terminée. Nouvelle ?")) {
                         const b = writeBatch(db); snap.forEach(doc => b.delete(doc.ref)); await b.commit();
                         await updateDoc(doc(db, "users", user, "medications", id), { boxCount: (med.boxCount || 1) + 1 });
                     } return;
@@ -301,12 +349,54 @@
             }
         }
 
+        window.toggleMedTypeFields = () => {
+            const type = document.getElementById('newMedType').value;
+            if (type === 'pomade') {
+                document.getElementById('plaquetteFields').classList.add('hidden');
+                document.getElementById('pomadeFields').classList.remove('hidden');
+            } else {
+                document.getElementById('plaquetteFields').classList.remove('hidden');
+                document.getElementById('pomadeFields').classList.add('hidden');
+            }
+        };
+
         window.updateBox = async (id, val) => await updateDoc(doc(db, "users", user, "medications", id), { boxCount: parseInt(val) });
         window.toggleArchive = async (id, s) => await updateDoc(doc(db, "users", user, "medications", id), { active: s === false });
         window.deleteMed = async (id) => { if(confirm("Supprimer ?")) await deleteDoc(doc(db, "users", user, "medications", id)); };
         window.confirmAddMed = async () => {
-            const n = document.getElementById('newMedName').value, pi = parseInt(document.getElementById('newMedPieces').value), pl = parseInt(document.getElementById('newMedPlates').value), c = document.getElementById('newMedColor').value;
-            if(n && pi) { await setDoc(doc(collection(db, "users", user, "medications")), { name: n, piecesPerPlate: pi, platesPerBox: pl, color: c, active: true, boxCount: 1 }); closeModal('addMedModal'); }
+            const n = document.getElementById('newMedName').value;
+            const type = document.getElementById('newMedType').value;
+            const c = document.getElementById('newMedColor').value;
+
+            if (type === 'pomade') {
+                const total = parseInt(document.getElementById('newMedTotal').value);
+                if(n && total) {
+                    await setDoc(doc(collection(db, "users", user, "medications")), {
+                        name: n,
+                        type: 'pomade',
+                        totalDoses: total,
+                        color: c,
+                        active: true,
+                        boxCount: 1
+                    });
+                    closeModal('addMedModal');
+                }
+            } else {
+                const pi = parseInt(document.getElementById('newMedPieces').value);
+                const pl = parseInt(document.getElementById('newMedPlates').value);
+                if(n && pi) {
+                    await setDoc(doc(collection(db, "users", user, "medications")), {
+                        name: n,
+                        type: 'plaquette',
+                        piecesPerPlate: pi,
+                        platesPerBox: pl,
+                        color: c,
+                        active: true,
+                        boxCount: 1
+                    });
+                    closeModal('addMedModal');
+                }
+            }
         };
 
         window.openRightDrawer = () => { document.getElementById('rightDrawer').classList.remove('translate-x-full'); document.getElementById('drawerOverlay').classList.remove('hidden'); };
