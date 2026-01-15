@@ -110,12 +110,55 @@
                 <input type="number" id="newMedPlates" placeholder="Nb Plaques" class="p-4 bg-slate-500/10 rounded-xl font-bold">
             </div>
 
-            <div id="pomadeFields" class="hidden mb-4">
-                <input type="number" id="newMedTotal" placeholder="Doses totales" class="w-full p-4 bg-slate-500/10 rounded-xl font-bold">
+            <div id="pomadeFields" class="hidden mb-4 text-center">
+                <p class="text-xs opacity-60">Sans limite - ajout libre au jour le jour</p>
             </div>
 
             <input type="color" id="newMedColor" value="#6366f1" class="w-full h-12 mb-6 bg-transparent cursor-pointer">
             <button onclick="confirmAddMed()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl uppercase text-xs">Ajouter</button>
+        </div>
+    </div>
+
+    <div id="alarmModal" class="modal-overlay" onclick="closeModal('alarmModal')">
+        <div class="glass p-6 w-full max-w-sm max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+            <h3 class="font-bold mb-4">Configurer les Rappels</h3>
+
+            <label class="flex items-center gap-3 mb-4 cursor-pointer">
+                <input type="checkbox" id="alarmEnabled" onchange="toggleAlarmFields()" class="w-4 h-4">
+                <span class="text-xs font-bold uppercase">Activer les rappels</span>
+            </label>
+
+            <div id="alarmFields" class="hidden space-y-4">
+                <div>
+                    <label class="text-xs font-bold uppercase opacity-60 block mb-2">Jours de la semaine</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2"><input type="checkbox" value="1" class="alarmDay"> Lundi</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="2" class="alarmDay"> Mardi</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="3" class="alarmDay"> Mercredi</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="4" class="alarmDay"> Jeudi</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="5" class="alarmDay"> Vendredi</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="6" class="alarmDay"> Samedi</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="0" class="alarmDay"> Dimanche</label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold uppercase opacity-60 block mb-2">Nombre de prises par jour</label>
+                    <input type="number" id="alarmTimesPerDay" min="1" max="10" value="1" class="w-full p-3 bg-slate-500/10 rounded-xl font-bold">
+                </div>
+
+                <div id="alarmTimesContainer" class="space-y-3">
+                    <label class="text-xs font-bold uppercase opacity-60 block mb-2">Horaires</label>
+                    <div class="alarmTime space-y-2">
+                        <input type="time" class="alarmTimeInput w-full p-3 bg-slate-500/10 rounded-xl font-bold" value="09:00">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-2 mt-6">
+                <button onclick="saveAlarm(currentEditingMedId)" class="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl uppercase text-xs">Sauvegarder</button>
+                <button onclick="closeModal('alarmModal')" class="flex-1 py-3 bg-slate-500/10 font-bold rounded-xl uppercase text-xs">Annuler</button>
+            </div>
         </div>
     </div>
 
@@ -239,14 +282,12 @@
 
             if (med.type === 'pomade') {
                 onSnapshot(collection(db, "users", user, "medications", med.id, "current_doses"), (snap) => {
-                    const count = snap.size, total = med.totalDoses || 100, prog = (count / total) * 100;
-                    let tag = prog >= 90 ? `<div class="alert-stock bg-red-500 text-white">URGENT</div>` : prog >= 80 ? `<div class="alert-stock bg-orange-500 text-white">STOCK BAS</div>` : "";
-                    card.innerHTML = `<div class="flex justify-between items-start mb-2"><div class="font-black text-[10px] uppercase truncate" style="color:${med.color}">${med.name}</div>${tag}</div>
-                        <div class="progress-bar mb-3"><div class="h-full transition-all duration-700" style="width:${prog}%; background:${med.color}"></div></div>
-                        <div class="flex justify-between items-center mb-4"><span class="text-[9px] font-bold opacity-30">POMADE</span><span class="text-[9px] font-black" style="color:${med.color}">${Math.round(prog)}%</span></div>
-                        <div class="flex items-center justify-center gap-6"><button onclick="changeDose('${med.id}', -1)" class="w-12 h-12 rounded-2xl bg-slate-500/10 font-black">-</button>
-                        <div class="text-center"><div class="text-3xl font-black">${count}</div><div class="text-[9px] opacity-30 font-bold">/ ${total}</div></div>
-                        <button onclick="changeDose('${med.id}', 1)" class="w-12 h-12 rounded-2xl bg-slate-500/10 font-black text-lg" style="color:${med.color}">+</button></div>`;
+                    const count = snap.size;
+                    card.innerHTML = `<div class="flex justify-between items-start mb-2"><div class="font-black text-[10px] uppercase truncate" style="color:${med.color}">${med.name}</div></div>
+                        <div class="text-center mb-4"><div class="text-3xl font-black">${count}</div><div class="text-[9px] opacity-30 font-bold">prises</div></div>
+                        <div class="flex items-center justify-center gap-6 mb-3"><button onclick="changeDose('${med.id}', -1)" class="w-12 h-12 rounded-2xl bg-slate-500/10 font-black">-</button>
+                        <button onclick="changeDose('${med.id}', 1)" class="w-12 h-12 rounded-2xl bg-slate-500/10 font-black text-lg" style="color:${med.color}">+</button></div>
+                        <button onclick="openAlarmModal('${med.id}')" class="w-full py-2 text-[9px] font-bold uppercase opacity-60 rounded-lg hover:opacity-100">⏰ Rappels</button>`;
                 });
             } else {
                 onSnapshot(collection(db, "users", user, "medications", med.id, "current_doses"), (snap) => {
@@ -256,9 +297,10 @@
                     card.innerHTML = `<div class="flex justify-between items-start mb-2"><div class="font-black text-[10px] uppercase truncate" style="color:${med.color}">${med.name}</div>${tag}</div>
                         <div class="progress-bar mb-3"><div class="h-full transition-all duration-700" style="width:${prog}%; background:${med.color}"></div></div>
                         <div class="flex justify-between items-center mb-4"><span class="text-[9px] font-bold opacity-30">Plq ${plateIdx}</span><span class="text-[9px] font-black" style="color:${med.color}">${Math.round(prog)}%</span></div>
-                        <div class="flex items-center justify-center gap-6"><button onclick="changeDose('${med.id}', -1)" class="w-12 h-12 rounded-2xl bg-slate-500/10 font-black">-</button>
+                        <div class="flex items-center justify-center gap-6 mb-3"><button onclick="changeDose('${med.id}', -1)" class="w-12 h-12 rounded-2xl bg-slate-500/10 font-black">-</button>
                         <div class="text-center"><div class="text-3xl font-black">${count % med.piecesPerPlate}</div><div class="text-[9px] opacity-30 font-bold">/ ${med.piecesPerPlate}</div></div>
-                        <button onclick="changeDose('${med.id}', 1)" class="w-12 h-12 rounded-2xl bg-slate-500/10 font-black text-lg" style="color:${med.color}">+</button></div>`;
+                        <button onclick="changeDose('${med.id}', 1)" class="w-12 h-12 rounded-2xl bg-slate-500/10 font-black text-lg" style="color:${med.color}">+</button></div>
+                        <button onclick="openAlarmModal('${med.id}')" class="w-full py-2 text-[9px] font-bold uppercase opacity-60 rounded-lg hover:opacity-100">⏰ Rappels</button>`;
                 });
             }
         }
@@ -267,11 +309,11 @@
             const med = medsData[id], d = date || new Date().toISOString().split('T')[0];
             const dosesRef = collection(db, "users", user, "medications", id, "current_doses"), snap = await getDocs(dosesRef);
             const histRef = doc(db, "users", user, "medications", id, "history", d);
-            const maxTotal = med.type === 'pomade' ? med.totalDoses : (med.piecesPerPlate * med.platesPerBox);
+            const maxTotal = med.type === 'pomade' ? null : (med.piecesPerPlate * med.platesPerBox);
 
             if(val > 0) {
-                if(snap.size >= maxTotal) {
-                    if(confirm(med.type === 'pomade' ? "Pomade terminée. Nouvelle ?" : "Boîte terminée. Nouvelle ?")) {
+                if(maxTotal && snap.size >= maxTotal) {
+                    if(confirm("Boîte terminée. Nouvelle ?")) {
                         const b = writeBatch(db); snap.forEach(doc => b.delete(doc.ref)); await b.commit();
                         await updateDoc(doc(db, "users", user, "medications", id), { boxCount: (med.boxCount || 1) + 1 });
                     } return;
@@ -369,15 +411,14 @@
             const c = document.getElementById('newMedColor').value;
 
             if (type === 'pomade') {
-                const total = parseInt(document.getElementById('newMedTotal').value);
-                if(n && total) {
+                if(n) {
                     await setDoc(doc(collection(db, "users", user, "medications")), {
                         name: n,
                         type: 'pomade',
-                        totalDoses: total,
                         color: c,
                         active: true,
-                        boxCount: 1
+                        boxCount: 1,
+                        alarmEnabled: false
                     });
                     closeModal('addMedModal');
                 }
@@ -392,11 +433,152 @@
                         platesPerBox: pl,
                         color: c,
                         active: true,
-                        boxCount: 1
+                        boxCount: 1,
+                        alarmEnabled: false
                     });
                     closeModal('addMedModal');
                 }
             }
+        };
+
+        let currentEditingMedId = null;
+
+        window.openAlarmModal = (medId) => {
+            currentEditingMedId = medId;
+            const med = medsData[medId];
+            document.getElementById('alarmEnabled').checked = med.alarmEnabled || false;
+            toggleAlarmFields();
+            if (med.alarmEnabled && med.alarmConfig) {
+                const config = med.alarmConfig;
+                document.getElementById('alarmTimesPerDay').value = config.timesPerDay || 1;
+                const daysContainer = document.querySelectorAll('.alarmDay');
+                daysContainer.forEach(cb => cb.checked = false);
+                if (config.days) {
+                    config.days.forEach(day => {
+                        daysContainer.forEach(cb => {
+                            if (parseInt(cb.value) === day) cb.checked = true;
+                        });
+                    });
+                }
+                updateAlarmTimeInputs();
+                if (config.times) {
+                    const timeInputs = document.querySelectorAll('.alarmTimeInput');
+                    config.times.forEach((time, i) => {
+                        if (timeInputs[i]) timeInputs[i].value = time;
+                    });
+                }
+            } else {
+                document.getElementById('alarmTimesPerDay').value = 1;
+                document.querySelectorAll('.alarmDay').forEach(cb => cb.checked = false);
+                updateAlarmTimeInputs();
+            }
+            openModal('alarmModal');
+        };
+
+        window.toggleAlarmFields = () => {
+            const enabled = document.getElementById('alarmEnabled').checked;
+            document.getElementById('alarmFields').classList.toggle('hidden', !enabled);
+        };
+
+        window.updateAlarmTimeInputs = () => {
+            const timesPerDay = parseInt(document.getElementById('alarmTimesPerDay').value) || 1;
+            const container = document.querySelector('.alarmTime');
+            const currentInputs = container.querySelectorAll('.alarmTimeInput');
+
+            while (currentInputs.length < timesPerDay) {
+                const input = document.createElement('input');
+                input.type = 'time';
+                input.className = 'alarmTimeInput w-full p-3 bg-slate-500/10 rounded-xl font-bold';
+                input.value = '09:00';
+                container.appendChild(input);
+            }
+            while (currentInputs.length > timesPerDay) {
+                currentInputs[currentInputs.length - 1].remove();
+            }
+        };
+
+        document.getElementById('alarmTimesPerDay')?.addEventListener('change', updateAlarmTimeInputs);
+
+        window.saveAlarm = async (medId) => {
+            if (!medId) return;
+            const enabled = document.getElementById('alarmEnabled').checked;
+            if (!enabled) {
+                await updateDoc(doc(db, "users", user, "medications", medId), { alarmEnabled: false });
+                closeModal('alarmModal');
+                return;
+            }
+
+            const selectedDays = Array.from(document.querySelectorAll('.alarmDay:checked')).map(cb => parseInt(cb.value));
+            if (selectedDays.length === 0) {
+                alert('Sélectionnez au moins un jour');
+                return;
+            }
+
+            const timeInputs = Array.from(document.querySelectorAll('.alarmTimeInput')).map(input => input.value);
+            if (timeInputs.some(t => !t)) {
+                alert('Complétez tous les horaires');
+                return;
+            }
+
+            const config = {
+                days: selectedDays,
+                timesPerDay: timeInputs.length,
+                times: timeInputs
+            };
+
+            await updateDoc(doc(db, "users", user, "medications", medId), {
+                alarmEnabled: true,
+                alarmConfig: config
+            });
+
+            scheduleNotifications();
+            closeModal('alarmModal');
+        };
+
+        window.scheduleNotifications = () => {
+            if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
+
+            const checkAndNotify = () => {
+                const now = new Date();
+                const today = now.getDay();
+                const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+                for (let id in medsData) {
+                    const med = medsData[id];
+                    if (!med.alarmEnabled || !med.alarmConfig) continue;
+
+                    const config = med.alarmConfig;
+                    if (!config.days.includes(today)) continue;
+                    if (!config.times.includes(timeStr)) continue;
+
+                    if (Notification.permission === 'granted') {
+                        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                            navigator.serviceWorker.ready.then(reg => {
+                                reg.showNotification(`${med.name} - Prise de médicament`, {
+                                    body: 'Temps de prendre votre médicament!',
+                                    icon: 'icon.png',
+                                    badge: 'icon.png',
+                                    tag: `med-${id}`,
+                                    requireInteraction: true
+                                }).catch(() => {
+                                    new Notification(`${med.name} - Prise de médicament`, {
+                                        body: 'Temps de prendre votre médicament!',
+                                        icon: 'icon.png'
+                                    });
+                                });
+                            });
+                        } else {
+                            new Notification(`${med.name} - Prise de médicament`, {
+                                body: 'Temps de prendre votre médicament!',
+                                icon: 'icon.png'
+                            });
+                        }
+                    }
+                }
+            };
+
+            setInterval(checkAndNotify, 60000);
+            checkAndNotify();
         };
 
         window.openRightDrawer = () => { document.getElementById('rightDrawer').classList.remove('translate-x-full'); document.getElementById('drawerOverlay').classList.remove('hidden'); };
@@ -406,7 +588,15 @@
         window.changeMonth = (v) => { currentDate.setMonth(currentDate.getMonth() + v); renderCalendar(); };
         window.toggleTheme = () => document.body.classList.toggle('dark');
         window.handleLogout = () => { localStorage.removeItem('medUser'); location.reload(); };
-        if(user) initApp();
+
+        async function startApp() {
+            if(user) {
+                await initApp();
+                scheduleNotifications();
+            }
+        }
+
+        if(user) startApp();
     </script>
 </body>
 </html>
