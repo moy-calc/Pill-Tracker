@@ -1022,7 +1022,7 @@
                 }
 
                 setInterval(() => {
-                    if (!swRegistration) return;
+                    if (Notification.permission !== "granted") return;
                     const now = new Date();
                     const timeStr = now.toTimeString().slice(0, 5);
                     const day = now.getDay();
@@ -1033,14 +1033,19 @@
                         if (sched[id].days.includes(day) && sched[id].time === timeStr) {
                             const notifyKey = `${id}_${now.toISOString().split('T')[0]}_${timeStr}`;
                             if (!notified[notifyKey]) {
-                                if (Notification.permission === "granted") {
-                                    const medName = medsData[id] ? medsData[id].name : "votre médicament";
-                                    swRegistration.showNotification('MedTracker Pro', {
-                                        body: `Il est temps de prendre : ${medName}`,
-                                        icon: 'icon.png',
-                                        badge: 'icon.png',
-                                        vibrate: [200, 100, 200]
-                                    }).catch(() => {});
+                                const medName = medsData[id] ? medsData[id].name : "votre médicament";
+                                const options = {
+                                    body: `Il est temps de prendre : ${medName}`,
+                                    icon: 'icon.png',
+                                    badge: 'icon.png',
+                                    vibrate: [200, 100, 200]
+                                };
+                                if (swRegistration && swRegistration.showNotification) {
+                                    swRegistration.showNotification('MedTracker Pro', options).catch(() => {
+                                        new Notification('MedTracker Pro', options);
+                                    });
+                                } else {
+                                    new Notification('MedTracker Pro', options);
                                 }
                                 notified[notifyKey] = true;
                                 localStorage.setItem('medNotified', JSON.stringify(notified));
@@ -1060,14 +1065,27 @@
                     if (error) throw error;
 
                     medsData = {};
+                    const ids = (meds || []).map(m => m.id);
 
-                    const countPromises = (meds || []).map(async m => {
-                        const { count } = await sb.from('medication_doses').select('*', { count: 'exact',
-                            head: true }).eq('medication_id', m.id);
-                        m._count = count || 0;
-                        medsData[m.id] = m;
-                    });
-                    await Promise.all(countPromises);
+                    if (ids.length > 0) {
+                        const { data: counts, error: countError } = await sb.from('medication_doses')
+                            .select('medication_id', { count: 'exact' })
+                            .in('medication_id', ids)
+                            .then(result => {
+                                const grouped = {};
+                                (result.data || []).forEach(d => {
+                                    grouped[d.medication_id] = (grouped[d.medication_id] || 0) + 1;
+                                });
+                                return { data: grouped, error: result.error };
+                            });
+
+                        if (countError) throw countError;
+
+                        (meds || []).forEach(m => {
+                            m._count = counts[m.id] || 0;
+                            medsData[m.id] = m;
+                        });
+                    }
 
                     const y = currentDate.getFullYear();
                     const m = currentDate.getMonth();
@@ -1753,4 +1771,4 @@
         });
     </script>
 </body>
-    </html>
+</html>
