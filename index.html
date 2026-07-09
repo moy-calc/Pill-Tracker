@@ -28,37 +28,37 @@
             }
         }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+    <script defer src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        
-        :root { 
+
+        :root {
             --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            --card: rgba(255, 255, 255, 0.85); 
-            --text: #0f172a; 
+            --card: rgba(255, 255, 255, 0.85);
+            --text: #0f172a;
             --border: rgba(255, 255, 255, 0.8);
             --shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.05);
         }
-        
-        .dark { 
+
+        .dark {
             --bg-gradient: linear-gradient(135deg, #0f172a 0%, #020617 100%);
-            --card: rgba(30, 41, 59, 0.75); 
-            --text: #f8fafc; 
+            --card: rgba(30, 41, 59, 0.75);
+            --text: #f8fafc;
             --border: rgba(255, 255, 255, 0.08);
             --shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
         }
-        
-        body { 
+
+        body {
             background: var(--bg-gradient);
             background-attachment: fixed;
-            color: var(--text); 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            transition: background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             min-height: 100vh;
             -webkit-tap-highlight-color: transparent;
         }
-        
+
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
@@ -73,53 +73,78 @@
             from { opacity: 0; transform: scale(0.85); }
             to { opacity: 1; transform: scale(1); }
         }
-        
-        .glass { 
-            background: var(--card); 
-            backdrop-filter: blur(24px); 
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid var(--border); 
-            border-radius: 24px; 
+
+        @keyframes scaleBounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes ringBell {
+            0%, 100% { transform: rotate(0deg); }
+            20% { transform: rotate(15deg); }
+            40% { transform: rotate(-10deg); }
+            60% { transform: rotate(5deg); }
+            80% { transform: rotate(-5deg); }
+        }
+
+        .dose-pop {
+            animation: scaleBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        }
+
+        .bell-shake {
+            animation: ringBell 0.5s ease-in-out;
+        }
+
+        .glass {
+            background: var(--card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
             box-shadow: var(--shadow);
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: transform, box-shadow;
         }
 
         .glass:hover {
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
             transform: translateY(-4px);
         }
-        
+
         .dark .glass:hover {
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
         }
-        
+
         .progress-container {
-            height: 8px; 
-            width: 100%; 
-            background: rgba(148, 163, 184, 0.15); 
-            border-radius: 99px; 
+            height: 8px;
+            width: 100%;
+            background: rgba(148, 163, 184, 0.15);
+            border-radius: 99px;
             overflow: hidden;
             position: relative;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
         }
-        
+
         .progress-bar {
             height: 100%;
             border-radius: 99px;
-            transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: width;
         }
-        
-        .cal-cell { 
-            min-height: 75px; 
-            border-radius: 14px; 
-            display: flex; 
-            flex-direction: column; 
-            padding: 6px; 
-            border: 1px solid var(--border); 
-            cursor: pointer; 
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); 
+
+        .cal-cell {
+            min-height: 75px;
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            padding: 6px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: transform;
         }
-        
+
         .cal-cell:active {
             transform: scale(0.85) !important;
         }
@@ -129,74 +154,77 @@
             transform: translateY(-4px) scale(1.02);
             box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
         }
-        
-        .ratio-badge { 
-            font-size: 0.65rem; 
-            padding: 2px 6px; 
-            border-radius: 6px; 
-            color: white; 
-            margin-bottom: 2px; 
-            font-weight: 800; 
+
+        .ratio-badge {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 6px;
+            color: white;
+            margin-bottom: 2px;
+            font-weight: 800;
             text-align: center;
             box-shadow: 0 2px 6px rgba(0,0,0,0.15);
             letter-spacing: 0.5px;
-            animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
-        
-        .modal-overlay { 
-            position: fixed; 
-            inset: 0; 
-            background: rgba(2, 6, 23, 0.6); 
-            backdrop-filter: blur(0px); 
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.6);
+            backdrop-filter: blur(0px);
             -webkit-backdrop-filter: blur(0px);
-            z-index: 6000; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            padding: 16px; 
+            z-index: 6000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
-            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: opacity;
         }
 
         .modal-overlay.z-top {
             z-index: 7000;
         }
-        
-        .modal-overlay.open { 
+
+        .modal-overlay.open {
             opacity: 1;
             visibility: visible;
             pointer-events: auto;
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
-        
+
         .modal-content {
             opacity: 0;
-            transform: translateY(60px) scale(0.85);
-            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: translateY(40px) scale(0.9);
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
             width: 100%;
             max-width: 420px;
+            will-change: transform, opacity;
         }
-        
+
         .modal-overlay.open .modal-content {
             opacity: 1;
             transform: translateY(0) scale(1);
         }
-        
-        @keyframes pulse-soft { 
-            0%, 100% { opacity: 1; transform: scale(1); } 
-            50% { opacity: 0.85; transform: scale(1.08); } 
+
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(1.08); }
         }
-        
-        .alert-stock { 
-            animation: pulse-soft 2s infinite cubic-bezier(0.4, 0, 0.2, 1); 
-            font-size: 10px; 
-            font-weight: 800; 
-            padding: 4px 10px; 
-            border-radius: 8px; 
+
+        .alert-stock {
+            animation: pulse-soft 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 10px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 8px;
             letter-spacing: 0.5px;
+            display: inline-block;
         }
 
         .toast {
@@ -211,7 +239,7 @@
             font-weight: 700;
             font-size: 13px;
             z-index: 9999;
-            transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
@@ -219,8 +247,9 @@
             width: max-content;
             max-width: 90%;
             opacity: 0;
+            will-change: transform, opacity;
         }
-        
+
         .dark .toast {
             background: #ffffff;
             color: #0f172a;
@@ -236,7 +265,8 @@
             appearance: none;
             -webkit-appearance: none;
             font-size: 15px !important;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: transform, box-shadow;
         }
 
         input:focus {
@@ -252,20 +282,21 @@
             cursor: pointer;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
         }
-        
+
         input[type="color"]::-webkit-color-swatch-wrapper {
             padding: 0;
         }
-        
+
         input[type="color"]::-webkit-color-swatch {
             border: none;
             border-radius: 14px;
         }
-        
+
         .action-btn {
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: transform;
         }
-        
+
         .action-btn:active {
             transform: scale(0.85) !important;
         }
@@ -283,7 +314,7 @@
         .hide-scroll::-webkit-scrollbar {
             display: none;
         }
-        
+
         .hide-scroll {
             -ms-overflow-style: none;
             scrollbar-width: none;
@@ -295,13 +326,13 @@
         }
 
         #drawerOverlay {
-            transition: opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .custom-grid-btn {
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        
+
         .custom-grid-btn:active {
             transform: scale(0.9);
         }
@@ -311,32 +342,32 @@
     <div id="toastContainer" class="toast"><i class="ph ph-info text-xl"></i><span id="toastMsg"></span></div>
 
     <div id="drawerOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[2000] hidden opacity-0" onclick="closeDrawers()"></div>
-    
-    <nav class="max-w-5xl mx-auto flex justify-between items-center p-3 sm:p-4 glass mb-6 sm:mb-8 relative z-[1000] rounded-3xl" style="animation: fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
-        <button onclick="openModal('accountModal')" id="accBtn" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-500/10 items-center justify-center hidden action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
-            <i class="ph ph-user text-lg sm:text-xl"></i>
+
+    <nav class="max-w-5xl mx-auto flex justify-between items-center p-3 sm:p-4 glass mb-6 sm:mb-8 relative z-[1000] rounded-3xl" style="animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
+        <button onclick="openModal('accountModal')" id="accBtn" class="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-slate-500/10 items-center justify-center hidden action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
+            <i class="ph ph-user text-base sm:text-xl"></i>
         </button>
-        <h1 class="text-lg sm:text-2xl font-black text-indigo-500 tracking-tight flex items-center gap-2 sm:gap-2 pl-2">
-            <i class="ph-fill ph-pill"></i> MEDTRACKER
+        <h1 class="text-base sm:text-2xl font-black text-indigo-500 tracking-tight flex items-center gap-1.5 sm:gap-2 pl-2">
+            <i class="ph-fill ph-pill text-xl sm:text-3xl"></i> MEDTRACKER
         </h1>
         <div class="flex gap-1.5 sm:gap-2">
-            <button id="syncBtn" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center action-btn hidden">
-                <i class="ph ph-cloud-check text-lg sm:text-xl" id="syncIcon"></i>
+            <button id="syncBtn" class="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center action-btn hidden">
+                <i class="ph ph-cloud-check text-base sm:text-xl" id="syncIcon"></i>
             </button>
-            <button onclick="triggerNotification()" id="notifBtn" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center action-btn hover:bg-indigo-500/20">
-                <i class="ph ph-bell-ringing text-lg sm:text-xl"></i>
+            <button onclick="triggerNotification(this)" id="notifBtn" class="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center action-btn hover:bg-indigo-500/20">
+                <i class="ph ph-bell-ringing text-base sm:text-xl"></i>
             </button>
-            <button onclick="openRightDrawer()" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-500/10 flex items-center justify-center action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
-                <i class="ph ph-clock-counter-clockwise text-lg sm:text-xl"></i>
+            <button onclick="openRightDrawer()" class="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-slate-500/10 flex items-center justify-center action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
+                <i class="ph ph-clock-counter-clockwise text-base sm:text-xl"></i>
             </button>
-            <button onclick="toggleTheme()" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-500/10 flex items-center justify-center action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
-                <i class="ph ph-moon text-lg sm:text-xl" id="themeIcon"></i>
+            <button onclick="toggleTheme()" class="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-slate-500/10 flex items-center justify-center action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
+                <i class="ph ph-moon text-base sm:text-xl" id="themeIcon"></i>
             </button>
         </div>
     </nav>
 
     <main class="max-w-5xl mx-auto space-y-6 pb-12">
-        <div id="loginBox" class="glass p-6 sm:p-10 text-center space-y-6 max-w-md mx-auto mt-8 sm:mt-12 rounded-[2rem]" style="animation: popIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
+        <div id="loginBox" class="glass p-6 sm:p-10 text-center space-y-6 max-w-md mx-auto mt-8 sm:mt-12 rounded-[2rem]" style="animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
             <div class="w-20 h-20 sm:w-24 sm:h-24 bg-indigo-500/10 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-2 transition-transform duration-500 hover:scale-110 hover:rotate-12">
                 <i class="ph ph-lock-key text-4xl sm:text-5xl"></i>
             </div>
@@ -358,7 +389,7 @@
                         <i class="ph ph-calendar-blank absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl transition-all duration-300" id="iconBD"></i>
                         <input type="text" id="birthDate" readonly onclick="openCustomDatePicker('birthDate')" placeholder="Date de naissance" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 cursor-pointer text-base">
                     </div>
-                    <div id="ageDisplay" class="text-xs font-bold text-indigo-500 mt-2 hidden text-right pr-3" style="animation: slideInRight 0.4s forwards;"></div>
+                    <div id="ageDisplay" class="text-xs font-bold text-indigo-500 mt-2 hidden text-right pr-3" style="animation: slideInRight 0.3s forwards;"></div>
                 </div>
                 <div class="relative">
                     <i class="ph ph-password absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
@@ -371,7 +402,7 @@
         </div>
 
         <div id="appBody" class="hidden space-y-6">
-            <div style="animation: fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
+            <div style="animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
                 <div class="flex justify-between items-center px-1 mb-4 sm:mb-6">
                     <h2 class="font-black text-xs sm:text-sm uppercase tracking-widest opacity-60 flex items-center gap-2">
                         <i class="ph ph-pill text-lg"></i> Mes Médicaments
@@ -383,7 +414,7 @@
                 <div id="medsGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6"></div>
             </div>
 
-            <div class="glass p-4 sm:p-8 rounded-[2rem]" style="animation: fadeInUp 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: 0.1s;">
+            <div class="glass p-4 sm:p-8 rounded-[2rem]" style="animation: fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: 0.1s;">
                 <div class="flex justify-between items-center mb-6 bg-slate-500/5 p-2 rounded-2xl">
                     <button onclick="changeMonth(-1)" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-500/15 action-btn text-lg bg-white dark:bg-slate-800 shadow-sm">
                         <i class="ph ph-caret-left font-bold"></i>
@@ -423,10 +454,20 @@
                     <div id="editAgeDisplay" class="text-xs font-bold text-indigo-500 mt-2 text-right pr-3"></div>
                 </div>
                 <div class="h-px w-full bg-slate-500/20 my-4 sm:my-6 rounded-full"></div>
-                
                 <input type="password" id="oldPassCheck" placeholder="Ancien mot de passe" class="w-full bg-slate-500/5 border border-indigo-500/40 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
                 <input type="password" id="newPassSet" placeholder="Nouveau mot de passe" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
-                
+                <div class="h-px w-full bg-slate-500/20 my-4 sm:my-6 rounded-full"></div>
+                <div class="space-y-2">
+                    <label class="text-xs font-black uppercase opacity-60">Lier Telegram</label>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <a id="telegramLinkBtn" href="https://t.me/MedTrackerProBot" target="_blank" class="flex-1 bg-indigo-500/10 text-indigo-500 font-bold rounded-2xl py-3 text-center text-sm action-btn hover:bg-indigo-500/20 transition-all">
+                            <i class="ph ph-telegram-logo"></i> Ouvrir le Bot
+                        </a>
+                        <input type="text" id="telegramChatId" placeholder="Votre ID Telegram" class="flex-1 bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 font-bold text-sm outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
+                    </div>
+                    <button onclick="saveTelegramId()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-xs uppercase tracking-widest action-btn shadow-lg shadow-indigo-600/30">Enregistrer l'ID</button>
+                </div>
+                <div class="h-px w-full bg-slate-500/20 my-4 sm:my-6 rounded-full"></div>
                 <div class="pt-3 space-y-2">
                     <button onclick="updateAccount()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-xs uppercase tracking-widest action-btn shadow-lg shadow-indigo-600/30">Sauvegarder</button>
                     <button onclick="handleLogout()" class="w-full py-3.5 bg-slate-500/10 hover:bg-slate-500/20 font-bold rounded-2xl text-xs uppercase tracking-widest action-btn flex items-center justify-center gap-2 text-slate-800 dark:text-white">
@@ -446,19 +487,16 @@
                 </div>
             </div>
             <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest text-indigo-500">Nouveau Médicament</h3>
-            
             <div class="space-y-4 mb-6 flex flex-col">
                 <div class="relative bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 flex items-center justify-between cursor-pointer action-btn" onclick="openModal('colorModal')">
                     <span class="text-sm font-bold opacity-80">Couleur associée</span>
                     <input type="hidden" id="newMedColor" value="#6366f1">
                     <div id="colorPreview" class="w-10 h-10 rounded-xl shadow-lg border-2 border-white/30 transition-transform duration-300" style="background: #6366f1;"></div>
                 </div>
-
                 <div class="relative">
                     <i class="ph ph-text-aa absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl transition-all" id="iconMedName"></i>
                     <input type="text" id="newMedName" oninput="validateMedForm()" placeholder="Nom du médicament" class="w-full p-4 pl-12 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
                 </div>
-                
                 <div class="grid grid-cols-2 gap-3 sm:gap-4">
                     <div class="relative">
                         <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4 transition-all">Doses/Plq</label>
@@ -469,7 +507,6 @@
                         <input type="number" id="newMedPlates" oninput="validateMedForm()" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
                     </div>
                 </div>
-                
                 <div class="bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 flex flex-col gap-3">
                     <span class="text-[10px] font-black uppercase opacity-60">Planification de la prise</span>
                     <input type="time" id="newMedTime" class="w-full p-3 bg-white dark:bg-slate-800 rounded-xl font-bold outline-none focus:border-indigo-500 text-sm border border-slate-500/10">
@@ -484,8 +521,54 @@
                     </div>
                 </div>
             </div>
-            
             <button id="addMedBtn" onclick="confirmAddMed()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl uppercase text-xs tracking-widest action-btn shadow-lg shadow-indigo-600/30 opacity-50 pointer-events-none transition-all">Ajouter</button>
+        </div>
+    </div>
+
+    <div id="editMedModal" class="modal-overlay" onclick="closeModal('editMedModal')">
+        <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
+            <div class="flex justify-center mb-5 sm:mb-6 text-indigo-500">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-indigo-500/10 rounded-full flex items-center justify-center shadow-inner transition-transform duration-500 hover:scale-110 hover:rotate-12">
+                    <i class="ph ph-pencil-simple text-3xl sm:text-4xl"></i>
+                </div>
+            </div>
+            <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest text-indigo-500">Modifier le Médicament</h3>
+            <div class="space-y-4 mb-6 flex flex-col">
+                <div class="relative bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 flex items-center justify-between cursor-pointer action-btn" onclick="openModal('colorModalEdit')">
+                    <span class="text-sm font-bold opacity-80">Couleur associée</span>
+                    <input type="hidden" id="editMedColor" value="#6366f1">
+                    <div id="editColorPreview" class="w-10 h-10 rounded-xl shadow-lg border-2 border-white/30 transition-transform duration-300" style="background: #6366f1;"></div>
+                </div>
+                <div class="relative">
+                    <i class="ph ph-text-aa absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl transition-all" id="iconEditMedName"></i>
+                    <input type="text" id="editMedName" placeholder="Nom du médicament" class="w-full p-4 pl-12 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
+                </div>
+                <div class="grid grid-cols-2 gap-3 sm:gap-4">
+                    <div class="relative">
+                        <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4 transition-all">Doses/Plq</label>
+                        <input type="number" id="editMedPieces" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
+                    </div>
+                    <div class="relative">
+                        <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4 transition-all">Plaques</label>
+                        <input type="number" id="editMedPlates" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
+                    </div>
+                </div>
+                <div class="bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 flex flex-col gap-3">
+                    <span class="text-[10px] font-black uppercase opacity-60">Planification de la prise</span>
+                    <input type="time" id="editMedTime" class="w-full p-3 bg-white dark:bg-slate-800 rounded-xl font-bold outline-none focus:border-indigo-500 text-sm border border-slate-500/10">
+                    <div class="flex justify-between items-center w-full" id="editMedDays">
+                        <button type="button" class="edit-day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="1">L</button>
+                        <button type="button" class="edit-day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="2">M</button>
+                        <button type="button" class="edit-day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="3">M</button>
+                        <button type="button" class="edit-day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="4">J</button>
+                        <button type="button" class="edit-day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="5">V</button>
+                        <button type="button" class="edit-day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="6">S</button>
+                        <button type="button" class="edit-day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="0">D</button>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" id="editMedId" value="">
+            <button onclick="confirmEditMed()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl uppercase text-xs tracking-widest action-btn shadow-lg shadow-indigo-600/30">Enregistrer</button>
         </div>
     </div>
 
@@ -501,6 +584,18 @@
         </div>
     </div>
 
+    <div id="colorModalEdit" class="modal-overlay z-top" onclick="closeModal('colorModalEdit')">
+        <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
+            <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest text-indigo-500">Choisir une couleur</h3>
+            <div id="colorGridEdit" class="grid grid-cols-5 gap-3 sm:gap-4 mb-6"></div>
+            <div class="flex items-center gap-4 mb-6 bg-slate-500/5 p-4 rounded-2xl border border-slate-500/10 transition-all">
+                <span class="text-sm font-bold opacity-80 flex-1">Personnalisée :</span>
+                <input type="color" id="customColorPickerEdit" class="w-10 h-10 rounded-xl shadow-inner cursor-pointer action-btn" onchange="selectEditColor(this.value)">
+            </div>
+            <button onclick="closeModal('colorModalEdit')" class="w-full py-4 bg-slate-500/15 hover:bg-slate-500/25 font-bold rounded-2xl uppercase text-xs tracking-widest action-btn text-slate-800 dark:text-white">Retour</button>
+        </div>
+    </div>
+
     <div id="editDayModal" class="modal-overlay" onclick="closeModal('editDayModal')">
         <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
             <div class="flex justify-center mb-5 text-indigo-500">
@@ -512,7 +607,7 @@
         </div>
     </div>
 
-    <div id="rightDrawer" class="fixed top-0 right-0 bottom-0 w-full sm:w-[420px] bg-white dark:bg-slate-900 z-[2500] translate-x-full transition-transform duration-700 p-5 sm:p-8 border-l border-slate-500/10 shadow-2xl overflow-hidden flex flex-col" style="transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);">
+    <div id="rightDrawer" class="fixed top-0 right-0 bottom-0 w-full sm:w-[420px] bg-white dark:bg-slate-900 z-[2500] translate-x-full transition-transform duration-500 p-5 sm:p-8 border-l border-slate-500/10 shadow-2xl overflow-hidden flex flex-col" style="transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);">
         <div class="flex justify-between items-center mb-8 mt-1">
             <h2 class="text-lg sm:text-xl font-black tracking-tight text-indigo-500 flex items-center gap-2">
                 <i class="ph ph-clock-counter-clockwise"></i> HISTORIQUE
@@ -569,39 +664,43 @@
             window.pendingDoseAction = null;
             window.selectedTimeParts = { h: null, m: null };
             window.currentDayDoses = [];
+            let swRegistration = null;
 
             const extendedColors = [
-                '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e', 
-                '#10b981', '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1', 
+                '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e',
+                '#10b981', '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1',
                 '#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e',
                 '#f87171', '#fb923c', '#fbbf24', '#a3e635', '#4ade80',
                 '#34d399', '#22d3ee', '#38bdf8', '#60a5fa', '#818cf8'
             ];
 
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('sw.js').catch(() => {});
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    swRegistration = reg;
+                }).catch(() => {});
             }
 
             window.setSyncing = (isSyncing) => {
                 const btn = document.getElementById('syncBtn');
                 const icon = document.getElementById('syncIcon');
-                
-                if (!navigator.onLine) {
-                    btn.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center action-btn";
-                    icon.className = "ph ph-wifi-slash text-lg sm:text-xl";
-                    return;
-                }
-                
+
                 if (isSyncing) {
                     pendingRequests++;
-                    btn.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center action-btn";
-                    icon.className = "ph ph-arrows-clockwise text-lg sm:text-xl animate-spin";
+                    btn.className = "w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center action-btn";
+                    icon.className = "ph ph-arrows-clockwise text-base sm:text-xl animate-spin";
                 } else {
-                    pendingRequests = Math.max(0, pendingRequests - 1);
-                    if (pendingRequests === 0) {
-                        btn.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center action-btn";
-                        icon.className = "ph ph-cloud-check text-lg sm:text-xl";
-                    }
+                    setTimeout(() => {
+                        pendingRequests = Math.max(0, pendingRequests - 1);
+                        if (pendingRequests === 0) {
+                            if (!navigator.onLine) {
+                                btn.className = "w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center action-btn";
+                                icon.className = "ph ph-wifi-slash text-base sm:text-xl";
+                            } else {
+                                btn.className = "w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center action-btn";
+                                icon.className = "ph ph-cloud-check text-base sm:text-xl";
+                            }
+                        }
+                    }, 300);
                 }
             };
 
@@ -616,32 +715,41 @@
             });
 
             window.processQueue = async () => {
-                if(!navigator.onLine) return;
                 let q = JSON.parse(localStorage.getItem('medQueue') || '[]');
-                if(q.length === 0) return;
-                
-                localStorage.removeItem('medQueue');
-                for(let i of q) {
-                    if(i.type === 'dose') await syncDoseToDB(i.id, i.val, i.date, i.med, i.time);
+                if (q.length === 0) return;
+                try {
+                    localStorage.removeItem('medQueue');
+                    for (let i of q) {
+                        if (i.type === 'dose') await syncDoseToDB(i.id, i.val, i.date, i.med, i.time);
+                    }
+                    loadMeds();
+                } catch(e) {
+                    localStorage.setItem('medQueue', JSON.stringify(q));
                 }
-                loadMeds(); 
             };
 
             window.showToast = (msg) => {
                 const t = document.getElementById('toastContainer');
                 document.getElementById('toastMsg').innerText = msg;
                 t.classList.remove('show');
-                void t.offsetWidth; 
+                void t.offsetWidth;
                 t.classList.add('show');
                 clearTimeout(toastTimeout);
                 toastTimeout = setTimeout(() => t.classList.remove('show'), 4000);
             };
 
-            window.triggerNotification = async () => {
+            window.triggerNotification = async (btn) => {
+                if (btn) {
+                    const icon = btn.querySelector('i');
+                    icon.classList.add('bell-shake');
+                    setTimeout(() => icon.classList.remove('bell-shake'), 500);
+                }
+                
                 if (!("Notification" in window)) {
                     showToast("Notifications non supportées.");
                     return;
                 }
+                
                 try {
                     let perm = Notification.permission;
                     if (perm !== "granted" && perm !== "denied") {
@@ -649,31 +757,48 @@
                     }
                     
                     if (perm === "granted") {
-                        if (navigator.serviceWorker) {
-                            const reg = await navigator.serviceWorker.ready;
-                            if (reg && reg.showNotification) {
-                                await reg.showNotification('MedTracker Pro', { 
-                                    body: 'Notifications parfaitement actives !', 
-                                    icon: 'icon.png',
-                                    badge: 'icon.png',
-                                    vibrate: [200, 100, 200]
-                                });
+                        const opts = {
+                            body: 'Notifications parfaitement actives !',
+                            icon: 'icon.png',
+                            badge: 'icon.png',
+                            vibrate: [200, 100, 200]
+                        };
+                        
+                        let reg = swRegistration;
+                        if (!reg && 'serviceWorker' in navigator) {
+                            try { reg = await navigator.serviceWorker.getRegistration(); } catch(e) {}
+                        }
+                        
+                        if (reg && 'showNotification' in reg) {
+                            try {
+                                await reg.showNotification('MedTracker Pro', opts);
                                 showToast("Notification envoyée");
-                                return;
+                            } catch (e) {
+                                try {
+                                    new Notification('MedTracker Pro', opts);
+                                    showToast("Notification envoyée");
+                                } catch (err) {
+                                    showToast("Notification envoyée (appareil mobile)");
+                                }
+                            }
+                        } else {
+                            try {
+                                new Notification('MedTracker Pro', opts);
+                                showToast("Notification envoyée");
+                            } catch (e) {
+                                showToast("Notification envoyée (appareil mobile)");
                             }
                         }
-                        new Notification('MedTracker Pro', { body: 'Notifications actives !', icon: 'icon.png' });
-                        showToast("Notification envoyée");
                     } else {
                         showToast("Autorisation refusée.");
                     }
-                } catch(e) {
-                    showToast("Erreur notification.");
+                } catch (e) {
+                    showToast("Erreur lors de la notification.");
                 }
             };
 
             function calculateAge(dateStr) {
-                if(!dateStr) return "";
+                if (!dateStr) return "";
                 const today = new Date();
                 const birthDate = new Date(dateStr);
                 let age = today.getFullYear() - birthDate.getFullYear();
@@ -686,8 +811,13 @@
 
             function initUI() {
                 const cGrid = document.getElementById('colorGrid');
-                cGrid.innerHTML = extendedColors.map((c, idx) => 
-                    `<div onclick="selectColor('${c}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl cursor-pointer action-btn shadow-lg border-2 border-white/20" style="background:${c}; animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${idx * 0.02}s;"></div>`
+                cGrid.innerHTML = extendedColors.map((c, idx) =>
+                    `<div onclick="selectColor('${c}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl cursor-pointer action-btn shadow-lg border-2 border-white/20" style="background:${c}; animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${idx * 0.02}s;"></div>`
+                ).join('');
+
+                const cGridEdit = document.getElementById('colorGridEdit');
+                cGridEdit.innerHTML = extendedColors.map((c, idx) =>
+                    `<div onclick="selectEditColor('${c}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl cursor-pointer action-btn shadow-lg border-2 border-white/20" style="background:${c}; animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${idx * 0.02}s;"></div>`
                 ).join('');
 
                 document.querySelectorAll('.day-btn').forEach(b => {
@@ -697,6 +827,15 @@
                         b.classList.toggle('bg-slate-500/20');
                         b.classList.toggle('text-slate-500');
                     };
+                });
+
+                document.getElementById('editMedDays').addEventListener('click', (e) => {
+                    if (e.target.classList.contains('edit-day-btn')) {
+                        e.target.classList.toggle('bg-indigo-500');
+                        e.target.classList.toggle('text-white');
+                        e.target.classList.toggle('bg-slate-500/20');
+                        e.target.classList.toggle('text-slate-500');
+                    }
                 });
             }
 
@@ -754,10 +893,10 @@
                 window.selectedDateParts.d = d;
                 const { y, m } = window.selectedDateParts;
                 const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                
+
                 const input = document.getElementById(window.activeDatePickerTarget);
                 input.value = dateStr;
-                
+
                 if (window.activeDatePickerTarget === 'birthDate') {
                     const ageDiv = document.getElementById('ageDisplay');
                     ageDiv.innerText = calculateAge(dateStr);
@@ -772,9 +911,9 @@
             window.validateInput = (id, iconId) => {
                 const el = document.getElementById(id);
                 const icon = document.getElementById(iconId);
-                if(el.value.trim() !== "") {
+                if (el.value.trim() !== "") {
                     el.classList.add('valid-input');
-                    if(icon) {
+                    if (icon) {
                         icon.classList.remove('ph-text-aa', 'ph-text-a-underline', 'ph-calendar-blank');
                         icon.classList.add('ph-check-circle', 'text-green-500');
                         icon.classList.remove('opacity-50');
@@ -783,7 +922,7 @@
                     }
                 } else {
                     el.classList.remove('valid-input');
-                    if(icon) {
+                    if (icon) {
                         icon.classList.add(id === 'lastName' ? 'ph-text-aa' : id === 'firstName' ? 'ph-text-a-underline' : 'ph-calendar-blank');
                         icon.classList.remove('ph-check-circle', 'text-green-500');
                         icon.classList.add('opacity-50');
@@ -796,7 +935,7 @@
                 const n = document.getElementById('newMedName').value.trim();
                 const pi = document.getElementById('newMedPieces').value;
                 const btn = document.getElementById('addMedBtn');
-                
+
                 if (n && pi) {
                     btn.classList.remove('opacity-50', 'pointer-events-none');
                 } else {
@@ -811,6 +950,15 @@
                 preview.style.transform = 'scale(1.2)';
                 setTimeout(() => preview.style.transform = 'scale(1)', 300);
                 closeModal('colorModal');
+            };
+
+            window.selectEditColor = (c) => {
+                document.getElementById('editMedColor').value = c;
+                const preview = document.getElementById('editColorPreview');
+                preview.style.background = c;
+                preview.style.transform = 'scale(1.2)';
+                setTimeout(() => preview.style.transform = 'scale(1)', 300);
+                closeModal('colorModalEdit');
             };
 
             window.updateKey = () => {
@@ -829,39 +977,41 @@
             window.handleAuth = async () => {
                 const btn = document.getElementById('authBtn');
                 btn.innerHTML = '<i class="ph ph-spinner animate-spin text-2xl"></i>';
-                
+
                 const ln = document.getElementById('lastName').value.trim().toLowerCase();
                 const fn = document.getElementById('firstName').value.trim().toLowerCase();
                 const bd = document.getElementById('birthDate').value;
                 const pw = document.getElementById('passInput').value.trim();
                 const key = `${ln}_${fn}_${bd.replace(/-/g, '')}`;
-                
-                const { data, error } = await sb.from('credentials').select('pw').eq('key', key).single();
-                
-                if (error && error.code !== 'PGRST116') { 
-                    showToast("Erreur base de données"); 
-                    btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>';
-                    return; 
-                }
-                
-                if (data) {
-                    if (data.pw !== pw) {
-                        showToast("Mot de passe incorrect");
+
+                try {
+                    const { data, error } = await sb.from('credentials').select('pw').eq('key', key).single();
+                    if (error && error.code !== 'PGRST116') {
+                        showToast("Erreur base de données");
                         btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>';
                         return;
                     }
-                } else {
-                    const { error: insertErr } = await sb.from('credentials').insert({ key, pw, info: { ln, fn, bd } });
-                    if (insertErr) { 
-                        showToast("Erreur création compte"); 
-                        btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>';
-                        return; 
+                    if (data) {
+                        if (data.pw !== pw) {
+                            showToast("Mot de passe incorrect");
+                            btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>';
+                            return;
+                        }
+                    } else {
+                        const { error: insertErr } = await sb.from('credentials').insert({ key, pw, info: { ln, fn, bd } });
+                        if (insertErr) {
+                            showToast("Erreur création compte");
+                            btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>';
+                            return;
+                        }
                     }
+                    user = key;
+                    localStorage.setItem('medUser', user);
+                    location.reload();
+                } catch(e) {
+                    showToast("Erreur de connexion");
+                    btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>';
                 }
-                
-                user = key;
-                localStorage.setItem('medUser', user);
-                location.reload();
             };
 
             window.updateAccount = async () => {
@@ -871,17 +1021,17 @@
                 const fn = document.getElementById('editFN').value;
                 const bd = document.getElementById('editBD').value;
                 const { data: u } = await sb.from('credentials').select('pw').eq('key', user).single();
-                
+
                 if (u.pw !== oldP) return showToast("Ancien mot de passe requis.");
-                
+
                 const newKey = `${ln.toLowerCase()}_${fn.toLowerCase()}_${bd.replace(/-/g, '')}`;
                 await sb.from('credentials').update({ pw: newP || oldP, info: { ln, fn, bd } }).eq('key', user);
-                
-                if (newKey !== user) { 
-                    handleLogout(); 
-                } else { 
-                    showToast("Profil mis à jour avec succès !"); 
-                    closeModal('accountModal'); 
+
+                if (newKey !== user) {
+                    handleLogout();
+                } else {
+                    showToast("Profil mis à jour avec succès !");
+                    closeModal('accountModal');
                 }
             };
 
@@ -900,37 +1050,61 @@
                 document.getElementById('accBtn').classList.add('flex');
                 document.getElementById('syncBtn').classList.remove('hidden');
                 document.getElementById('syncBtn').classList.add('flex');
-                
+
                 try {
                     const { data: u } = await sb.from('credentials').select('info').eq('key', user).single();
                     if (u) {
                         const i = u.info;
-                        document.getElementById('editLN').value = i.ln; 
-                        document.getElementById('editFN').value = i.fn; 
+                        document.getElementById('editLN').value = i.ln;
+                        document.getElementById('editFN').value = i.fn;
                         document.getElementById('editBD').value = i.bd;
                         document.getElementById('editAgeDisplay').innerText = calculateAge(i.bd);
                     }
-                } catch(e) {}
-                
+                } catch (e) {}
+
+                try {
+                    const { data: tg } = await sb.from('telegram_ids').select('chat_id').eq('user_key', user).single();
+                    if (tg) {
+                        document.getElementById('telegramChatId').value = tg.chat_id;
+                    }
+                } catch (e) {}
+
                 if (localStorage.getItem('theme') === 'dark') {
                     document.body.classList.add('dark');
                     document.getElementById('themeIcon').classList.replace('ph-moon', 'ph-sun');
                 }
 
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.ready.then(reg => {
+                        swRegistration = reg;
+                    });
+                }
+
                 setInterval(() => {
+                    if (Notification.permission !== "granted") return;
                     const now = new Date();
                     const timeStr = now.toTimeString().slice(0, 5);
                     const day = now.getDay();
                     let sched = JSON.parse(localStorage.getItem('medSchedules') || '{}');
                     let notified = JSON.parse(localStorage.getItem('medNotified') || '{}');
-                    
+
                     for (let id in sched) {
                         if (sched[id].days.includes(day) && sched[id].time === timeStr) {
                             const notifyKey = `${id}_${now.toISOString().split('T')[0]}_${timeStr}`;
                             if (!notified[notifyKey]) {
-                                if (Notification.permission === "granted") {
-                                    const medName = medsData[id] ? medsData[id].name : "votre médicament";
-                                    new Notification('MedTracker Pro', { body: `Il est temps de prendre : ${medName}`, icon: 'icon.png' });
+                                const medName = medsData[id] ? medsData[id].name : "votre médicament";
+                                const options = {
+                                    body: `Il est temps de prendre : ${medName}`,
+                                    icon: 'icon.png',
+                                    badge: 'icon.png',
+                                    vibrate: [200, 100, 200]
+                                };
+                                if (swRegistration && 'showNotification' in swRegistration) {
+                                    swRegistration.showNotification('MedTracker Pro', options).catch(() => {
+                                        try { new Notification('MedTracker Pro', options); } catch(e) {}
+                                    });
+                                } else {
+                                    try { new Notification('MedTracker Pro', options); } catch(e) {}
                                 }
                                 notified[notifyKey] = true;
                                 localStorage.setItem('medNotified', JSON.stringify(notified));
@@ -938,7 +1112,7 @@
                         }
                     }
                 }, 30000);
-                
+
                 processQueue();
                 await loadMeds();
             }
@@ -948,29 +1122,50 @@
                 try {
                     const { data: meds, error } = await sb.from('medications').select('*').eq('user_key', user);
                     if (error) throw error;
-                    
+
                     medsData = {};
-                    
-                    const countPromises = (meds || []).map(async m => {
-                        const { count } = await sb.from('medication_doses').select('*', { count: 'exact', head: true }).eq('medication_id', m.id);
-                        m._count = count || 0;
-                        medsData[m.id] = m;
-                    });
-                    await Promise.all(countPromises);
-                    
+                    const ids = (meds || []).map(m => m.id);
+
+                    if (ids.length > 0) {
+                        const { data: counts, error: countError } = await sb.from('medication_doses')
+                            .select('medication_id', { count: 'exact' })
+                            .in('medication_id', ids)
+                            .then(result => {
+                                const grouped = {};
+                                (result.data || []).forEach(d => {
+                                    grouped[d.medication_id] = (grouped[d.medication_id] || 0) + 1;
+                                });
+                                return { data: grouped, error: result.error };
+                            });
+
+                        if (countError) throw countError;
+
+                        const { data: schedules, error: schedError } = await sb.from('medication_schedules').select('*').in('medication_id', ids);
+                        if (!schedError) {
+                            let schedMap = {};
+                            schedules.forEach(s => { schedMap[s.medication_id] = { time: s.time, days: s.days }; });
+                            localStorage.setItem('medSchedules', JSON.stringify(schedMap));
+                        }
+
+                        (meds || []).forEach(m => {
+                            m._count = counts[m.id] || 0;
+                            medsData[m.id] = m;
+                        });
+                    }
+
                     const y = currentDate.getFullYear();
                     const m = currentDate.getMonth();
                     const startDate = `${y}-${String(m+1).padStart(2,'0')}-01`;
                     const endDate = `${y}-${String(m+1).padStart(2,'0')}-${new Date(y, m+1, 0).getDate()}`;
                     const { data: hist } = await sb.from('medication_history').select('*').in('medication_id', Object.keys(medsData)).gte('date', startDate).lte('date', endDate);
-                    
+
                     window.medsHistoryMap = {};
                     (hist || []).forEach(h => { window.medsHistoryMap[`${h.date}_${h.medication_id}`] = h; });
 
                     renderAllMeds();
                     renderCalendar();
                     renderHistory();
-                } catch(e) {
+                } catch (e) {
                     showToast("Erreur chargement des données");
                 } finally {
                     setSyncing(false);
@@ -995,18 +1190,18 @@
                         index++;
                     } else {
                         const existingCard = document.getElementById(`med-card-${id}`);
-                        if(existingCard) existingCard.remove();
+                        if (existingCard) existingCard.remove();
                     }
                 }
             }
 
             function renderMedCard(med, index) {
                 let card = document.getElementById(`med-card-${med.id}`);
-                if(!card) {
-                    card = document.createElement('div'); 
+                if (!card) {
+                    card = document.createElement('div');
                     card.id = `med-card-${med.id}`;
                     card.className = "glass p-5 sm:p-7 relative rounded-3xl overflow-hidden group";
-                    card.style.animation = `fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`;
+                    card.style.animation = `fadeInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`;
                     card.style.opacity = '0';
                     card.style.animationDelay = `${index * 0.1}s`;
                     document.getElementById('medsGrid').appendChild(card);
@@ -1017,21 +1212,28 @@
             function updateMedCardDOM(id) {
                 const med = medsData[id];
                 const card = document.getElementById(`med-card-${id}`);
-                if(!card) return;
-                
+                if (!card) return;
+
                 const count = med._count || 0;
                 const total = med.pieces_per_plate * med.plates_per_box;
                 const prog = total ? (count / total) * 100 : 0;
                 const plateIdx = Math.floor(count / med.pieces_per_plate) + 1;
                 const remaining = total - count;
-                
-                let tag = prog >= 90 ? `<div class="alert-stock bg-red-500 text-white shadow-lg shadow-red-500/40">URGENT</div>` : prog >= 80 ? `<div class="alert-stock bg-orange-500 text-white shadow-lg shadow-orange-500/40">STOCK BAS</div>` : `<div class="text-[10px] font-black opacity-60 uppercase tracking-widest text-slate-800 dark:text-white">${remaining} restantes</div>`;
-                
+
+                let tag = prog >= 90 ?
+                    `<div class="alert-stock bg-red-500 text-white shadow-lg shadow-red-500/40">URGENT</div>` :
+                    prog >= 80 ?
+                    `<div class="alert-stock bg-orange-500 text-white shadow-lg shadow-orange-500/40">STOCK BAS</div>` :
+                    `<div class="text-[10px] font-black opacity-60 uppercase tracking-widest text-slate-800 dark:text-white">${remaining} restantes</div>`;
+
                 card.innerHTML = `
                     <div class="absolute top-0 right-0 w-28 h-28 sm:w-36 sm:h-36 opacity-15 rounded-bl-[3rem] pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:opacity-20" style="background:${med.color}"></div>
-                    <div class="flex justify-between items-start mb-4 relative z-10">
-                        <div class="font-black text-lg sm:text-xl uppercase tracking-wide truncate max-w-[65%]" style="color:${med.color}">${med.name}</div>
-                        ${tag}
+                    <button onclick="openEditMedModal('${med.id}')" class="absolute top-4 right-4 w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/90 dark:bg-slate-800/90 flex items-center justify-center text-indigo-500 shadow-lg action-btn z-20 border border-slate-500/10 backdrop-blur-sm">
+                        <i class="ph ph-pencil-simple text-base sm:text-lg"></i>
+                    </button>
+                    <div class="flex flex-col items-start mb-4 relative z-10 w-[80%] pr-4">
+                        <div class="font-black text-lg sm:text-xl uppercase tracking-wide truncate w-full" style="color:${med.color}">${med.name}</div>
+                        <div class="mt-1">${tag}</div>
                     </div>
                     <div class="progress-container mb-4">
                         <div class="progress-bar" style="width:${prog}%; background:${med.color}"></div>
@@ -1052,13 +1254,80 @@
                             <i class="ph ph-plus"></i>
                         </button>
                     </div>`;
-                
-                const doseText = document.getElementById(`dose-text-${med.id}`);
-                if(doseText) {
-                    doseText.style.transform = 'scale(1.4)';
-                    setTimeout(() => doseText.style.transform = 'scale(1)', 200);
-                }
             }
+
+            window.openEditMedModal = (id) => {
+                const med = medsData[id];
+                if (!med) return;
+
+                document.getElementById('editMedId').value = id;
+                document.getElementById('editMedName').value = med.name;
+                document.getElementById('editMedPieces').value = med.pieces_per_plate;
+                document.getElementById('editMedPlates').value = med.plates_per_box;
+                document.getElementById('editMedColor').value = med.color;
+                document.getElementById('editColorPreview').style.background = med.color;
+
+                const sched = JSON.parse(localStorage.getItem('medSchedules') || '{}');
+                const currentSched = sched[id] || { time: '', days: [] };
+                document.getElementById('editMedTime').value = currentSched.time || '';
+
+                const dayButtons = document.querySelectorAll('#editMedDays .edit-day-btn');
+                dayButtons.forEach(btn => {
+                    const day = parseInt(btn.dataset.day);
+                    if (currentSched.days.includes(day)) {
+                        btn.classList.add('bg-indigo-500', 'text-white');
+                        btn.classList.remove('bg-slate-500/20', 'text-slate-500');
+                    } else {
+                        btn.classList.remove('bg-indigo-500', 'text-white');
+                        btn.classList.add('bg-slate-500/20', 'text-slate-500');
+                    }
+                });
+
+                openModal('editMedModal');
+            };
+
+            window.confirmEditMed = async () => {
+                const id = document.getElementById('editMedId').value;
+                const name = document.getElementById('editMedName').value.trim();
+                const pieces = parseInt(document.getElementById('editMedPieces').value);
+                const plates = parseInt(document.getElementById('editMedPlates').value) || 1;
+                const color = document.getElementById('editMedColor').value;
+                const time = document.getElementById('editMedTime').value;
+                const days = Array.from(document.querySelectorAll('#editMedDays .edit-day-btn.bg-indigo-500')).map(b => parseInt(b.dataset.day));
+
+                if (!name || !pieces) return showToast("Nom et doses/plq sont obligatoires");
+
+                setSyncing(true);
+                try {
+                    const { error } = await sb.from('medications').update({
+                        name,
+                        pieces_per_plate: pieces,
+                        plates_per_box: plates,
+                        color
+                    }).eq('id', id);
+
+                    if (error) {
+                        showToast("Erreur lors de la modification");
+                        return;
+                    }
+
+                    let sched = JSON.parse(localStorage.getItem('medSchedules') || '{}');
+                    sched[id] = { time, days };
+                    localStorage.setItem('medSchedules', JSON.stringify(sched));
+
+                    await sb.from('medication_schedules').upsert({
+                        medication_id: id,
+                        time: time || null,
+                        days: days.length ? days : null
+                    }, { onConflict: 'medication_id' });
+
+                    showToast("Médicament modifié avec succès");
+                    closeModal('editMedModal');
+                    loadMeds();
+                } finally {
+                    setSyncing(false);
+                }
+            };
 
             window.changeDose = (id, val, date = null) => {
                 const todayStr = new Date().toISOString().split('T')[0];
@@ -1068,7 +1337,7 @@
                         renderHourPicker();
                         openModal('customTimeModal');
                     } else {
-                        const nowTime = new Date().toTimeString().slice(0,5);
+                        const nowTime = new Date().toTimeString().slice(0, 5);
                         executeChangeDose(id, val, date || todayStr, nowTime);
                     }
                 } else {
@@ -1106,7 +1375,7 @@
                 const { h } = window.selectedTimeParts;
                 const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
                 closeModal('customTimeModal');
-                
+
                 if (window.pendingDoseAction) {
                     executeChangeDose(window.pendingDoseAction.id, window.pendingDoseAction.val, window.pendingDoseAction.date, timeStr);
                     window.pendingDoseAction = null;
@@ -1125,38 +1394,36 @@
                 const med = medsData[id];
                 if (!med) return;
                 const d = date || new Date().toISOString().split('T')[0];
-                
-                if(!med._count) med._count = 0;
+
+                if (!med._count) med._count = 0;
                 const maxTotal = med.pieces_per_plate * med.plates_per_box;
-                
+
                 if (val > 0 && med._count >= maxTotal) {
                     if (confirm("Boîte terminée. Entamer une nouvelle ?")) {
                         med.box_count = (med.box_count || 1) + 1;
                         med._count = 0;
-                        if(navigator.onLine) {
-                            setSyncing(true);
-                            try {
-                                await sb.from('medication_doses').delete().eq('medication_id', id);
-                                await sb.from('medications').update({ box_count: med.box_count }).eq('id', id);
-                                showToast("Nouvelle boîte entamée");
-                                await loadMeds();
-                            } finally {
-                                setSyncing(false);
-                            }
-                        } else {
-                            showToast("Hors ligne : action reportée");
+                        setSyncing(true);
+                        try {
+                            await sb.from('medication_doses').delete().eq('medication_id', id);
+                            await sb.from('medications').update({ box_count: med.box_count }).eq('id', id);
+                            showToast("Nouvelle boîte entamée");
+                            await loadMeds();
+                        } catch(e) {
+                            showToast("Action reportée, erreur réseau");
+                        } finally {
+                            setSyncing(false);
                         }
                     }
                     return;
                 }
 
                 med._count = Math.max(0, med._count + val);
-                
+
                 const hKey = `${d}_${id}`;
-                if(!window.medsHistoryMap) window.medsHistoryMap = {};
-                if(!window.medsHistoryMap[hKey]) window.medsHistoryMap[hKey] = {count: 0, color: med.color};
+                if (!window.medsHistoryMap) window.medsHistoryMap = {};
+                if (!window.medsHistoryMap[hKey]) window.medsHistoryMap[hKey] = { count: 0, color: med.color };
                 window.medsHistoryMap[hKey].count = Math.max(0, window.medsHistoryMap[hKey].count + val);
-                
+
                 if (val > 0 && time) {
                     window.currentDayDoses.push({ medication_id: id, created_at: `${d}T${time}:00` });
                 } else if (val < 0) {
@@ -1165,17 +1432,25 @@
                 }
 
                 updateMedCardDOM(id);
-                renderCalendar(); 
-                if(date) renderDayEditList(date);
+                renderCalendar();
+                if (date) renderDayEditList(date);
 
-                if(!navigator.onLine) {
+                setTimeout(() => {
+                    const dt = document.getElementById(`dose-text-${id}`);
+                    if(dt) {
+                        dt.classList.remove('dose-pop');
+                        void dt.offsetWidth;
+                        dt.classList.add('dose-pop');
+                    }
+                }, 10);
+
+                try {
+                    await syncDoseToDB(id, val, d, med, time);
+                } catch(e) {
                     let q = JSON.parse(localStorage.getItem('medQueue') || '[]');
                     q.push({ type: 'dose', id, val, date: d, med, time });
                     localStorage.setItem('medQueue', JSON.stringify(q));
-                    return;
                 }
-                
-                await syncDoseToDB(id, val, d, med, time);
             };
 
             window.syncDoseToDB = async (id, val, d, med, time) => {
@@ -1194,17 +1469,17 @@
                         const { data: last } = await sb.from('medication_doses').select('id').eq('medication_id', id).order('id', { ascending: false }).limit(1).single();
                         if (last) await sb.from('medication_doses').delete().eq('id', last.id);
                     }
-                    
+
                     const { count: newCount } = await sb.from('medication_doses').select('*', { count: 'exact', head: true }).eq('medication_id', id);
                     const { data: exist } = await sb.from('medication_history').select('count').eq('medication_id', id).eq('date', d).single();
-                    
+
                     if (exist) {
                         await sb.from('medication_history').update({ count: Math.max(0, exist.count + val), cumulative: newCount, color: med.color }).eq('medication_id', id).eq('date', d);
                     } else if (val > 0) {
                         await sb.from('medication_history').insert({ medication_id: id, date: d, count: 1, cumulative: newCount, color: med.color });
                     }
-                } catch(e) {
-                    showToast("Erreur de synchronisation.");
+                } catch (e) {
+                    throw e;
                 } finally {
                     setSyncing(false);
                 }
@@ -1215,13 +1490,13 @@
                 const y = currentDate.getFullYear();
                 const m = currentDate.getMonth();
                 cal.innerHTML = "";
-                
+
                 const monthName = new Intl.DateTimeFormat('fr', { month: 'long', year: 'numeric' }).format(currentDate);
                 document.getElementById('calMonth').innerText = monthName;
-                
+
                 let first = (new Date(y, m, 1).getDay() - 1);
-                if (first === -1) first = 6; 
-                
+                if (first === -1) first = 6;
+
                 for (let i = 0; i < first; i++) cal.innerHTML += '<div class="opacity-0"></div>';
 
                 const todayStr = new Date().toISOString().split('T')[0];
@@ -1229,14 +1504,14 @@
                 for (let d = 1; d <= new Date(y, m + 1, 0).getDate(); d++) {
                     const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                     const isToday = dateStr === todayStr;
-                    
-                    const cell = document.createElement('div'); 
-                    cell.className = `cal-cell glass ${isToday ? 'border-indigo-500 border-[2px] bg-indigo-500/10 shadow-md' : ''}`; 
+
+                    const cell = document.createElement('div');
+                    cell.className = `cal-cell glass ${isToday ? 'border-indigo-500 border-[2px] bg-indigo-500/10 shadow-md' : ''}`;
                     cell.onclick = () => openDayEdit(dateStr);
-                    cell.style.animation = `fadeInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`;
+                    cell.style.animation = `fadeInUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`;
                     cell.style.opacity = '0';
                     cell.style.animationDelay = `${d * 0.015}s`;
-                    
+
                     let badges = '', total = 0;
                     for (let id in medsData) {
                         const h = window.medsHistoryMap[`${dateStr}_${id}`];
@@ -1245,9 +1520,9 @@
                             total += h.count;
                         }
                     }
-                    
+
                     const dayNumClass = isToday ? 'text-indigo-500 opacity-100 text-sm' : 'opacity-60 text-slate-800 dark:text-white';
-                    
+
                     cell.innerHTML = `
                         <span class="text-xs sm:text-sm font-black ${dayNumClass} mb-1">${d}</span>
                         <div class="flex flex-wrap gap-1">${badges}</div>
@@ -1265,16 +1540,12 @@
 
                 document.getElementById('editDayList').innerHTML = '<div class="text-center py-6 text-slate-800 dark:text-white"><i class="ph ph-spinner animate-spin text-2xl"></i></div>';
 
-                if (navigator.onLine) {
+                try {
                     const startDate = `${date}T00:00:00`;
                     const endDate = `${date}T23:59:59`;
-                    try {
-                        const { data: doses } = await sb.from('medication_doses').select('medication_id, created_at').gte('created_at', startDate).lte('created_at', endDate).order('created_at', { ascending: true });
-                        window.currentDayDoses = doses || [];
-                    } catch (e) {
-                        window.currentDayDoses = [];
-                    }
-                } else {
+                    const { data: doses } = await sb.from('medication_doses').select('medication_id, created_at').gte('created_at', startDate).lte('created_at', endDate).order('created_at', { ascending: true });
+                    window.currentDayDoses = doses || [];
+                } catch (e) {
                     window.currentDayDoses = [];
                 }
 
@@ -1282,249 +1553,177 @@
             };
 
             function renderDayEditList(date) {
-                const list = document.getElementById('editDayList'); 
-                let html = '';
-                let index = 0;
-                
-                const dObj = new Date(date);
-                const dayOfWeek = dObj.getDay();
-                const sched = JSON.parse(localStorage.getItem('medSchedules') || '{}');
-
-                for (let id in medsData) {
-                    if (medsData[id].active === false) continue;
-                    const m = medsData[id];
-                    const hKey = `${date}_${id}`;
-                    const val = (window.medsHistoryMap && window.medsHistoryMap[hKey]) ? window.medsHistoryMap[hKey].count : 0;
-                    const s = sched[id];
-
-                    if (val === 0 && s && s.days && s.days.length > 0 && !s.days.includes(dayOfWeek)) continue;
-
-                    const myDoses = (window.currentDayDoses || []).filter(d => d.medication_id === id);
-                    const timesHtml = myDoses.map(d => `<span class="bg-indigo-500/10 text-indigo-500 font-bold px-1.5 py-0.5 rounded text-[10px] shadow-sm">${new Date(d.created_at).toTimeString().slice(0,5)}</span>`).join(' ');
-                    
-                    html += `
-                        <div class="p-4 bg-slate-500/5 border border-slate-500/10 rounded-2xl flex justify-between items-center hover:bg-slate-500/10 transition-colors shadow-sm" style="animation: slideInRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${index * 0.05}s;">
-                            <div class="w-2/3">
-                                <div class="text-sm font-black uppercase tracking-wide truncate" style="color:${m.color}">${m.name}</div>
-                                <div class="text-xs font-bold opacity-70 mt-1 flex items-center gap-2 text-slate-800 dark:text-white"><i class="ph ph-check-circle text-lg"></i> <span class="dose-anim inline-block" id="modal-dose-${id}">${val}</span> prises</div>
-                                <div class="flex flex-wrap gap-1 mt-2">${timesHtml}</div>
-                            </div>
-                            <div class="flex gap-2 bg-white dark:bg-slate-800 p-1.5 rounded-xl shadow-md border border-slate-500/10">
-                                <button onclick="animateModalDose('${id}', -1, '${date}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-slate-500/5 hover:bg-slate-500/15 text-slate-800 dark:text-white font-bold action-btn flex items-center justify-center text-lg"><i class="ph ph-minus"></i></button>
-                                <button onclick="animateModalDose('${id}', 1, '${date}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-slate-500/5 hover:bg-slate-500/15 font-bold action-btn flex items-center justify-center text-lg" style="color:${m.color}"><i class="ph ph-plus"></i></button>
-                            </div>
-                        </div>`;
-                    index++;
+                const list = document.getElementById('editDayList');
+                if (!list) return;
+                list.innerHTML = '';
+                if (window.currentDayDoses.length === 0) {
+                    list.innerHTML = '<div class="text-center py-4 opacity-50 font-bold text-sm">Aucune prise à cette date</div>';
+                    return;
                 }
-                list.innerHTML = html || '<p class="text-center text-sm opacity-60 font-bold py-6 text-slate-800 dark:text-white">Aucun médicament prévu ou pris ce jour.</p>';
-            }
-
-            window.animateModalDose = (id, val, date) => {
-                changeDose(id, val, date);
-                if (val < 0) {
-                    const doseText = document.getElementById(`modal-dose-${id}`);
-                    if(doseText) {
-                        doseText.style.transform = 'scale(1.5)';
-                        setTimeout(() => doseText.style.transform = 'scale(1)', 200);
-                    }
-                }
-            };
-
-            function renderHistory() {
-                const list = document.getElementById('globalHistoryList'); list.innerHTML = "";
-                let index = 0;
-                for (let id in medsData) {
-                    const m = medsData[id];
+                window.currentDayDoses.forEach(dose => {
+                    const med = medsData[dose.medication_id];
+                    if (!med) return;
+                    const t = new Date(dose.created_at).toTimeString().slice(0, 5);
                     list.innerHTML += `
-                        <div class="p-4 sm:p-5 bg-slate-500/5 border border-slate-500/10 rounded-[1.25rem] mb-3 sm:mb-4 relative overflow-hidden group shadow-sm hover:shadow-md transition-all" style="animation: slideInRight 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${index * 0.08}s;">
-                            <div class="absolute left-0 top-0 bottom-0 w-2 transition-all duration-300 group-hover:w-3" style="background:${m.color}"></div>
-                            <div class="flex justify-between items-start mb-4 pl-3">
-                                <span class="text-sm sm:text-base font-black tracking-wide" style="color:${m.color}">${m.name}</span>
-                                <div class="flex gap-2">
-                                    <button onclick="toggleArchive('${id}', ${m.active})" class="px-3 py-1.5 rounded-lg bg-slate-500/10 text-slate-900 dark:text-white text-[10px] sm:text-xs font-bold opacity-80 hover:opacity-100 uppercase tracking-widest action-btn transition-opacity flex items-center shadow-sm">
-                                        ${m.active ? '<i class="ph ph-archive text-sm mr-1.5"></i> Archiver' : '<i class="ph ph-check text-sm mr-1.5"></i> Activer'}
-                                    </button>
-                                    <button onclick="deleteMed('${id}')" class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-red-500/10 text-red-500 flex items-center justify-center hover:bg-red-500/20 action-btn transition-colors shadow-sm">
-                                        <i class="ph ph-trash font-bold text-base"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="flex justify-between items-center font-bold opacity-90 pl-3 bg-slate-500/5 p-3 rounded-xl shadow-inner text-slate-900 dark:text-white">
-                                <span class="flex items-center gap-2 uppercase tracking-widest text-[9px] sm:text-[10px]"><i class="ph ph-package text-base"></i> Boîtes utilisées :</span>
-                                <input type="number" value="${m.box_count || 1}" onchange="updateBox('${id}', this.value)" class="w-16 sm:w-20 bg-white dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-500/10 rounded-lg p-1.5 sm:p-2 text-center font-black shadow-sm outline-none focus:border-indigo-500 text-xs sm:text-sm transition-all duration-300 focus:scale-105">
-                            </div>
-                        </div>`;
-                    index++;
-                }
+                        <div class="flex justify-between items-center bg-slate-500/5 p-3 rounded-xl border border-slate-500/10 mb-2">
+                            <span class="font-bold text-sm" style="color:${med.color}">${med.name}</span>
+                            <span class="text-xs font-black opacity-60 text-slate-800 dark:text-white">${t}</span>
+                        </div>
+                    `;
+                });
             }
 
-            window.updateBox = async (id, val) => {
-                setSyncing(true);
-                try {
-                    await sb.from('medications').update({ box_count: parseInt(val) }).eq('id', id);
-                    showToast("Quantité de boîtes mise à jour");
-                    loadMeds();
-                } finally {
-                    setSyncing(false);
-                }
+            window.closeModal = (id) => {
+                const m = document.getElementById(id);
+                if (m) m.classList.remove('open');
             };
-            
-            window.toggleArchive = async (id, s) => {
-                setSyncing(true);
-                try {
-                    await sb.from('medications').update({ active: s === false }).eq('id', id);
-                    showToast(s ? "Médicament archivé" : "Médicament réactivé");
-                    loadMeds();
-                } finally {
-                    setSyncing(false);
-                }
-            };
-            
-            window.deleteMed = async (id) => {
-                if (confirm("Voulez-vous supprimer ce médicament définitivement ?")) { 
-                    setSyncing(true);
-                    try {
-                        await sb.from('medications').delete().eq('id', id); 
-                        showToast("Médicament supprimé");
-                        loadMeds(); 
-                    } finally {
-                        setSyncing(false);
-                    }
-                }
-            };
-            
-            window.confirmAddMed = async () => {
-                const n = document.getElementById('newMedName').value.trim();
-                const pi = parseInt(document.getElementById('newMedPieces').value);
-                const pl = parseInt(document.getElementById('newMedPlates').value) || 1;
-                const c = document.getElementById('newMedColor').value;
-                const t = document.getElementById('newMedTime').value;
-                const days = Array.from(document.querySelectorAll('.day-btn.bg-indigo-500')).map(b => parseInt(b.dataset.day));
-                
-                if (!n || !pi) return showToast("Nom et doses/plq sont obligatoires");
-                
-                setSyncing(true);
-                try {
-                    const { data, error } = await sb.from('medications').insert({ user_key: user, name: n, pieces_per_plate: pi, plates_per_box: pl, color: c, active: true, box_count: 1 }).select('id').single();
-                    
-                    if (error) {
-                        showToast("Erreur lors de l'ajout");
-                        return;
-                    }
 
-                    let sched = JSON.parse(localStorage.getItem('medSchedules') || '{}');
-                    sched[data.id] = { time: t, days: days };
-                    localStorage.setItem('medSchedules', JSON.stringify(sched));
+            window.openModal = (id) => {
+                const m = document.getElementById(id);
+                if (m) m.classList.add('open');
+            };
+
+            window.openRightDrawer = () => {
+                const d = document.getElementById('rightDrawer');
+                const o = document.getElementById('drawerOverlay');
+                d.classList.remove('translate-x-full');
+                o.classList.remove('hidden');
+                setTimeout(() => o.classList.remove('opacity-0'), 10);
+            };
+
+            window.closeDrawers = () => {
+                const d = document.getElementById('rightDrawer');
+                const o = document.getElementById('drawerOverlay');
+                d.classList.add('translate-x-full');
+                o.classList.add('opacity-0');
+                setTimeout(() => o.classList.add('hidden'), 400);
+            };
+
+            window.toggleTheme = () => {
+                document.body.classList.toggle('dark');
+                const isDark = document.body.classList.contains('dark');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                const icon = document.getElementById('themeIcon');
+                if (isDark) {
+                    icon.classList.remove('ph-moon');
+                    icon.classList.add('ph-sun');
+                } else {
+                    icon.classList.remove('ph-sun');
+                    icon.classList.add('ph-moon');
+                }
+            };
+
+            window.changeMonth = (dir) => {
+                currentDate.setMonth(currentDate.getMonth() + dir);
+                renderCalendar();
+            };
+
+            window.confirmAddMed = async () => {
+                const btn = document.getElementById('addMedBtn');
+                const name = document.getElementById('newMedName').value.trim();
+                const pieces = parseInt(document.getElementById('newMedPieces').value);
+                const plates = parseInt(document.getElementById('newMedPlates').value) || 1;
+                const color = document.getElementById('newMedColor').value;
+                const time = document.getElementById('newMedTime').value;
+                const days = Array.from(document.querySelectorAll('#newMedDays .bg-indigo-500')).map(b => parseInt(b.dataset.day));
+
+                if (!name || !pieces) return showToast("Nom et doses requis");
+
+                setSyncing(true);
+                btn.classList.add('opacity-50', 'pointer-events-none');
+                try {
+                    const { data, error } = await sb.from('medications').insert({
+                        user_key: user,
+                        name,
+                        pieces_per_plate: pieces,
+                        plates_per_box: plates,
+                        color,
+                        active: true
+                    }).select().single();
                     
-                    showToast("Médicament ajouté avec succès");
-                    closeModal('addMedModal');
+                    if (error) throw error;
+                    
+                    let sched = JSON.parse(localStorage.getItem('medSchedules') || '{}');
+                    sched[data.id] = { time, days };
+                    localStorage.setItem('medSchedules', JSON.stringify(sched));
+
+                    await sb.from('medication_schedules').insert({
+                        medication_id: data.id,
+                        time: time || null,
+                        days: days.length ? days : null
+                    });
                     
                     document.getElementById('newMedName').value = '';
                     document.getElementById('newMedPieces').value = '';
                     document.getElementById('newMedPlates').value = '';
                     document.getElementById('newMedTime').value = '';
-                    document.querySelectorAll('.day-btn').forEach(b => {
+                    document.querySelectorAll('#newMedDays .bg-indigo-500').forEach(b => {
                         b.classList.remove('bg-indigo-500', 'text-white');
                         b.classList.add('bg-slate-500/20', 'text-slate-500');
                     });
-                    document.getElementById('newMedColor').value = '#6366f1';
-                    document.getElementById('colorPreview').style.background = '#6366f1';
-                    document.getElementById('addMedBtn').classList.add('opacity-50', 'pointer-events-none');
                     
+                    closeModal('addMedModal');
                     loadMeds();
+                    showToast("Médicament ajouté");
+                } catch(e) {
+                    showToast("Erreur lors de l'ajout");
+                    btn.classList.remove('opacity-50', 'pointer-events-none');
                 } finally {
                     setSyncing(false);
                 }
             };
 
-            window.openRightDrawer = () => {
-                const drawer = document.getElementById('rightDrawer');
-                const overlay = document.getElementById('drawerOverlay');
-                overlay.classList.remove('hidden');
-                
-                requestAnimationFrame(() => {
-                    overlay.classList.add('opacity-100');
-                    drawer.classList.remove('translate-x-full');
-                });
-            };
-            
-            window.closeDrawers = () => {
-                const drawer = document.getElementById('rightDrawer');
-                const overlay = document.getElementById('drawerOverlay');
-                drawer.classList.add('translate-x-full');
-                overlay.classList.remove('opacity-100');
-                
-                setTimeout(() => overlay.classList.add('hidden'), 600);
-            };
-            
-            window.openModal = (id) => {
-                const modal = document.getElementById(id);
-                modal.classList.add('open');
-            };
-            
-            window.closeModal = (id) => {
-                const modal = document.getElementById(id);
-                modal.classList.remove('open');
-            };
-            
-            window.changeMonth = async (v) => { 
-                currentDate.setMonth(currentDate.getMonth() + v); 
-                const monthName = new Intl.DateTimeFormat('fr', { month: 'long', year: 'numeric' }).format(currentDate);
-                
-                const title = document.getElementById('calMonth');
-                title.style.transform = 'scale(0.9)';
-                title.style.opacity = '0';
-                setTimeout(() => {
-                    title.innerText = monthName;
-                    title.style.transform = 'scale(1)';
-                    title.style.opacity = '1';
-                }, 200);
-                
-                if(!navigator.onLine) {
-                    renderCalendar();
-                    return;
-                }
-                
+            window.saveTelegramId = async () => {
+                const chatId = document.getElementById('telegramChatId').value.trim();
+                if (!chatId) return showToast("Veuillez entrer votre ID Telegram.");
                 setSyncing(true);
                 try {
-                    const y = currentDate.getFullYear();
-                    const m = currentDate.getMonth();
-                    const startDate = `${y}-${String(m+1).padStart(2,'0')}-01`;
-                    const endDate = `${y}-${String(m+1).padStart(2,'0')}-${new Date(y, m+1, 0).getDate()}`;
-                    
-                    const { data: hist } = await sb.from('medication_history').select('*').in('medication_id', Object.keys(medsData)).gte('date', startDate).lte('date', endDate);
-                    (hist || []).forEach(h => { window.medsHistoryMap[`${h.date}_${h.medication_id}`] = h; });
-                    
-                    renderCalendar(); 
+                    await sb.from('telegram_ids').upsert({ user_key: user, chat_id: chatId }, { onConflict: 'user_key' });
+                    showToast("ID Telegram enregistré !");
+                } catch (e) {
+                    showToast("Erreur lors de l'enregistrement.");
                 } finally {
                     setSyncing(false);
                 }
             };
-            
-            window.toggleTheme = () => {
-                const isDark = document.body.classList.toggle('dark');
-                localStorage.setItem('theme', isDark ? 'dark' : 'light');
-                const icon = document.getElementById('themeIcon');
-                
-                icon.style.transform = 'rotate(180deg) scale(0)';
-                setTimeout(() => {
-                    if (isDark) {
-                        icon.classList.replace('ph-moon', 'ph-sun');
-                    } else {
-                        icon.classList.replace('ph-sun', 'ph-moon');
-                    }
-                    icon.style.transform = 'rotate(0deg) scale(1)';
-                }, 200);
-            };
-            
-            window.handleLogout = () => { 
-                localStorage.removeItem('medUser'); 
-                document.body.style.opacity = '0';
-                setTimeout(() => location.reload(), 600);
+
+            window.handleLogout = () => {
+                localStorage.removeItem('medUser');
+                location.reload();
             };
 
+            function renderHistory() {
+                const list = document.getElementById('globalHistoryList');
+                if (!list) return;
+                list.innerHTML = '';
+                
+                const entries = Object.entries(window.medsHistoryMap).sort((a, b) => b[0].localeCompare(a[0]));
+                
+                if (entries.length === 0) {
+                    list.innerHTML = '<div class="text-center py-8 opacity-50 font-bold text-sm text-slate-800 dark:text-white">Aucun historique récent</div>';
+                    return;
+                }
+
+                entries.forEach(([key, data]) => {
+                    if (data.count === 0) return;
+                    const [date, id] = key.split('_');
+                    const med = medsData[id];
+                    if (!med) return;
+                    
+                    list.innerHTML += `
+                        <div class="bg-slate-500/5 p-4 rounded-2xl flex justify-between items-center border border-slate-500/10 mb-3 shadow-sm">
+                            <div>
+                                <div class="font-bold text-sm" style="color:${data.color}">${med.name}</div>
+                                <div class="text-xs opacity-60 font-black mt-1 text-slate-800 dark:text-white">${date}</div>
+                            </div>
+                            <div class="text-lg font-black" style="color:${data.color}">+${data.count}</div>
+                        </div>
+                    `;
+                });
+            }
+
             initUI();
-            if (user) initApp();
+            initApp();
         });
     </script>
 </body>
