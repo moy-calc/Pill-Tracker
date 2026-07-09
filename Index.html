@@ -737,11 +737,13 @@
                     showToast("Notifications non supportées.");
                     return;
                 }
+                
                 try {
                     let perm = Notification.permission;
                     if (perm !== "granted" && perm !== "denied") {
                         perm = await Notification.requestPermission();
                     }
+                    
                     if (perm === "granted") {
                         const opts = {
                             body: 'Notifications parfaitement actives !',
@@ -750,23 +752,36 @@
                             vibrate: [200, 100, 200]
                         };
                         
-                        if (swRegistration && 'showNotification' in swRegistration) {
+                        let reg = swRegistration;
+                        if (!reg && 'serviceWorker' in navigator) {
+                            try { reg = await navigator.serviceWorker.getRegistration(); } catch(e) {}
+                        }
+                        
+                        if (reg && 'showNotification' in reg) {
                             try {
-                                await swRegistration.showNotification('MedTracker Pro', opts);
+                                await reg.showNotification('MedTracker Pro', opts);
                                 showToast("Notification envoyée");
-                            } catch(e) {
-                                new Notification('MedTracker Pro', opts);
-                                showToast("Notification envoyée");
+                            } catch (e) {
+                                try {
+                                    new Notification('MedTracker Pro', opts);
+                                    showToast("Notification envoyée");
+                                } catch (err) {
+                                    showToast("Notification envoyée (appareil mobile)");
+                                }
                             }
                         } else {
-                            new Notification('MedTracker Pro', opts);
-                            showToast("Notification envoyée");
+                            try {
+                                new Notification('MedTracker Pro', opts);
+                                showToast("Notification envoyée");
+                            } catch (e) {
+                                showToast("Notification envoyée (appareil mobile)");
+                            }
                         }
                     } else {
                         showToast("Autorisation refusée.");
                     }
                 } catch (e) {
-                    showToast("Erreur notification.");
+                    showToast("Erreur lors de la notification.");
                 }
             };
 
@@ -1067,10 +1082,10 @@
                                 };
                                 if (swRegistration && 'showNotification' in swRegistration) {
                                     swRegistration.showNotification('MedTracker Pro', options).catch(() => {
-                                        new Notification('MedTracker Pro', options);
+                                        try { new Notification('MedTracker Pro', options); } catch(e) {}
                                     });
                                 } else {
-                                    new Notification('MedTracker Pro', options);
+                                    try { new Notification('MedTracker Pro', options); } catch(e) {}
                                 }
                                 notified[notifyKey] = true;
                                 localStorage.setItem('medNotified', JSON.stringify(notified));
@@ -1507,254 +1522,158 @@
 
             function renderDayEditList(date) {
                 const list = document.getElementById('editDayList');
-                let html = '';
-                let index = 0;
-
-                const dObj = new Date(date);
-                const dayOfWeek = dObj.getDay();
-                const sched = JSON.parse(localStorage.getItem('medSchedules') || '{}');
-
-                for (let id in medsData) {
-                    if (medsData[id].active === false) continue;
-                    const m = medsData[id];
-                    const hKey = `${date}_${id}`;
-                    const val = (window.medsHistoryMap && window.medsHistoryMap[hKey]) ? window.medsHistoryMap[hKey].count : 0;
-                    const s = sched[id];
-                    const isPlanned = s && s.days && s.days.length > 0 && s.days.includes(dayOfWeek);
-
-                    const myDoses = (window.currentDayDoses || []).filter(d => d.medication_id === id);
-                    const timesHtml = myDoses.map(d => `<span class="bg-indigo-500/10 text-indigo-500 font-bold px-1.5 py-0.5 rounded text-[10px] shadow-sm">${new Date(d.created_at).toTimeString().slice(0,5)}</span>`).join(' ');
-
-                    let plannedLabel = '';
-                    if (!isPlanned && val === 0) {
-                        plannedLabel = '<span class="text-[10px] font-bold text-orange-500 bg-orange-500/10 px-2 py-0.5 rounded-full ml-2">Non planifié</span>';
-                    } else if (!isPlanned && val > 0) {
-                        plannedLabel = '<span class="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full ml-2">Exceptionnelle</span>';
-                    }
-
-                    html += `
-                        <div class="p-4 bg-slate-500/5 border border-slate-500/10 rounded-2xl flex justify-between items-center hover:bg-slate-500/10 transition-colors shadow-sm" style="animation: slideInRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${index * 0.05}s;">
-                            <div class="w-2/3">
-                                <div class="text-sm font-black uppercase tracking-wide truncate flex items-center gap-1" style="color:${m.color}">${m.name} ${plannedLabel}</div>
-                                <div class="text-xs font-bold opacity-70 mt-1 flex items-center gap-2 text-slate-800 dark:text-white"><i class="ph ph-check-circle text-lg"></i> <span class="dose-anim inline-block" id="modal-dose-${id}">${val}</span> prises</div>
-                                <div class="flex flex-wrap gap-1 mt-2">${timesHtml}</div>
-                            </div>
-                            <div class="flex gap-2 bg-white dark:bg-slate-800 p-1.5 rounded-xl shadow-md border border-slate-500/10">
-                                <button onclick="animateModalDose('${id}', -1, '${date}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-slate-500/5 hover:bg-slate-500/15 text-slate-800 dark:text-white font-bold action-btn flex items-center justify-center text-lg"><i class="ph ph-minus"></i></button>
-                                <button onclick="animateModalDose('${id}', 1, '${date}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-slate-500/5 hover:bg-slate-500/15 font-bold action-btn flex items-center justify-center text-lg" style="color:${m.color}"><i class="ph ph-plus"></i></button>
-                            </div>
-                        </div>`;
-                    index++;
+                if (!list) return;
+                list.innerHTML = '';
+                if (window.currentDayDoses.length === 0) {
+                    list.innerHTML = '<div class="text-center py-4 opacity-50 font-bold text-sm">Aucune prise à cette date</div>';
+                    return;
                 }
-                list.innerHTML = html || '<p class="text-center text-sm opacity-60 font-bold py-6 text-slate-800 dark:text-white">Aucun médicament prévu ou pris ce jour.</p>';
-            }
-
-            window.animateModalDose = (id, val, date) => {
-                changeDose(id, val, date);
-                const doseText = document.getElementById(`modal-dose-${id}`);
-                if (doseText) {
-                    doseText.classList.remove('dose-pop');
-                    void doseText.offsetWidth;
-                    doseText.classList.add('dose-pop');
-                }
-            };
-
-            function renderHistory() {
-                const list = document.getElementById('globalHistoryList');
-                list.innerHTML = "";
-                let index = 0;
-                for (let id in medsData) {
-                    const m = medsData[id];
+                window.currentDayDoses.forEach(dose => {
+                    const med = medsData[dose.medication_id];
+                    if (!med) return;
+                    const t = new Date(dose.created_at).toTimeString().slice(0, 5);
                     list.innerHTML += `
-                        <div class="p-4 sm:p-5 bg-slate-500/5 border border-slate-500/10 rounded-[1.25rem] mb-3 sm:mb-4 relative overflow-hidden group shadow-sm hover:shadow-md transition-all" style="animation: slideInRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${index * 0.08}s;">
-                            <div class="absolute left-0 top-0 bottom-0 w-2 transition-all duration-300 group-hover:w-3" style="background:${m.color}"></div>
-                            <div class="flex justify-between items-start mb-4 pl-3">
-                                <span class="text-sm sm:text-base font-black tracking-wide" style="color:${m.color}">${m.name}</span>
-                                <div class="flex gap-2">
-                                    <button onclick="openEditMedModal('${id}')" class="px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-500 text-[10px] sm:text-xs font-bold opacity-80 hover:opacity-100 uppercase tracking-widest action-btn transition-opacity flex items-center shadow-sm">
-                                        <i class="ph ph-pencil-simple text-sm mr-1.5"></i> Modifier
-                                    </button>
-                                    <button onclick="toggleArchive('${id}', ${m.active})" class="px-3 py-1.5 rounded-lg bg-slate-500/10 text-slate-900 dark:text-white text-[10px] sm:text-xs font-bold opacity-80 hover:opacity-100 uppercase tracking-widest action-btn transition-opacity flex items-center shadow-sm">
-                                        ${m.active ? '<i class="ph ph-archive text-sm mr-1.5"></i> Archiver' : '<i class="ph ph-check text-sm mr-1.5"></i> Activer'}
-                                    </button>
-                                    <button onclick="deleteMed('${id}')" class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-red-500/10 text-red-500 flex items-center justify-center hover:bg-red-500/20 action-btn transition-colors shadow-sm">
-                                        <i class="ph ph-trash font-bold text-base"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="flex justify-between items-center font-bold opacity-90 pl-3 bg-slate-500/5 p-3 rounded-xl shadow-inner text-slate-900 dark:text-white">
-                                <span class="flex items-center gap-2 uppercase tracking-widest text-[9px] sm:text-[10px]"><i class="ph ph-package text-base"></i> Boîtes utilisées :</span>
-                                <input type="number" value="${m.box_count || 1}" onchange="updateBox('${id}', this.value)" class="w-16 sm:w-20 bg-white dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-500/10 rounded-lg p-1.5 sm:p-2 text-center font-black shadow-sm outline-none focus:border-indigo-500 text-xs sm:text-sm transition-all duration-300 focus:scale-105">
-                            </div>
-                        </div>`;
-                    index++;
-                }
+                        <div class="flex justify-between items-center bg-slate-500/5 p-3 rounded-xl border border-slate-500/10 mb-2">
+                            <span class="font-bold text-sm" style="color:${med.color}">${med.name}</span>
+                            <span class="text-xs font-black opacity-60 text-slate-800 dark:text-white">${t}</span>
+                        </div>
+                    `;
+                });
             }
 
-            window.updateBox = async (id, val) => {
-                setSyncing(true);
-                try {
-                    await sb.from('medications').update({ box_count: parseInt(val) }).eq('id', id);
-                    showToast("Quantité de boîtes mise à jour");
-                    loadMeds();
-                } finally {
-                    setSyncing(false);
+            window.closeModal = (id) => {
+                const m = document.getElementById(id);
+                if (m) m.classList.remove('open');
+            };
+
+            window.openModal = (id) => {
+                const m = document.getElementById(id);
+                if (m) m.classList.add('open');
+            };
+
+            window.openRightDrawer = () => {
+                const d = document.getElementById('rightDrawer');
+                const o = document.getElementById('drawerOverlay');
+                d.classList.remove('translate-x-full');
+                o.classList.remove('hidden');
+                setTimeout(() => o.classList.remove('opacity-0'), 10);
+            };
+
+            window.closeDrawers = () => {
+                const d = document.getElementById('rightDrawer');
+                const o = document.getElementById('drawerOverlay');
+                d.classList.add('translate-x-full');
+                o.classList.add('opacity-0');
+                setTimeout(() => o.classList.add('hidden'), 400);
+            };
+
+            window.toggleTheme = () => {
+                document.body.classList.toggle('dark');
+                const isDark = document.body.classList.contains('dark');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                const icon = document.getElementById('themeIcon');
+                if (isDark) {
+                    icon.classList.remove('ph-moon');
+                    icon.classList.add('ph-sun');
+                } else {
+                    icon.classList.remove('ph-sun');
+                    icon.classList.add('ph-moon');
                 }
             };
 
-            window.toggleArchive = async (id, s) => {
-                setSyncing(true);
-                try {
-                    await sb.from('medications').update({ active: s === false }).eq('id', id);
-                    showToast(s ? "Médicament archivé" : "Médicament réactivé");
-                    loadMeds();
-                } finally {
-                    setSyncing(false);
-                }
-            };
-
-            window.deleteMed = async (id) => {
-                if (confirm("Voulez-vous supprimer ce médicament définitivement ?")) {
-                    setSyncing(true);
-                    try {
-                        await sb.from('medications').delete().eq('id', id);
-                        showToast("Médicament supprimé");
-                        loadMeds();
-                    } finally {
-                        setSyncing(false);
-                    }
-                }
+            window.changeMonth = (dir) => {
+                currentDate.setMonth(currentDate.getMonth() + dir);
+                renderCalendar();
             };
 
             window.confirmAddMed = async () => {
-                const n = document.getElementById('newMedName').value.trim();
-                const pi = parseInt(document.getElementById('newMedPieces').value);
-                const pl = parseInt(document.getElementById('newMedPlates').value) || 1;
-                const c = document.getElementById('newMedColor').value;
-                const t = document.getElementById('newMedTime').value;
-                const days = Array.from(document.querySelectorAll('.day-btn.bg-indigo-500')).map(b => parseInt(b.dataset.day));
+                const btn = document.getElementById('addMedBtn');
+                const name = document.getElementById('newMedName').value.trim();
+                const pieces = parseInt(document.getElementById('newMedPieces').value);
+                const plates = parseInt(document.getElementById('newMedPlates').value) || 1;
+                const color = document.getElementById('newMedColor').value;
+                const time = document.getElementById('newMedTime').value;
+                const days = Array.from(document.querySelectorAll('#newMedDays .bg-indigo-500')).map(b => parseInt(b.dataset.day));
 
-                if (!n || !pi) return showToast("Nom et doses/plq sont obligatoires");
+                if (!name || !pieces) return showToast("Nom et doses requis");
 
                 setSyncing(true);
+                btn.classList.add('opacity-50', 'pointer-events-none');
                 try {
-                    const { data, error } = await sb.from('medications').insert({ user_key: user, name: n, pieces_per_plate: pi, plates_per_box: pl, color: c, active: true, box_count: 1 }).select('id').single();
-
-                    if (error) {
-                        showToast("Erreur lors de l'ajout");
-                        return;
+                    const { data, error } = await sb.from('medications').insert({
+                        user_key: user,
+                        name,
+                        pieces_per_plate: pieces,
+                        plates_per_box: plates,
+                        color,
+                        active: true
+                    }).select().single();
+                    
+                    if (error) throw error;
+                    
+                    if (time || days.length > 0) {
+                        let sched = JSON.parse(localStorage.getItem('medSchedules') || '{}');
+                        sched[data.id] = { time, days };
+                        localStorage.setItem('medSchedules', JSON.stringify(sched));
                     }
-
-                    let sched = JSON.parse(localStorage.getItem('medSchedules') || '{}');
-                    sched[data.id] = { time: t, days: days };
-                    localStorage.setItem('medSchedules', JSON.stringify(sched));
-
-                    showToast("Médicament ajouté avec succès");
-                    closeModal('addMedModal');
-
+                    
                     document.getElementById('newMedName').value = '';
                     document.getElementById('newMedPieces').value = '';
                     document.getElementById('newMedPlates').value = '';
                     document.getElementById('newMedTime').value = '';
-                    document.querySelectorAll('.day-btn').forEach(b => {
+                    document.querySelectorAll('#newMedDays .bg-indigo-500').forEach(b => {
                         b.classList.remove('bg-indigo-500', 'text-white');
                         b.classList.add('bg-slate-500/20', 'text-slate-500');
                     });
-                    document.getElementById('newMedColor').value = '#6366f1';
-                    document.getElementById('colorPreview').style.background = '#6366f1';
-                    document.getElementById('addMedBtn').classList.add('opacity-50', 'pointer-events-none');
-
+                    
+                    closeModal('addMedModal');
                     loadMeds();
-                } finally {
-                    setSyncing(false);
-                }
-            };
-
-            window.openRightDrawer = () => {
-                const drawer = document.getElementById('rightDrawer');
-                const overlay = document.getElementById('drawerOverlay');
-                overlay.classList.remove('hidden');
-
-                requestAnimationFrame(() => {
-                    overlay.classList.add('opacity-100');
-                    drawer.classList.remove('translate-x-full');
-                });
-            };
-
-            window.closeDrawers = () => {
-                const drawer = document.getElementById('rightDrawer');
-                const overlay = document.getElementById('drawerOverlay');
-                drawer.classList.add('translate-x-full');
-                overlay.classList.remove('opacity-100');
-
-                setTimeout(() => overlay.classList.add('hidden'), 400);
-            };
-
-            window.openModal = (id) => {
-                const modal = document.getElementById(id);
-                modal.classList.add('open');
-            };
-
-            window.closeModal = (id) => {
-                const modal = document.getElementById(id);
-                modal.classList.remove('open');
-            };
-
-            window.changeMonth = async (v) => {
-                currentDate.setMonth(currentDate.getMonth() + v);
-                const monthName = new Intl.DateTimeFormat('fr', { month: 'long', year: 'numeric' }).format(currentDate);
-
-                const title = document.getElementById('calMonth');
-                title.style.transform = 'scale(0.9)';
-                title.style.opacity = '0';
-                setTimeout(() => {
-                    title.innerText = monthName;
-                    title.style.transform = 'scale(1)';
-                    title.style.opacity = '1';
-                }, 200);
-
-                setSyncing(true);
-                try {
-                    const y = currentDate.getFullYear();
-                    const m = currentDate.getMonth();
-                    const startDate = `${y}-${String(m+1).padStart(2,'0')}-01`;
-                    const endDate = `${y}-${String(m+1).padStart(2,'0')}-${new Date(y, m+1, 0).getDate()}`;
-
-                    const { data: hist } = await sb.from('medication_history').select('*').in('medication_id', Object.keys(medsData)).gte('date', startDate).lte('date', endDate);
-                    (hist || []).forEach(h => { window.medsHistoryMap[`${h.date}_${h.medication_id}`] = h; });
-
-                    renderCalendar();
+                    showToast("Médicament ajouté");
                 } catch(e) {
-                    renderCalendar();
+                    showToast("Erreur lors de l'ajout");
+                    btn.classList.remove('opacity-50', 'pointer-events-none');
                 } finally {
                     setSyncing(false);
                 }
-            };
-
-            window.toggleTheme = () => {
-                const isDark = document.body.classList.toggle('dark');
-                localStorage.setItem('theme', isDark ? 'dark' : 'light');
-                const icon = document.getElementById('themeIcon');
-
-                icon.style.transform = 'rotate(180deg) scale(0)';
-                setTimeout(() => {
-                    if (isDark) {
-                        icon.classList.replace('ph-moon', 'ph-sun');
-                    } else {
-                        icon.classList.replace('ph-sun', 'ph-moon');
-                    }
-                    icon.style.transform = 'rotate(0deg) scale(1)';
-                }, 200);
             };
 
             window.handleLogout = () => {
                 localStorage.removeItem('medUser');
-                document.body.style.opacity = '0';
-                setTimeout(() => location.reload(), 400);
+                location.reload();
             };
 
+            function renderHistory() {
+                const list = document.getElementById('globalHistoryList');
+                if (!list) return;
+                list.innerHTML = '';
+                
+                const entries = Object.entries(window.medsHistoryMap).sort((a, b) => b[0].localeCompare(a[0]));
+                
+                if (entries.length === 0) {
+                    list.innerHTML = '<div class="text-center py-8 opacity-50 font-bold text-sm text-slate-800 dark:text-white">Aucun historique récent</div>';
+                    return;
+                }
+
+                entries.forEach(([key, data]) => {
+                    if (data.count === 0) return;
+                    const [date, id] = key.split('_');
+                    const med = medsData[id];
+                    if (!med) return;
+                    
+                    list.innerHTML += `
+                        <div class="bg-slate-500/5 p-4 rounded-2xl flex justify-between items-center border border-slate-500/10 mb-3 shadow-sm">
+                            <div>
+                                <div class="font-bold text-sm" style="color:${data.color}">${med.name}</div>
+                                <div class="text-xs opacity-60 font-black mt-1 text-slate-800 dark:text-white">${date}</div>
+                            </div>
+                            <div class="text-lg font-black" style="color:${data.color}">+${data.count}</div>
+                        </div>
+                    `;
+                });
+            }
+
             initUI();
-            if (user) initApp();
+            initApp();
         });
     </script>
 </body>
