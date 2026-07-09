@@ -58,9 +58,24 @@
             background-attachment: fixed;
             color: var(--text); 
             font-family: 'Plus Jakarta Sans', sans-serif; 
-            transition: background 0.5s ease, color 0.5s ease; 
+            transition: background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); 
             min-height: 100vh;
             -webkit-tap-highlight-color: transparent;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.85); }
+            to { opacity: 1; transform: scale(1); }
         }
         
         .glass { 
@@ -70,14 +85,16 @@
             border: 1px solid var(--border); 
             border-radius: 24px; 
             box-shadow: var(--shadow);
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .glass:hover {
-            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-4px);
         }
+        
         .dark .glass:hover {
-            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
         }
         
         .progress-container {
@@ -93,7 +110,7 @@
         .progress-bar {
             height: 100%;
             border-radius: 99px;
-            transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         
         .cal-cell { 
@@ -104,16 +121,17 @@
             padding: 6px; 
             border: 1px solid var(--border); 
             cursor: pointer; 
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); 
         }
         
         .cal-cell:active {
-            transform: scale(0.92);
+            transform: scale(0.85) !important;
         }
 
         .cal-cell:hover {
-            background: rgba(148, 163, 184, 0.08);
-            transform: translateY(-2px);
+            background: rgba(148, 163, 184, 0.15);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
         }
         
         .ratio-badge { 
@@ -126,14 +144,15 @@
             text-align: center;
             box-shadow: 0 2px 6px rgba(0,0,0,0.15);
             letter-spacing: 0.5px;
+            animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
         
         .modal-overlay { 
             position: fixed; 
             inset: 0; 
             background: rgba(2, 6, 23, 0.6); 
-            backdrop-filter: blur(16px); 
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(0px); 
+            -webkit-backdrop-filter: blur(0px);
             z-index: 6000; 
             display: flex; 
             align-items: center; 
@@ -142,7 +161,7 @@
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .modal-overlay.z-top {
@@ -153,26 +172,30 @@
             opacity: 1;
             visibility: visible;
             pointer-events: auto;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
         }
         
         .modal-content {
-            transform: translateY(40px) scale(0.92);
-            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            opacity: 0;
+            transform: translateY(60px) scale(0.85);
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
             width: 100%;
             max-width: 420px;
         }
         
         .modal-overlay.open .modal-content {
+            opacity: 1;
             transform: translateY(0) scale(1);
         }
         
         @keyframes pulse-soft { 
             0%, 100% { opacity: 1; transform: scale(1); } 
-            50% { opacity: 0.85; transform: scale(1.05); } 
+            50% { opacity: 0.85; transform: scale(1.08); } 
         }
         
         .alert-stock { 
-            animation: pulse-soft 2.5s infinite cubic-bezier(0.4, 0, 0.2, 1); 
+            animation: pulse-soft 2s infinite cubic-bezier(0.4, 0, 0.2, 1); 
             font-size: 10px; 
             font-weight: 800; 
             padding: 4px 10px; 
@@ -184,15 +207,15 @@
             position: fixed;
             top: 24px;
             left: 50%;
-            transform: translateX(-50%) translateY(-150px) scale(0.9);
+            transform: translateX(-50%) translateY(-150px) scale(0.5);
             background: var(--text);
-            color: var(--bg);
+            color: var(--bg-gradient);
             padding: 14px 24px;
             border-radius: 100px;
             font-weight: 700;
             font-size: 13px;
             z-index: 9999;
-            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
@@ -212,6 +235,12 @@
             appearance: none;
             -webkit-appearance: none;
             font-size: 15px !important;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        input:focus {
+            transform: scale(1.02);
+            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.15);
         }
 
         input[type="color"] {
@@ -233,19 +262,21 @@
         }
         
         .action-btn {
-            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         
         .action-btn:active {
-            transform: scale(0.88);
+            transform: scale(0.85) !important;
         }
 
         .action-btn:hover {
-            transform: translateY(-2px);
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.2);
         }
 
         .dose-anim {
-            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: inline-block;
         }
 
         .hide-scroll::-webkit-scrollbar {
@@ -261,14 +292,18 @@
             border-color: #22c55e !important;
             background-color: rgba(34, 197, 94, 0.08) !important;
         }
+
+        #drawerOverlay {
+            transition: opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
     </style>
 </head>
 <body class="p-3 sm:p-5 lg:p-6">
     <div id="toastContainer" class="toast"><i class="ph ph-info text-xl"></i><span id="toastMsg"></span></div>
 
-    <div id="drawerOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[2000] hidden transition-opacity duration-400 opacity-0" onclick="closeDrawers()"></div>
+    <div id="drawerOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[2000] hidden opacity-0" onclick="closeDrawers()"></div>
     
-    <nav class="max-w-5xl mx-auto flex justify-between items-center p-3 sm:p-4 glass mb-6 sm:mb-8 relative z-[1000] rounded-3xl">
+    <nav class="max-w-5xl mx-auto flex justify-between items-center p-3 sm:p-4 glass mb-6 sm:mb-8 relative z-[1000] rounded-3xl" style="animation: fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
         <button onclick="openModal('accountModal')" id="accBtn" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-500/10 items-center justify-center hidden action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
             <i class="ph ph-user text-lg sm:text-xl"></i>
         </button>
@@ -276,7 +311,7 @@
             <i class="ph-fill ph-pill"></i> MEDTRACKER
         </h1>
         <div class="flex gap-1.5 sm:gap-2">
-            <button id="syncBtn" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center action-btn transition-colors hidden">
+            <button id="syncBtn" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center action-btn hidden">
                 <i class="ph ph-cloud-check text-lg sm:text-xl" id="syncIcon"></i>
             </button>
             <button onclick="triggerNotification()" id="notifBtn" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center action-btn hover:bg-indigo-500/20">
@@ -292,8 +327,8 @@
     </nav>
 
     <main class="max-w-5xl mx-auto space-y-6 pb-12">
-        <div id="loginBox" class="glass p-6 sm:p-10 text-center space-y-6 max-w-md mx-auto mt-8 sm:mt-12 rounded-[2rem]">
-            <div class="w-20 h-20 sm:w-24 sm:h-24 bg-indigo-500/10 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-2">
+        <div id="loginBox" class="glass p-6 sm:p-10 text-center space-y-6 max-w-md mx-auto mt-8 sm:mt-12 rounded-[2rem]" style="animation: popIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
+            <div class="w-20 h-20 sm:w-24 sm:h-24 bg-indigo-500/10 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-2 transition-transform duration-500 hover:scale-110 hover:rotate-12">
                 <i class="ph ph-lock-key text-4xl sm:text-5xl"></i>
             </div>
             <div>
@@ -302,32 +337,32 @@
             </div>
             <div class="space-y-4">
                 <div class="relative">
-                    <i class="ph ph-text-aa absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl" id="iconLN"></i>
-                    <input type="text" id="lastName" oninput="validateInput('lastName', 'iconLN')" placeholder="Nom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-all text-base">
+                    <i class="ph ph-text-aa absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl transition-all duration-300" id="iconLN"></i>
+                    <input type="text" id="lastName" oninput="validateInput('lastName', 'iconLN')" placeholder="Nom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
                 </div>
                 <div class="relative">
-                    <i class="ph ph-text-a-underline absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl" id="iconFN"></i>
-                    <input type="text" id="firstName" oninput="validateInput('firstName', 'iconFN')" placeholder="Prénom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-all text-base">
+                    <i class="ph ph-text-a-underline absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl transition-all duration-300" id="iconFN"></i>
+                    <input type="text" id="firstName" oninput="validateInput('firstName', 'iconFN')" placeholder="Prénom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
                 </div>
                 <div>
                     <div class="relative">
-                        <i class="ph ph-calendar-blank absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl" id="iconBD"></i>
-                        <input type="text" id="birthDate" placeholder="Date de naissance" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-all cursor-pointer text-base">
+                        <i class="ph ph-calendar-blank absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl transition-all duration-300" id="iconBD"></i>
+                        <input type="text" id="birthDate" placeholder="Date de naissance" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 cursor-pointer text-base">
                     </div>
-                    <div id="ageDisplay" class="text-xs font-bold text-indigo-500 mt-2 hidden text-right pr-3"></div>
+                    <div id="ageDisplay" class="text-xs font-bold text-indigo-500 mt-2 hidden text-right pr-3" style="animation: slideInRight 0.4s forwards;"></div>
                 </div>
                 <div class="relative">
                     <i class="ph ph-password absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
-                    <input type="password" id="passInput" placeholder="Mot de passe" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-all hidden text-base">
+                    <input type="password" id="passInput" placeholder="Mot de passe" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 hidden text-base">
                 </div>
             </div>
-            <button id="authBtn" onclick="handleAuth()" class="w-full py-4 sm:py-5 mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl opacity-50 pointer-events-none transition-all action-btn flex items-center justify-center gap-2 text-sm tracking-widest uppercase shadow-lg shadow-indigo-600/30">
+            <button id="authBtn" onclick="handleAuth()" class="w-full py-4 sm:py-5 mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl opacity-50 pointer-events-none action-btn flex items-center justify-center gap-2 text-sm tracking-widest uppercase shadow-lg shadow-indigo-600/30">
                 VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>
             </button>
         </div>
 
         <div id="appBody" class="hidden space-y-6">
-            <div>
+            <div style="animation: fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
                 <div class="flex justify-between items-center px-1 mb-4 sm:mb-6">
                     <h2 class="font-black text-xs sm:text-sm uppercase tracking-widest opacity-60 flex items-center gap-2">
                         <i class="ph ph-pill text-lg"></i> Mes Médicaments
@@ -339,12 +374,12 @@
                 <div id="medsGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6"></div>
             </div>
 
-            <div class="glass p-4 sm:p-8 rounded-[2rem]">
+            <div class="glass p-4 sm:p-8 rounded-[2rem]" style="animation: fadeInUp 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: 0.1s;">
                 <div class="flex justify-between items-center mb-6 bg-slate-500/5 p-2 rounded-2xl">
                     <button onclick="changeMonth(-1)" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-500/15 action-btn text-lg bg-white dark:bg-slate-800 shadow-sm">
                         <i class="ph ph-caret-left font-bold"></i>
                     </button>
-                    <h3 id="calMonth" class="font-black uppercase text-xs sm:text-sm tracking-widest text-indigo-500"></h3>
+                    <h3 id="calMonth" class="font-black uppercase text-xs sm:text-sm tracking-widest text-indigo-500 transition-all duration-300"></h3>
                     <button onclick="changeMonth(1)" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-500/15 action-btn text-lg bg-white dark:bg-slate-800 shadow-sm">
                         <i class="ph ph-caret-right font-bold"></i>
                     </button>
@@ -366,22 +401,22 @@
     <div id="accountModal" class="modal-overlay" onclick="closeModal('accountModal')">
         <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
             <div class="flex justify-center mb-5 sm:mb-6 text-indigo-500">
-                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-indigo-500/10 rounded-full flex items-center justify-center shadow-inner">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-indigo-500/10 rounded-full flex items-center justify-center shadow-inner transition-transform duration-500 hover:scale-110 hover:rotate-12">
                     <i class="ph ph-user-circle text-4xl sm:text-5xl"></i>
                 </div>
             </div>
             <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest text-indigo-500">Profil Utilisateur</h3>
             <div class="space-y-3 sm:space-y-4 mb-6">
-                <input type="text" id="editLN" placeholder="Nom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-colors">
-                <input type="text" id="editFN" placeholder="Prénom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-colors">
+                <input type="text" id="editLN" placeholder="Nom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
+                <input type="text" id="editFN" placeholder="Prénom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
                 <div>
-                    <input type="text" id="editBD" placeholder="Date de naissance" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-colors cursor-pointer">
+                    <input type="text" id="editBD" placeholder="Date de naissance" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5 cursor-pointer">
                     <div id="editAgeDisplay" class="text-xs font-bold text-indigo-500 mt-2 text-right pr-3"></div>
                 </div>
                 <div class="h-px w-full bg-slate-500/20 my-4 sm:my-6 rounded-full"></div>
                 
-                <input type="password" id="oldPassCheck" placeholder="Ancien mot de passe" class="w-full bg-slate-500/5 border border-indigo-500/40 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-colors">
-                <input type="password" id="newPassSet" placeholder="Nouveau mot de passe" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-colors">
+                <input type="password" id="oldPassCheck" placeholder="Ancien mot de passe" class="w-full bg-slate-500/5 border border-indigo-500/40 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
+                <input type="password" id="newPassSet" placeholder="Nouveau mot de passe" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
                 
                 <div class="pt-3 space-y-2">
                     <button onclick="updateAccount()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-xs uppercase tracking-widest action-btn shadow-lg shadow-indigo-600/30">Sauvegarder</button>
@@ -397,32 +432,32 @@
     <div id="addMedModal" class="modal-overlay" onclick="closeModal('addMedModal')">
         <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
             <div class="flex justify-center mb-5 sm:mb-6 text-indigo-500">
-                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-indigo-500/10 rounded-full flex items-center justify-center shadow-inner">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-indigo-500/10 rounded-full flex items-center justify-center shadow-inner transition-transform duration-500 hover:scale-110 hover:rotate-12">
                     <i class="ph ph-pill text-3xl sm:text-4xl"></i>
                 </div>
             </div>
             <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest text-indigo-500">Nouveau Médicament</h3>
             
             <div class="space-y-4 mb-6 flex flex-col">
-                <div class="relative bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:bg-slate-500/15 transition-all action-btn" onclick="openModal('colorModal')">
+                <div class="relative bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 flex items-center justify-between cursor-pointer action-btn" onclick="openModal('colorModal')">
                     <span class="text-sm font-bold opacity-80">Couleur associée</span>
                     <input type="hidden" id="newMedColor" value="#6366f1">
-                    <div id="colorPreview" class="w-10 h-10 rounded-xl shadow-lg border-2 border-white/30" style="background: #6366f1;"></div>
+                    <div id="colorPreview" class="w-10 h-10 rounded-xl shadow-lg border-2 border-white/30 transition-transform duration-300" style="background: #6366f1;"></div>
                 </div>
 
                 <div class="relative">
-                    <i class="ph ph-text-aa absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl" id="iconMedName"></i>
-                    <input type="text" id="newMedName" oninput="validateMedForm()" placeholder="Nom du médicament" class="w-full p-4 pl-12 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-colors">
+                    <i class="ph ph-text-aa absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl transition-all" id="iconMedName"></i>
+                    <input type="text" id="newMedName" oninput="validateMedForm()" placeholder="Nom du médicament" class="w-full p-4 pl-12 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
                 </div>
                 
                 <div class="grid grid-cols-2 gap-3 sm:gap-4">
                     <div class="relative">
-                        <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4">Doses/Plq</label>
-                        <input type="number" id="newMedPieces" oninput="validateMedForm()" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-colors text-center text-lg">
+                        <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4 transition-all">Doses/Plq</label>
+                        <input type="number" id="newMedPieces" oninput="validateMedForm()" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
                     </div>
                     <div class="relative">
-                        <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4">Plaques</label>
-                        <input type="number" id="newMedPlates" oninput="validateMedForm()" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-colors text-center text-lg">
+                        <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4 transition-all">Plaques</label>
+                        <input type="number" id="newMedPlates" oninput="validateMedForm()" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
                     </div>
                 </div>
             </div>
@@ -435,9 +470,9 @@
         <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
             <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest text-indigo-500">Choisir une couleur</h3>
             <div id="colorGrid" class="grid grid-cols-5 gap-3 sm:gap-4 mb-6"></div>
-            <div class="flex items-center gap-4 mb-6 bg-slate-500/5 p-4 rounded-2xl border border-slate-500/10">
+            <div class="flex items-center gap-4 mb-6 bg-slate-500/5 p-4 rounded-2xl border border-slate-500/10 transition-all">
                 <span class="text-sm font-bold opacity-80 flex-1">Personnalisée :</span>
-                <input type="color" id="customColorPicker" class="w-10 h-10 rounded-xl shadow-inner cursor-pointer" onchange="selectColor(this.value)">
+                <input type="color" id="customColorPicker" class="w-10 h-10 rounded-xl shadow-inner cursor-pointer action-btn" onchange="selectColor(this.value)">
             </div>
             <button onclick="closeModal('colorModal')" class="w-full py-4 bg-slate-500/15 hover:bg-slate-500/25 font-bold rounded-2xl uppercase text-xs tracking-widest action-btn">Retour</button>
         </div>
@@ -446,7 +481,7 @@
     <div id="editDayModal" class="modal-overlay" onclick="closeModal('editDayModal')">
         <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
             <div class="flex justify-center mb-5 text-indigo-500">
-                <i class="ph ph-calendar-check text-4xl"></i>
+                <i class="ph ph-calendar-check text-4xl transition-transform duration-500 hover:scale-125"></i>
             </div>
             <h3 id="editDayTitle" class="font-black mb-6 text-center uppercase text-xs sm:text-sm tracking-widest text-indigo-500 bg-indigo-500/10 py-2.5 rounded-2xl"></h3>
             <div id="editDayList" class="space-y-3 sm:space-y-4 max-h-[50vh] overflow-y-auto pr-2 hide-scroll"></div>
@@ -454,7 +489,7 @@
         </div>
     </div>
 
-    <div id="rightDrawer" class="fixed top-0 right-0 bottom-0 w-full sm:w-[420px] bg-white dark:bg-slate-900 z-[2500] translate-x-full transition-transform duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) p-5 sm:p-8 border-l border-slate-500/10 shadow-2xl overflow-hidden flex flex-col">
+    <div id="rightDrawer" class="fixed top-0 right-0 bottom-0 w-full sm:w-[420px] bg-white dark:bg-slate-900 z-[2500] translate-x-full transition-transform duration-700 cubic-bezier(0.34, 1.56, 0.64, 1) p-5 sm:p-8 border-l border-slate-500/10 shadow-2xl overflow-hidden flex flex-col">
         <div class="flex justify-between items-center mb-8 mt-1">
             <h2 class="text-lg sm:text-xl font-black tracking-tight text-indigo-500 flex items-center gap-2">
                 <i class="ph ph-clock-counter-clockwise"></i> HISTORIQUE
@@ -501,19 +536,19 @@
                 const icon = document.getElementById('syncIcon');
                 
                 if (!navigator.onLine) {
-                    btn.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center action-btn transition-colors";
+                    btn.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center action-btn";
                     icon.className = "ph ph-wifi-slash text-lg sm:text-xl";
                     return;
                 }
                 
                 if (isSyncing) {
                     pendingRequests++;
-                    btn.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center action-btn transition-colors";
+                    btn.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center action-btn";
                     icon.className = "ph ph-arrows-clockwise text-lg sm:text-xl animate-spin";
                 } else {
                     pendingRequests = Math.max(0, pendingRequests - 1);
                     if (pendingRequests === 0) {
-                        btn.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center action-btn transition-colors";
+                        btn.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center action-btn";
                         icon.className = "ph ph-cloud-check text-lg sm:text-xl";
                     }
                 }
@@ -540,6 +575,8 @@
             window.showToast = (msg) => {
                 const t = document.getElementById('toastContainer');
                 document.getElementById('toastMsg').innerText = msg;
+                t.classList.remove('show');
+                void t.offsetWidth; 
                 t.classList.add('show');
                 clearTimeout(toastTimeout);
                 toastTimeout = setTimeout(() => t.classList.remove('show'), 4000);
@@ -550,26 +587,39 @@
                     showToast("Notifications non supportées sur cet appareil.");
                     return;
                 }
-                if (Notification.permission === "granted") {
-                    try {
+                try {
+                    let perm = Notification.permission;
+                    if (perm !== "granted" && perm !== "denied") {
+                        perm = await Notification.requestPermission();
+                    }
+                    
+                    if (perm === "granted") {
                         if (navigator.serviceWorker) {
                             const reg = await navigator.serviceWorker.ready;
-                            reg.showNotification('MedTracker', { body: 'Notifications actives !', icon: 'icon.png' });
-                        } else {
-                            new Notification('MedTracker', { body: 'Notifications actives !', icon: 'icon.png' });
+                            if (reg && reg.showNotification) {
+                                await reg.showNotification('MedTracker', { 
+                                    body: 'Notifications actives !', 
+                                    icon: 'icon.png' 
+                                });
+                                showToast("Notification de test envoyée");
+                                return;
+                            }
                         }
-                    } catch(e) {
-                        new Notification('MedTracker', { body: 'Notifications actives !', icon: 'icon.png' });
-                    }
-                } else if (Notification.permission !== "denied") {
-                    const p = await Notification.requestPermission();
-                    if (p === "granted") {
-                        new Notification('MedTracker', { body: 'Notifications autorisées !', icon: 'icon.png' });
+                        new Notification('MedTracker', { 
+                            body: 'Notifications actives !', 
+                            icon: 'icon.png' 
+                        });
+                        showToast("Notification de test envoyée");
                     } else {
-                        showToast("Notifications refusées.");
+                        showToast("Autorisation des notifications refusée.");
                     }
-                } else {
-                    showToast("Autorisation des notifications refusée.");
+                } catch(e) {
+                    try {
+                        new Notification('MedTracker', { body: 'Notifications actives !', icon: 'icon.png' });
+                        showToast("Notification de test envoyée");
+                    } catch(err) {
+                        showToast("Erreur lors de l'envoi de la notification.");
+                    }
                 }
             };
 
@@ -587,8 +637,8 @@
 
             function initUI() {
                 const cGrid = document.getElementById('colorGrid');
-                cGrid.innerHTML = extendedColors.map(c => 
-                    `<div onclick="selectColor('${c}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl cursor-pointer hover:scale-110 transition-transform shadow-lg border-2 border-white/20" style="background:${c}"></div>`
+                cGrid.innerHTML = extendedColors.map((c, idx) => 
+                    `<div onclick="selectColor('${c}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl cursor-pointer action-btn shadow-lg border-2 border-white/20" style="background:${c}; animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${idx * 0.02}s;"></div>`
                 ).join('');
 
                 flatpickr("#birthDate", {
@@ -622,6 +672,8 @@
                         icon.classList.remove('ph-text-aa', 'ph-text-a-underline', 'ph-calendar-blank');
                         icon.classList.add('ph-check-circle', 'text-green-500');
                         icon.classList.remove('opacity-50');
+                        icon.style.transform = 'scale(1.2)';
+                        setTimeout(() => icon.style.transform = 'scale(1)', 200);
                     }
                 } else {
                     el.classList.remove('valid-input');
@@ -648,7 +700,10 @@
 
             window.selectColor = (c) => {
                 document.getElementById('newMedColor').value = c;
-                document.getElementById('colorPreview').style.background = c;
+                const preview = document.getElementById('colorPreview');
+                preview.style.background = c;
+                preview.style.transform = 'scale(1.2)';
+                setTimeout(() => preview.style.transform = 'scale(1)', 300);
                 closeModal('colorModal');
             };
 
@@ -792,9 +847,11 @@
 
             function renderAllMeds() {
                 const grid = document.getElementById('medsGrid');
+                let index = 0;
                 for (let id in medsData) {
                     if (medsData[id].active !== false) {
-                        renderMedCard(medsData[id]);
+                        renderMedCard(medsData[id], index);
+                        index++;
                     } else {
                         const existingCard = document.getElementById(`med-card-${id}`);
                         if(existingCard) existingCard.remove();
@@ -802,12 +859,15 @@
                 }
             }
 
-            function renderMedCard(med) {
+            function renderMedCard(med, index) {
                 let card = document.getElementById(`med-card-${med.id}`);
                 if(!card) {
                     card = document.createElement('div'); 
                     card.id = `med-card-${med.id}`;
-                    card.className = "glass p-5 sm:p-7 relative rounded-3xl overflow-hidden group transition-all duration-300 transform hover:-translate-y-1";
+                    card.className = "glass p-5 sm:p-7 relative rounded-3xl overflow-hidden group";
+                    card.style.animation = `fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`;
+                    card.style.opacity = '0';
+                    card.style.animationDelay = `${index * 0.1}s`;
                     document.getElementById('medsGrid').appendChild(card);
                 }
                 updateMedCardDOM(med.id);
@@ -837,7 +897,7 @@
                     </div>
                     <div class="flex justify-between items-center mb-6 relative z-10">
                         <span class="text-xs font-bold opacity-60 bg-slate-500/10 px-3 py-1.5 rounded-lg">Plaque ${plateIdx}</span>
-                        <span class="text-base sm:text-lg font-black" style="color:${med.color}">${Math.round(prog)}%</span>
+                        <span class="text-base sm:text-lg font-black transition-all duration-300" style="color:${med.color}">${Math.round(prog)}%</span>
                     </div>
                     <div class="flex items-center justify-between bg-slate-500/5 p-2 sm:p-3 rounded-2xl relative z-10 border border-slate-500/10 shadow-inner">
                         <button onclick="changeDose('${med.id}', -1)" class="w-12 h-12 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white shadow-md flex items-center justify-center font-black action-btn hover:text-red-500 text-xl">
@@ -854,7 +914,7 @@
                 
                 const doseText = document.getElementById(`dose-text-${med.id}`);
                 if(doseText) {
-                    doseText.style.transform = 'scale(1.2)';
+                    doseText.style.transform = 'scale(1.4)';
                     setTimeout(() => doseText.style.transform = 'scale(1)', 200);
                 }
             }
@@ -951,6 +1011,9 @@
                     const cell = document.createElement('div'); 
                     cell.className = `cal-cell glass ${isToday ? 'border-indigo-500 border-[2px] bg-indigo-500/10 shadow-md' : ''}`; 
                     cell.onclick = () => openDayEdit(dateStr);
+                    cell.style.animation = `fadeInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`;
+                    cell.style.opacity = '0';
+                    cell.style.animationDelay = `${d * 0.015}s`;
                     
                     let badges = '', total = 0;
                     for (let id in medsData) {
@@ -966,7 +1029,7 @@
                     cell.innerHTML = `
                         <span class="text-xs sm:text-sm font-black ${dayNumClass} mb-1">${d}</span>
                         <div class="flex flex-wrap gap-1">${badges}</div>
-                        <div class="mt-auto text-center font-black text-[10px] opacity-40 pt-1">${total > 0 ? total + ' pr.' : ''}</div>
+                        <div class="mt-auto text-center font-black text-[10px] opacity-40 pt-1 transition-all">${total > 0 ? total + ' pr.' : ''}</div>
                     `;
                     cal.appendChild(cell);
                 }
@@ -975,6 +1038,7 @@
             function renderDayEditList(date) {
                 const list = document.getElementById('editDayList'); 
                 let html = '';
+                let index = 0;
                 for (let id in medsData) {
                     if (medsData[id].active === false) continue;
                     const m = medsData[id];
@@ -982,19 +1046,29 @@
                     const val = (window.medsHistoryMap && window.medsHistoryMap[hKey]) ? window.medsHistoryMap[hKey].count : 0;
                     
                     html += `
-                        <div class="p-4 bg-slate-500/5 border border-slate-500/10 rounded-2xl flex justify-between items-center hover:bg-slate-500/10 transition-colors shadow-sm">
+                        <div class="p-4 bg-slate-500/5 border border-slate-500/10 rounded-2xl flex justify-between items-center hover:bg-slate-500/10 transition-colors shadow-sm" style="animation: slideInRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${index * 0.05}s;">
                             <div>
                                 <div class="text-sm font-black uppercase tracking-wide" style="color:${m.color}">${m.name}</div>
-                                <div class="text-xs font-bold opacity-70 mt-1 flex items-center gap-2"><i class="ph ph-check-circle text-lg"></i> <span class="dose-anim inline-block">${val}</span> prises</div>
+                                <div class="text-xs font-bold opacity-70 mt-1 flex items-center gap-2"><i class="ph ph-check-circle text-lg"></i> <span class="dose-anim inline-block" id="modal-dose-${id}">${val}</span> prises</div>
                             </div>
                             <div class="flex gap-2 bg-white dark:bg-slate-800 p-1.5 rounded-xl shadow-md border border-slate-500/10">
-                                <button onclick="changeDose('${id}', -1, '${date}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-slate-500/5 hover:bg-slate-500/15 text-slate-800 dark:text-white font-bold action-btn flex items-center justify-center text-lg"><i class="ph ph-minus"></i></button>
-                                <button onclick="changeDose('${id}', 1, '${date}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-slate-500/5 hover:bg-slate-500/15 font-bold action-btn flex items-center justify-center text-lg" style="color:${m.color}"><i class="ph ph-plus"></i></button>
+                                <button onclick="animateModalDose('${id}', -1, '${date}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-slate-500/5 hover:bg-slate-500/15 text-slate-800 dark:text-white font-bold action-btn flex items-center justify-center text-lg"><i class="ph ph-minus"></i></button>
+                                <button onclick="animateModalDose('${id}', 1, '${date}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-slate-500/5 hover:bg-slate-500/15 font-bold action-btn flex items-center justify-center text-lg" style="color:${m.color}"><i class="ph ph-plus"></i></button>
                             </div>
                         </div>`;
+                    index++;
                 }
                 list.innerHTML = html || '<p class="text-center text-sm opacity-60 font-bold py-6">Aucun médicament actif.</p>';
             }
+
+            window.animateModalDose = (id, val, date) => {
+                changeDose(id, val, date);
+                const doseText = document.getElementById(`modal-dose-${id}`);
+                if(doseText) {
+                    doseText.style.transform = 'scale(1.5)';
+                    setTimeout(() => doseText.style.transform = 'scale(1)', 200);
+                }
+            };
 
             window.openDayEdit = (date) => {
                 const dateObj = new Date(date);
@@ -1006,11 +1080,12 @@
 
             function renderHistory() {
                 const list = document.getElementById('globalHistoryList'); list.innerHTML = "";
+                let index = 0;
                 for (let id in medsData) {
                     const m = medsData[id];
                     list.innerHTML += `
-                        <div class="p-4 sm:p-5 bg-slate-500/5 border border-slate-500/10 rounded-[1.25rem] mb-3 sm:mb-4 relative overflow-hidden group shadow-sm hover:shadow-md transition-all">
-                            <div class="absolute left-0 top-0 bottom-0 w-2" style="background:${m.color}"></div>
+                        <div class="p-4 sm:p-5 bg-slate-500/5 border border-slate-500/10 rounded-[1.25rem] mb-3 sm:mb-4 relative overflow-hidden group shadow-sm hover:shadow-md transition-all" style="animation: slideInRight 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${index * 0.08}s;">
+                            <div class="absolute left-0 top-0 bottom-0 w-2 transition-all duration-300 group-hover:w-3" style="background:${m.color}"></div>
                             <div class="flex justify-between items-start mb-4 pl-3">
                                 <span class="text-sm sm:text-base font-black tracking-wide" style="color:${m.color}">${m.name}</span>
                                 <div class="flex gap-2">
@@ -1024,9 +1099,10 @@
                             </div>
                             <div class="flex justify-between items-center font-bold opacity-90 pl-3 bg-slate-500/5 p-3 rounded-xl shadow-inner">
                                 <span class="flex items-center gap-2 uppercase tracking-widest text-[9px] sm:text-[10px]"><i class="ph ph-package text-base"></i> Boîtes utilisées :</span>
-                                <input type="number" value="${m.box_count || 1}" onchange="updateBox('${id}', this.value)" class="w-16 sm:w-20 bg-white dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-500/10 rounded-lg p-1.5 sm:p-2 text-center font-black shadow-sm outline-none focus:border-indigo-500 text-xs sm:text-sm">
+                                <input type="number" value="${m.box_count || 1}" onchange="updateBox('${id}', this.value)" class="w-16 sm:w-20 bg-white dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-500/10 rounded-lg p-1.5 sm:p-2 text-center font-black shadow-sm outline-none focus:border-indigo-500 text-xs sm:text-sm transition-all duration-300 focus:scale-105">
                             </div>
                         </div>`;
+                    index++;
                 }
             }
 
@@ -1100,7 +1176,7 @@
                 drawer.classList.add('translate-x-full');
                 overlay.classList.remove('opacity-100');
                 
-                setTimeout(() => overlay.classList.add('hidden'), 400);
+                setTimeout(() => overlay.classList.add('hidden'), 600);
             };
             
             window.openModal = (id) => {
@@ -1116,7 +1192,15 @@
             window.changeMonth = async (v) => { 
                 currentDate.setMonth(currentDate.getMonth() + v); 
                 const monthName = new Intl.DateTimeFormat('fr', { month: 'long', year: 'numeric' }).format(currentDate);
-                document.getElementById('calMonth').innerText = monthName;
+                
+                const title = document.getElementById('calMonth');
+                title.style.transform = 'scale(0.9)';
+                title.style.opacity = '0';
+                setTimeout(() => {
+                    title.innerText = monthName;
+                    title.style.transform = 'scale(1)';
+                    title.style.opacity = '1';
+                }, 200);
                 
                 if(!navigator.onLine) {
                     renderCalendar();
@@ -1140,16 +1224,22 @@
                 const isDark = document.body.classList.toggle('dark');
                 localStorage.setItem('theme', isDark ? 'dark' : 'light');
                 const icon = document.getElementById('themeIcon');
-                if (isDark) {
-                    icon.classList.replace('ph-moon', 'ph-sun');
-                } else {
-                    icon.classList.replace('ph-sun', 'ph-moon');
-                }
+                
+                icon.style.transform = 'rotate(180deg) scale(0)';
+                setTimeout(() => {
+                    if (isDark) {
+                        icon.classList.replace('ph-moon', 'ph-sun');
+                    } else {
+                        icon.classList.replace('ph-sun', 'ph-moon');
+                    }
+                    icon.style.transform = 'rotate(0deg) scale(1)';
+                }, 200);
             };
             
             window.handleLogout = () => { 
                 localStorage.removeItem('medUser'); 
-                location.reload(); 
+                document.body.style.opacity = '0';
+                setTimeout(() => location.reload(), 600);
             };
 
             initUI();
