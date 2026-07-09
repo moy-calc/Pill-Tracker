@@ -9,8 +9,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
-    <script src="https://cdn.tailwindcss.com">
-    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -29,10 +28,8 @@
             }
         }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js">
-    </script>
-    <script src="https://unpkg.com/@phosphor-icons/web">
-    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+    <script defer src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
@@ -57,7 +54,7 @@
             background-attachment: fixed;
             color: var(--text);
             font-family: 'Plus Jakarta Sans', sans-serif;
-            transition: background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: background 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             min-height: 100vh;
             -webkit-tap-highlight-color: transparent;
         }
@@ -79,12 +76,13 @@
 
         .glass {
             background: var(--card);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--border);
             border-radius: 24px;
             box-shadow: var(--shadow);
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: transform, box-shadow;
         }
 
         .glass:hover {
@@ -109,7 +107,8 @@
         .progress-bar {
             height: 100%;
             border-radius: 99px;
-            transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: width;
         }
 
         .cal-cell {
@@ -120,7 +119,8 @@
             padding: 6px;
             border: 1px solid var(--border);
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: transform;
         }
 
         .cal-cell:active {
@@ -143,7 +143,7 @@
             text-align: center;
             box-shadow: 0 2px 6px rgba(0,0,0,0.15);
             letter-spacing: 0.5px;
-            animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
 
         .modal-overlay {
@@ -160,7 +160,8 @@
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
-            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: opacity;
         }
 
         .modal-overlay.z-top {
@@ -171,16 +172,17 @@
             opacity: 1;
             visibility: visible;
             pointer-events: auto;
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
 
         .modal-content {
             opacity: 0;
-            transform: translateY(60px) scale(0.85);
-            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: translateY(40px) scale(0.9);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             width: 100%;
             max-width: 420px;
+            will-change: transform, opacity;
         }
 
         .modal-overlay.open .modal-content {
@@ -214,7 +216,7 @@
             font-weight: 700;
             font-size: 13px;
             z-index: 9999;
-            transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
@@ -222,6 +224,7 @@
             width: max-content;
             max-width: 90%;
             opacity: 0;
+            will-change: transform, opacity;
         }
 
         .dark .toast {
@@ -240,6 +243,7 @@
             -webkit-appearance: none;
             font-size: 15px !important;
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: transform, box-shadow;
         }
 
         input:focus {
@@ -266,7 +270,8 @@
         }
 
         .action-btn {
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: transform;
         }
 
         .action-btn:active {
@@ -279,7 +284,7 @@
         }
 
         .dose-anim {
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             display: inline-block;
         }
 
@@ -298,7 +303,7 @@
         }
 
         #drawerOverlay {
-            transition: opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .custom-grid-btn {
@@ -315,31 +320,31 @@
 
     <div id="drawerOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[2000] hidden opacity-0" onclick="closeDrawers()"></div>
 
-    <nav class="max-w-5xl mx-auto flex justify-between items-center p-3 sm:p-4 glass mb-6 sm:mb-8 relative z-[1000] rounded-3xl" style="animation: fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
-        <button onclick="openModal('accountModal')" id="accBtn" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-500/10 items-center justify-center hidden action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
-            <i class="ph ph-user text-lg sm:text-xl"></i>
+    <nav class="max-w-5xl mx-auto flex justify-between items-center p-3 sm:p-4 glass mb-6 sm:mb-8 relative z-[1000] rounded-3xl" style="animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
+        <button onclick="openModal('accountModal')" id="accBtn" class="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-slate-500/10 items-center justify-center hidden action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
+            <i class="ph ph-user text-base sm:text-xl"></i>
         </button>
-        <h1 class="text-lg sm:text-2xl font-black text-indigo-500 tracking-tight flex items-center gap-2 sm:gap-2 pl-2">
+        <h1 class="text-base sm:text-2xl font-black text-indigo-500 tracking-tight flex items-center gap-1.5 sm:gap-2 pl-2">
             <i class="ph-fill ph-pill"></i> MEDTRACKER
         </h1>
         <div class="flex gap-1.5 sm:gap-2">
-            <button id="syncBtn" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center action-btn hidden">
-                <i class="ph ph-cloud-check text-lg sm:text-xl" id="syncIcon"></i>
+            <button id="syncBtn" class="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center action-btn hidden">
+                <i class="ph ph-cloud-check text-base sm:text-xl" id="syncIcon"></i>
             </button>
-            <button onclick="triggerNotification()" id="notifBtn" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center action-btn hover:bg-indigo-500/20">
-                <i class="ph ph-bell-ringing text-lg sm:text-xl"></i>
+            <button onclick="triggerNotification()" id="notifBtn" class="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center action-btn hover:bg-indigo-500/20">
+                <i class="ph ph-bell-ringing text-base sm:text-xl"></i>
             </button>
-            <button onclick="openRightDrawer()" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-500/10 flex items-center justify-center action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
-                <i class="ph ph-clock-counter-clockwise text-lg sm:text-xl"></i>
+            <button onclick="openRightDrawer()" class="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-slate-500/10 flex items-center justify-center action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
+                <i class="ph ph-clock-counter-clockwise text-base sm:text-xl"></i>
             </button>
-            <button onclick="toggleTheme()" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-500/10 flex items-center justify-center action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
-                <i class="ph ph-moon text-lg sm:text-xl" id="themeIcon"></i>
+            <button onclick="toggleTheme()" class="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-slate-500/10 flex items-center justify-center action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
+                <i class="ph ph-moon text-base sm:text-xl" id="themeIcon"></i>
             </button>
         </div>
     </nav>
 
     <main class="max-w-5xl mx-auto space-y-6 pb-12">
-        <div id="loginBox" class="glass p-6 sm:p-10 text-center space-y-6 max-w-md mx-auto mt-8 sm:mt-12 rounded-[2rem]" style="animation: popIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
+        <div id="loginBox" class="glass p-6 sm:p-10 text-center space-y-6 max-w-md mx-auto mt-8 sm:mt-12 rounded-[2rem]" style="animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
             <div class="w-20 h-20 sm:w-24 sm:h-24 bg-indigo-500/10 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-2 transition-transform duration-500 hover:scale-110 hover:rotate-12">
                 <i class="ph ph-lock-key text-4xl sm:text-5xl"></i>
             </div>
@@ -361,7 +366,7 @@
                         <i class="ph ph-calendar-blank absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl transition-all duration-300" id="iconBD"></i>
                         <input type="text" id="birthDate" readonly onclick="openCustomDatePicker('birthDate')" placeholder="Date de naissance" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 cursor-pointer text-base">
                     </div>
-                    <div id="ageDisplay" class="text-xs font-bold text-indigo-500 mt-2 hidden text-right pr-3" style="animation: slideInRight 0.4s forwards;"></div>
+                    <div id="ageDisplay" class="text-xs font-bold text-indigo-500 mt-2 hidden text-right pr-3" style="animation: slideInRight 0.3s forwards;"></div>
                 </div>
                 <div class="relative">
                     <i class="ph ph-password absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
@@ -374,7 +379,7 @@
         </div>
 
         <div id="appBody" class="hidden space-y-6">
-            <div style="animation: fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
+            <div style="animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
                 <div class="flex justify-between items-center px-1 mb-4 sm:mb-6">
                     <h2 class="font-black text-xs sm:text-sm uppercase tracking-widest opacity-60 flex items-center gap-2">
                         <i class="ph ph-pill text-lg"></i> Mes Médicaments
@@ -386,7 +391,7 @@
                 <div id="medsGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6"></div>
             </div>
 
-            <div class="glass p-4 sm:p-8 rounded-[2rem]" style="animation: fadeInUp 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: 0.1s;">
+            <div class="glass p-4 sm:p-8 rounded-[2rem]" style="animation: fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: 0.1s;">
                 <div class="flex justify-between items-center mb-6 bg-slate-500/5 p-2 rounded-2xl">
                     <button onclick="changeMonth(-1)" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-500/15 action-btn text-lg bg-white dark:bg-slate-800 shadow-sm">
                         <i class="ph ph-caret-left font-bold"></i>
@@ -579,7 +584,7 @@
         </div>
     </div>
 
-    <div id="rightDrawer" class="fixed top-0 right-0 bottom-0 w-full sm:w-[420px] bg-white dark:bg-slate-900 z-[2500] translate-x-full transition-transform duration-700 p-5 sm:p-8 border-l border-slate-500/10 shadow-2xl overflow-hidden flex flex-col" style="transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);">
+    <div id="rightDrawer" class="fixed top-0 right-0 bottom-0 w-full sm:w-[420px] bg-white dark:bg-slate-900 z-[2500] translate-x-full transition-transform duration-500 p-5 sm:p-8 border-l border-slate-500/10 shadow-2xl overflow-hidden flex flex-col" style="transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);">
         <div class="flex justify-between items-center mb-8 mt-1">
             <h2 class="text-lg sm:text-xl font-black tracking-tight text-indigo-500 flex items-center gap-2">
                 <i class="ph ph-clock-counter-clockwise"></i> HISTORIQUE
@@ -659,23 +664,26 @@
 
                 if (!navigator.onLine) {
                     btn.className =
-                        "w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center action-btn";
-                    icon.className = "ph ph-wifi-slash text-lg sm:text-xl";
+                        "w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center action-btn";
+                    icon.className = "ph ph-wifi-slash text-base sm:text-xl";
+                    pendingRequests = 0; 
                     return;
                 }
 
                 if (isSyncing) {
                     pendingRequests++;
                     btn.className =
-                        "w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center action-btn";
-                    icon.className = "ph ph-arrows-clockwise text-lg sm:text-xl animate-spin";
+                        "w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center action-btn";
+                    icon.className = "ph ph-arrows-clockwise text-base sm:text-xl animate-spin";
                 } else {
-                    pendingRequests = Math.max(0, pendingRequests - 1);
-                    if (pendingRequests === 0) {
-                        btn.className =
-                            "w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center action-btn";
-                        icon.className = "ph ph-cloud-check text-lg sm:text-xl";
-                    }
+                    setTimeout(() => {
+                        pendingRequests = Math.max(0, pendingRequests - 1);
+                        if (pendingRequests === 0) {
+                            btn.className =
+                                "w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center action-btn";
+                            icon.className = "ph ph-cloud-check text-base sm:text-xl";
+                        }
+                    }, 300);
                 }
             };
 
@@ -723,18 +731,20 @@
                     }
 
                     if (perm === "granted") {
-                        if (swRegistration && swRegistration.showNotification) {
-                            await swRegistration.showNotification('MedTracker Pro', {
+                        if (swRegistration && swRegistration.active) {
+                            swRegistration.showNotification('MedTracker Pro', {
                                 body: 'Notifications parfaitement actives !',
                                 icon: 'icon.png',
                                 badge: 'icon.png',
                                 vibrate: [200, 100, 200]
+                            }).catch(() => {
+                                new Notification('MedTracker Pro', { body: 'Notifications actives !', icon: 'icon.png' });
                             });
                             showToast("Notification envoyée");
-                            return;
+                        } else {
+                            new Notification('MedTracker Pro', { body: 'Notifications actives !', icon: 'icon.png' });
+                            showToast("Notification envoyée");
                         }
-                        new Notification('MedTracker Pro', { body: 'Notifications actives !', icon: 'icon.png' });
-                        showToast("Notification envoyée");
                     } else {
                         showToast("Autorisation refusée.");
                     }
@@ -758,12 +768,12 @@
             function initUI() {
                 const cGrid = document.getElementById('colorGrid');
                 cGrid.innerHTML = extendedColors.map((c, idx) =>
-                    `<div onclick="selectColor('${c}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl cursor-pointer action-btn shadow-lg border-2 border-white/20" style="background:${c}; animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${idx * 0.02}s;"></div>`
+                    `<div onclick="selectColor('${c}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl cursor-pointer action-btn shadow-lg border-2 border-white/20" style="background:${c}; animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${idx * 0.02}s;"></div>`
                 ).join('');
 
                 const cGridEdit = document.getElementById('colorGridEdit');
                 cGridEdit.innerHTML = extendedColors.map((c, idx) =>
-                    `<div onclick="selectEditColor('${c}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl cursor-pointer action-btn shadow-lg border-2 border-white/20" style="background:${c}; animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${idx * 0.02}s;"></div>`
+                    `<div onclick="selectEditColor('${c}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl cursor-pointer action-btn shadow-lg border-2 border-white/20" style="background:${c}; animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${idx * 0.02}s;"></div>`
                 ).join('');
 
                 document.querySelectorAll('.day-btn').forEach(b => {
@@ -1040,7 +1050,7 @@
                                     badge: 'icon.png',
                                     vibrate: [200, 100, 200]
                                 };
-                                if (swRegistration && swRegistration.showNotification) {
+                                if (swRegistration && swRegistration.active) {
                                     swRegistration.showNotification('MedTracker Pro', options).catch(() => {
                                         new Notification('MedTracker Pro', options);
                                     });
@@ -1138,7 +1148,7 @@
                     card.id = `med-card-${med.id}`;
                     card.className = "glass p-5 sm:p-7 relative rounded-3xl overflow-hidden group";
                     card.style.animation =
-                        `fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`;
+                        `fadeInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`;
                     card.style.opacity = '0';
                     card.style.animationDelay = `${index * 0.1}s`;
                     document.getElementById('medsGrid').appendChild(card);
@@ -1451,7 +1461,7 @@
                         `cal-cell glass ${isToday ? 'border-indigo-500 border-[2px] bg-indigo-500/10 shadow-md' : ''}`;
                     cell.onclick = () => openDayEdit(dateStr);
                     cell.style.animation =
-                        `fadeInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`;
+                        `fadeInUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`;
                     cell.style.opacity = '0';
                     cell.style.animationDelay = `${d * 0.015}s`;
 
@@ -1536,7 +1546,7 @@
                     }
 
                     html += `
-                        <div class="p-4 bg-slate-500/5 border border-slate-500/10 rounded-2xl flex justify-between items-center hover:bg-slate-500/10 transition-colors shadow-sm" style="animation: slideInRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${index * 0.05}s;">
+                        <div class="p-4 bg-slate-500/5 border border-slate-500/10 rounded-2xl flex justify-between items-center hover:bg-slate-500/10 transition-colors shadow-sm" style="animation: slideInRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${index * 0.05}s;">
                             <div class="w-2/3">
                                 <div class="text-sm font-black uppercase tracking-wide truncate flex items-center gap-1" style="color:${m.color}">${m.name} ${plannedLabel}</div>
                                 <div class="text-xs font-bold opacity-70 mt-1 flex items-center gap-2 text-slate-800 dark:text-white"><i class="ph ph-check-circle text-lg"></i> <span class="dose-anim inline-block" id="modal-dose-${id}">${val}</span> prises</div>
@@ -1571,7 +1581,7 @@
                 for (let id in medsData) {
                     const m = medsData[id];
                     list.innerHTML += `
-                        <div class="p-4 sm:p-5 bg-slate-500/5 border border-slate-500/10 rounded-[1.25rem] mb-3 sm:mb-4 relative overflow-hidden group shadow-sm hover:shadow-md transition-all" style="animation: slideInRight 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${index * 0.08}s;">
+                        <div class="p-4 sm:p-5 bg-slate-500/5 border border-slate-500/10 rounded-[1.25rem] mb-3 sm:mb-4 relative overflow-hidden group shadow-sm hover:shadow-md transition-all" style="animation: slideInRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${index * 0.08}s;">
                             <div class="absolute left-0 top-0 bottom-0 w-2 transition-all duration-300 group-hover:w-3" style="background:${m.color}"></div>
                             <div class="flex justify-between items-start mb-4 pl-3">
                                 <span class="text-sm sm:text-base font-black tracking-wide" style="color:${m.color}">${m.name}</span>
@@ -1695,7 +1705,7 @@
                 drawer.classList.add('translate-x-full');
                 overlay.classList.remove('opacity-100');
 
-                setTimeout(() => overlay.classList.add('hidden'), 600);
+                setTimeout(() => overlay.classList.add('hidden'), 400);
             };
 
             window.openModal = (id) => {
@@ -1763,7 +1773,7 @@
             window.handleLogout = () => {
                 localStorage.removeItem('medUser');
                 document.body.style.opacity = '0';
-                setTimeout(() => location.reload(), 600);
+                setTimeout(() => location.reload(), 400);
             };
 
             initUI();
