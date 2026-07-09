@@ -24,6 +24,8 @@
         .modal-overlay.open { display: flex; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .alert-stock { animation: pulse 1.5s infinite; font-size: 8px; font-weight: 900; padding: 2px 6px; border-radius: 6px; }
+        .date-input::-webkit-calendar-picker-indicator { filter: invert(0.5); opacity: 0.6; }
+        .dark .date-input::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.8; }
     </style>
 </head>
 <body class="p-3 antialiased">
@@ -40,13 +42,17 @@
     </nav>
     <main class="max-w-4xl mx-auto space-y-6">
         <div id="loginBox" class="glass p-8 text-center space-y-4 max-w-sm mx-auto">
+            <p class="text-xs opacity-60 font-medium">Connectez‑vous ou créez un compte</p>
             <div class="space-y-3">
                 <input type="text" id="lastName" oninput="updateKey()" placeholder="Nom" class="w-full bg-slate-500/10 rounded-xl p-4 font-bold outline-none">
                 <input type="text" id="firstName" oninput="updateKey()" placeholder="Prénom" class="w-full bg-slate-500/10 rounded-xl p-4 font-bold outline-none">
-                <input type="date" id="birthDate" oninput="updateKey()" class="w-full bg-slate-500/10 rounded-xl p-4 font-bold outline-none">
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-lg opacity-50 pointer-events-none">📅</span>
+                    <input type="date" id="birthDate" oninput="updateKey()" class="date-input w-full bg-slate-500/10 rounded-xl p-4 pl-12 font-bold outline-none">
+                </div>
                 <input type="password" id="passInput" placeholder="Mot de passe" class="w-full bg-slate-500/10 rounded-xl p-4 text-center font-bold outline-none hidden">
             </div>
-            <button id="authBtn" onclick="handleAuth()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl opacity-50 pointer-events-none">VÉRIFIER</button>
+            <button id="authBtn" onclick="handleAuth()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl opacity-50 pointer-events-none">VALIDER</button>
         </div>
         <div id="appBody" class="hidden space-y-6">
             <div class="flex justify-between items-center px-2">
@@ -70,7 +76,10 @@
             <div class="space-y-3 mb-6">
                 <input type="text" id="editLN" placeholder="Nom" class="w-full bg-slate-500/10 rounded-xl p-3 font-bold text-sm">
                 <input type="text" id="editFN" placeholder="Prénom" class="w-full bg-slate-500/10 rounded-xl p-3 font-bold text-sm">
-                <input type="date" id="editBD" class="w-full bg-slate-500/10 rounded-xl p-3 font-bold text-sm">
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm opacity-40 pointer-events-none">📅</span>
+                    <input type="date" id="editBD" class="date-input w-full bg-slate-500/10 rounded-xl p-3 pl-10 font-bold text-sm">
+                </div>
                 <hr class="opacity-5 my-4">
                 <input type="password" id="oldPassCheck" placeholder="Ancien mot de passe" class="w-full bg-slate-500/5 border border-indigo-500/20 rounded-xl p-3 font-bold text-sm">
                 <input type="password" id="newPassSet" placeholder="Nouveau mot de passe" class="w-full bg-slate-500/10 rounded-xl p-3 font-bold text-sm">
@@ -192,7 +201,17 @@
 
         window.updateKey = () => {
             const ln = document.getElementById('lastName').value.trim(), fn = document.getElementById('firstName').value.trim(), bd = document.getElementById('birthDate').value;
-            if (ln && fn && bd) { document.getElementById('passInput').classList.remove('hidden'); document.getElementById('authBtn').classList.remove('opacity-50', 'pointer-events-none'); }
+            const passInput = document.getElementById('passInput');
+            const authBtn = document.getElementById('authBtn');
+            if (ln && fn && bd) {
+                passInput.classList.remove('hidden');
+                authBtn.classList.remove('opacity-50', 'pointer-events-none');
+                authBtn.textContent = 'VALIDER';
+            } else {
+                passInput.classList.add('hidden');
+                authBtn.classList.add('opacity-50', 'pointer-events-none');
+                authBtn.textContent = 'VALIDER';
+            }
         };
 
         window.handleAuth = async () => {
