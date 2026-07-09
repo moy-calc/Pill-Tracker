@@ -63,36 +63,18 @@
         }
 
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(40px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
         @keyframes popIn {
-            from {
-                opacity: 0;
-                transform: scale(0.85);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+            from { opacity: 0; transform: scale(0.85); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         .glass {
@@ -121,7 +103,7 @@
             border-radius: 99px;
             overflow: hidden;
             position: relative;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .progress-bar {
@@ -159,7 +141,7 @@
             margin-bottom: 2px;
             font-weight: 800;
             text-align: center;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
             letter-spacing: 0.5px;
             animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
@@ -207,15 +189,8 @@
         }
 
         @keyframes pulse-soft {
-            0%,
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.85;
-                transform: scale(1.08);
-            }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(1.08); }
         }
 
         .alert-stock {
@@ -240,7 +215,7 @@
             font-size: 13px;
             z-index: 9999;
             transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
             gap: 12px;
@@ -259,8 +234,7 @@
             opacity: 1;
         }
 
-        input,
-        select {
+        input, select {
             color: var(--text);
             appearance: none;
             -webkit-appearance: none;
@@ -279,7 +253,7 @@
             border-radius: 14px;
             overflow: hidden;
             cursor: pointer;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
         }
 
         input[type="color"]::-webkit-color-swatch-wrapper {
@@ -666,6 +640,7 @@
             window.pendingDoseAction = null;
             window.selectedTimeParts = { h: null, m: null };
             window.currentDayDoses = [];
+            let swRegistration = null;
 
             const extendedColors = [
                 '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e',
@@ -676,7 +651,9 @@
             ];
 
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('sw.js').catch(() => {});
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    swRegistration = reg;
+                }).catch(() => {});
             }
 
             window.setSyncing = (isSyncing) => {
@@ -749,21 +726,17 @@
                     }
 
                     if (perm === "granted") {
-                        if (navigator.serviceWorker) {
-                            const reg = await navigator.serviceWorker.ready;
-                            if (reg && reg.showNotification) {
-                                await reg.showNotification('MedTracker Pro', {
-                                    body: 'Notifications parfaitement actives !',
-                                    icon: 'icon.png',
-                                    badge: 'icon.png',
-                                    vibrate: [200, 100, 200]
-                                });
-                                showToast("Notification envoyée");
-                                return;
-                            }
+                        if (swRegistration && swRegistration.showNotification) {
+                            await swRegistration.showNotification('MedTracker Pro', {
+                                body: 'Notifications parfaitement actives !',
+                                icon: 'icon.png',
+                                badge: 'icon.png',
+                                vibrate: [200, 100, 200]
+                            });
+                            showToast("Notification envoyée");
+                            return;
                         }
-                        new Notification('MedTracker Pro', { body: 'Notifications actives !',
-                            icon: 'icon.png' });
+                        new Notification('MedTracker Pro', { body: 'Notifications actives !', icon: 'icon.png' });
                         showToast("Notification envoyée");
                     } else {
                         showToast("Autorisation refusée.");
@@ -1046,6 +1019,7 @@
                 }
 
                 setInterval(() => {
+                    if (!swRegistration) return;
                     const now = new Date();
                     const timeStr = now.toTimeString().slice(0, 5);
                     const day = now.getDay();
@@ -1058,8 +1032,12 @@
                             if (!notified[notifyKey]) {
                                 if (Notification.permission === "granted") {
                                     const medName = medsData[id] ? medsData[id].name : "votre médicament";
-                                    new Notification('MedTracker Pro', { body: `Il est temps de prendre : ${medName}`,
-                                        icon: 'icon.png' });
+                                    swRegistration.showNotification('MedTracker Pro', {
+                                        body: `Il est temps de prendre : ${medName}`,
+                                        icon: 'icon.png',
+                                        badge: 'icon.png',
+                                        vibrate: [200, 100, 200]
+                                    }).catch(() => {});
                                 }
                                 notified[notifyKey] = true;
                                 localStorage.setItem('medNotified', JSON.stringify(notified));
@@ -1139,7 +1117,7 @@
                     card.id = `med-card-${med.id}`;
                     card.className = "glass p-5 sm:p-7 relative rounded-3xl overflow-hidden group";
                     card.style.animation =
-                    `fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`;
+                        `fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`;
                     card.style.opacity = '0';
                     card.style.animationDelay = `${index * 0.1}s`;
                     document.getElementById('medsGrid').appendChild(card);
@@ -1452,7 +1430,7 @@
                         `cal-cell glass ${isToday ? 'border-indigo-500 border-[2px] bg-indigo-500/10 shadow-md' : ''}`;
                     cell.onclick = () => openDayEdit(dateStr);
                     cell.style.animation =
-                    `fadeInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`;
+                        `fadeInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`;
                     cell.style.opacity = '0';
                     cell.style.animationDelay = `${d * 0.015}s`;
 
@@ -1483,7 +1461,7 @@
                 const dateObj = new Date(date);
                 const formatOpts = { weekday: 'long', day: 'numeric', month: 'long' };
                 document.getElementById('editDayTitle').innerText = new Intl.DateTimeFormat('fr', formatOpts).format(
-                dateObj);
+                    dateObj);
                 openModal('editDayModal');
 
                 document.getElementById('editDayList').innerHTML =
@@ -1522,18 +1500,24 @@
                     const val = (window.medsHistoryMap && window.medsHistoryMap[hKey]) ? window.medsHistoryMap[hKey].count :
                         0;
                     const s = sched[id];
-
-                    if (val === 0 && s && s.days && s.days.length > 0 && !s.days.includes(dayOfWeek)) continue;
+                    const isPlanned = s && s.days && s.days.length > 0 && s.days.includes(dayOfWeek);
 
                     const myDoses = (window.currentDayDoses || []).filter(d => d.medication_id === id);
                     const timesHtml = myDoses.map(d =>
                         `<span class="bg-indigo-500/10 text-indigo-500 font-bold px-1.5 py-0.5 rounded text-[10px] shadow-sm">${new Date(d.created_at).toTimeString().slice(0,5)}</span>`
                     ).join(' ');
 
+                    let plannedLabel = '';
+                    if (!isPlanned && val === 0) {
+                        plannedLabel = '<span class="text-[10px] font-bold text-orange-500 bg-orange-500/10 px-2 py-0.5 rounded-full ml-2">Non planifié</span>';
+                    } else if (!isPlanned && val > 0) {
+                        plannedLabel = '<span class="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full ml-2">Exceptionnelle</span>';
+                    }
+
                     html += `
                         <div class="p-4 bg-slate-500/5 border border-slate-500/10 rounded-2xl flex justify-between items-center hover:bg-slate-500/10 transition-colors shadow-sm" style="animation: slideInRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${index * 0.05}s;">
                             <div class="w-2/3">
-                                <div class="text-sm font-black uppercase tracking-wide truncate" style="color:${m.color}">${m.name}</div>
+                                <div class="text-sm font-black uppercase tracking-wide truncate flex items-center gap-1" style="color:${m.color}">${m.name} ${plannedLabel}</div>
                                 <div class="text-xs font-bold opacity-70 mt-1 flex items-center gap-2 text-slate-800 dark:text-white"><i class="ph ph-check-circle text-lg"></i> <span class="dose-anim inline-block" id="modal-dose-${id}">${val}</span> prises</div>
                                 <div class="flex flex-wrap gap-1 mt-2">${timesHtml}</div>
                             </div>
@@ -1571,6 +1555,9 @@
                             <div class="flex justify-between items-start mb-4 pl-3">
                                 <span class="text-sm sm:text-base font-black tracking-wide" style="color:${m.color}">${m.name}</span>
                                 <div class="flex gap-2">
+                                    <button onclick="openEditMedModal('${id}')" class="px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-500 text-[10px] sm:text-xs font-bold opacity-80 hover:opacity-100 uppercase tracking-widest action-btn transition-opacity flex items-center shadow-sm">
+                                        <i class="ph ph-pencil-simple text-sm mr-1.5"></i> Modifier
+                                    </button>
                                     <button onclick="toggleArchive('${id}', ${m.active})" class="px-3 py-1.5 rounded-lg bg-slate-500/10 text-slate-900 dark:text-white text-[10px] sm:text-xs font-bold opacity-80 hover:opacity-100 uppercase tracking-widest action-btn transition-opacity flex items-center shadow-sm">
                                         ${m.active ? '<i class="ph ph-archive text-sm mr-1.5"></i> Archiver' : '<i class="ph ph-check text-sm mr-1.5"></i> Activer'}
                                     </button>
@@ -1763,4 +1750,4 @@
         });
     </script>
 </body>
-</html>
+    </html>
