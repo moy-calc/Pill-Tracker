@@ -204,8 +204,8 @@
             top: 24px;
             left: 50%;
             transform: translateX(-50%) translateY(-150px) scale(0.5);
-            background: var(--text);
-            color: var(--bg-gradient);
+            background: #0f172a;
+            color: #ffffff;
             padding: 14px 24px;
             border-radius: 100px;
             font-weight: 700;
@@ -219,6 +219,11 @@
             width: max-content;
             max-width: 90%;
             opacity: 0;
+        }
+        
+        .dark .toast {
+            background: #ffffff;
+            color: #0f172a;
         }
 
         .toast.show {
@@ -464,6 +469,20 @@
                         <input type="number" id="newMedPlates" oninput="validateMedForm()" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
                     </div>
                 </div>
+                
+                <div class="bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 flex flex-col gap-3">
+                    <span class="text-[10px] font-black uppercase opacity-60">Planification de la prise</span>
+                    <input type="time" id="newMedTime" class="w-full p-3 bg-white dark:bg-slate-800 rounded-xl font-bold outline-none focus:border-indigo-500 text-sm border border-slate-500/10">
+                    <div class="flex justify-between items-center w-full" id="newMedDays">
+                        <button type="button" class="day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="1">L</button>
+                        <button type="button" class="day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="2">M</button>
+                        <button type="button" class="day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="3">M</button>
+                        <button type="button" class="day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="4">J</button>
+                        <button type="button" class="day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="5">V</button>
+                        <button type="button" class="day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="6">S</button>
+                        <button type="button" class="day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="0">D</button>
+                    </div>
+                </div>
             </div>
             
             <button id="addMedBtn" onclick="confirmAddMed()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl uppercase text-xs tracking-widest action-btn shadow-lg shadow-indigo-600/30 opacity-50 pointer-events-none transition-all">Ajouter</button>
@@ -522,7 +541,8 @@
                 <i class="ph ph-clock text-4xl transition-transform duration-500 hover:scale-125"></i>
             </div>
             <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest text-indigo-500" id="timePickerTitle">Heure de la prise</h3>
-            <div id="timePickerGrid" class="grid grid-cols-4 gap-2 mb-6 max-h-[40vh] overflow-y-auto hide-scroll p-1"></div>
+            <div id="timePickerGrid" class="grid grid-cols-4 gap-2 mb-4 max-h-[40vh] overflow-y-auto hide-scroll p-1"></div>
+            <button onclick="skipTime()" class="w-full py-4 bg-indigo-500/15 hover:bg-indigo-500/25 font-bold rounded-2xl uppercase text-xs tracking-widest action-btn text-indigo-600 dark:text-indigo-400 mb-2">Ignorer l'heure</button>
             <button onclick="closeModal('customTimeModal')" class="w-full py-4 bg-slate-500/15 hover:bg-slate-500/25 font-bold rounded-2xl uppercase text-xs tracking-widest action-btn text-slate-800 dark:text-white">Annuler</button>
         </div>
     </div>
@@ -548,6 +568,7 @@
             window.selectedDateParts = { y: null, m: null, d: null };
             window.pendingDoseAction = null;
             window.selectedTimeParts = { h: null, m: null };
+            window.currentDayDoses = [];
 
             const extendedColors = [
                 '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e', 
@@ -668,6 +689,15 @@
                 cGrid.innerHTML = extendedColors.map((c, idx) => 
                     `<div onclick="selectColor('${c}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl cursor-pointer action-btn shadow-lg border-2 border-white/20" style="background:${c}; animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${idx * 0.02}s;"></div>`
                 ).join('');
+
+                document.querySelectorAll('.day-btn').forEach(b => {
+                    b.onclick = () => {
+                        b.classList.toggle('bg-indigo-500');
+                        b.classList.toggle('text-white');
+                        b.classList.toggle('bg-slate-500/20');
+                        b.classList.toggle('text-slate-500');
+                    };
+                });
             }
 
             window.openCustomDatePicker = (targetId) => {
@@ -886,6 +916,28 @@
                     document.body.classList.add('dark');
                     document.getElementById('themeIcon').classList.replace('ph-moon', 'ph-sun');
                 }
+
+                setInterval(() => {
+                    const now = new Date();
+                    const timeStr = now.toTimeString().slice(0, 5);
+                    const day = now.getDay();
+                    let sched = JSON.parse(localStorage.getItem('medSchedules') || '{}');
+                    let notified = JSON.parse(localStorage.getItem('medNotified') || '{}');
+                    
+                    for (let id in sched) {
+                        if (sched[id].days.includes(day) && sched[id].time === timeStr) {
+                            const notifyKey = `${id}_${now.toISOString().split('T')[0]}_${timeStr}`;
+                            if (!notified[notifyKey]) {
+                                if (Notification.permission === "granted") {
+                                    const medName = medsData[id] ? medsData[id].name : "votre médicament";
+                                    new Notification('MedTracker Pro', { body: `Il est temps de prendre : ${medName}`, icon: 'icon.png' });
+                                }
+                                notified[notifyKey] = true;
+                                localStorage.setItem('medNotified', JSON.stringify(notified));
+                            }
+                        }
+                    }
+                }, 30000);
                 
                 processQueue();
                 await loadMeds();
@@ -928,8 +980,17 @@
             function renderAllMeds() {
                 const grid = document.getElementById('medsGrid');
                 let index = 0;
+                const todayDay = new Date().getDay();
+                const sched = JSON.parse(localStorage.getItem('medSchedules') || '{}');
+
                 for (let id in medsData) {
                     if (medsData[id].active !== false) {
+                        const s = sched[id];
+                        if (s && s.days && s.days.length > 0 && !s.days.includes(todayDay)) {
+                            const existingCard = document.getElementById(`med-card-${id}`);
+                            if (existingCard) existingCard.remove();
+                            continue;
+                        }
                         renderMedCard(medsData[id], index);
                         index++;
                     } else {
@@ -1000,10 +1061,16 @@
             }
 
             window.changeDose = (id, val, date = null) => {
+                const todayStr = new Date().toISOString().split('T')[0];
                 if (val > 0) {
-                    window.pendingDoseAction = { id, val, date };
-                    renderHourPicker();
-                    openModal('customTimeModal');
+                    if (date && date !== todayStr) {
+                        window.pendingDoseAction = { id, val, date };
+                        renderHourPicker();
+                        openModal('customTimeModal');
+                    } else {
+                        const nowTime = new Date().toTimeString().slice(0,5);
+                        executeChangeDose(id, val, date || todayStr, nowTime);
+                    }
                 } else {
                     executeChangeDose(id, val, date, null);
                 }
@@ -1046,6 +1113,14 @@
                 }
             };
 
+            window.skipTime = () => {
+                closeModal('customTimeModal');
+                if (window.pendingDoseAction) {
+                    executeChangeDose(window.pendingDoseAction.id, window.pendingDoseAction.val, window.pendingDoseAction.date, null);
+                    window.pendingDoseAction = null;
+                }
+            };
+
             window.executeChangeDose = async (id, val, date, time) => {
                 const med = medsData[id];
                 if (!med) return;
@@ -1082,6 +1157,13 @@
                 if(!window.medsHistoryMap[hKey]) window.medsHistoryMap[hKey] = {count: 0, color: med.color};
                 window.medsHistoryMap[hKey].count = Math.max(0, window.medsHistoryMap[hKey].count + val);
                 
+                if (val > 0 && time) {
+                    window.currentDayDoses.push({ medication_id: id, created_at: `${d}T${time}:00` });
+                } else if (val < 0) {
+                    const idx = window.currentDayDoses.map(d => d.medication_id).lastIndexOf(id);
+                    if (idx > -1) window.currentDayDoses.splice(idx, 1);
+                }
+
                 updateMedCardDOM(id);
                 renderCalendar(); 
                 if(date) renderDayEditList(date);
@@ -1104,6 +1186,8 @@
                         if (time) {
                             const fullDateTime = new Date(`${d}T${time}:00`).toISOString();
                             insertData.created_at = fullDateTime;
+                        } else if (d !== new Date().toISOString().split('T')[0]) {
+                            insertData.created_at = new Date(`${d}T12:00:00`).toISOString();
                         }
                         await sb.from('medication_doses').insert(insertData);
                     } else {
@@ -1173,21 +1257,57 @@
                 }
             }
 
+            window.openDayEdit = async (date) => {
+                const dateObj = new Date(date);
+                const formatOpts = { weekday: 'long', day: 'numeric', month: 'long' };
+                document.getElementById('editDayTitle').innerText = new Intl.DateTimeFormat('fr', formatOpts).format(dateObj);
+                openModal('editDayModal');
+
+                document.getElementById('editDayList').innerHTML = '<div class="text-center py-6 text-slate-800 dark:text-white"><i class="ph ph-spinner animate-spin text-2xl"></i></div>';
+
+                if (navigator.onLine) {
+                    const startDate = `${date}T00:00:00`;
+                    const endDate = `${date}T23:59:59`;
+                    try {
+                        const { data: doses } = await sb.from('medication_doses').select('medication_id, created_at').gte('created_at', startDate).lte('created_at', endDate).order('created_at', { ascending: true });
+                        window.currentDayDoses = doses || [];
+                    } catch (e) {
+                        window.currentDayDoses = [];
+                    }
+                } else {
+                    window.currentDayDoses = [];
+                }
+
+                renderDayEditList(date);
+            };
+
             function renderDayEditList(date) {
                 const list = document.getElementById('editDayList'); 
                 let html = '';
                 let index = 0;
+                
+                const dObj = new Date(date);
+                const dayOfWeek = dObj.getDay();
+                const sched = JSON.parse(localStorage.getItem('medSchedules') || '{}');
+
                 for (let id in medsData) {
                     if (medsData[id].active === false) continue;
                     const m = medsData[id];
                     const hKey = `${date}_${id}`;
                     const val = (window.medsHistoryMap && window.medsHistoryMap[hKey]) ? window.medsHistoryMap[hKey].count : 0;
+                    const s = sched[id];
+
+                    if (val === 0 && s && s.days && s.days.length > 0 && !s.days.includes(dayOfWeek)) continue;
+
+                    const myDoses = (window.currentDayDoses || []).filter(d => d.medication_id === id);
+                    const timesHtml = myDoses.map(d => `<span class="bg-indigo-500/10 text-indigo-500 font-bold px-1.5 py-0.5 rounded text-[10px] shadow-sm">${new Date(d.created_at).toTimeString().slice(0,5)}</span>`).join(' ');
                     
                     html += `
                         <div class="p-4 bg-slate-500/5 border border-slate-500/10 rounded-2xl flex justify-between items-center hover:bg-slate-500/10 transition-colors shadow-sm" style="animation: slideInRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${index * 0.05}s;">
-                            <div>
-                                <div class="text-sm font-black uppercase tracking-wide" style="color:${m.color}">${m.name}</div>
+                            <div class="w-2/3">
+                                <div class="text-sm font-black uppercase tracking-wide truncate" style="color:${m.color}">${m.name}</div>
                                 <div class="text-xs font-bold opacity-70 mt-1 flex items-center gap-2 text-slate-800 dark:text-white"><i class="ph ph-check-circle text-lg"></i> <span class="dose-anim inline-block" id="modal-dose-${id}">${val}</span> prises</div>
+                                <div class="flex flex-wrap gap-1 mt-2">${timesHtml}</div>
                             </div>
                             <div class="flex gap-2 bg-white dark:bg-slate-800 p-1.5 rounded-xl shadow-md border border-slate-500/10">
                                 <button onclick="animateModalDose('${id}', -1, '${date}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-slate-500/5 hover:bg-slate-500/15 text-slate-800 dark:text-white font-bold action-btn flex items-center justify-center text-lg"><i class="ph ph-minus"></i></button>
@@ -1196,7 +1316,7 @@
                         </div>`;
                     index++;
                 }
-                list.innerHTML = html || '<p class="text-center text-sm opacity-60 font-bold py-6 text-slate-800 dark:text-white">Aucun médicament actif.</p>';
+                list.innerHTML = html || '<p class="text-center text-sm opacity-60 font-bold py-6 text-slate-800 dark:text-white">Aucun médicament prévu ou pris ce jour.</p>';
             }
 
             window.animateModalDose = (id, val, date) => {
@@ -1208,14 +1328,6 @@
                         setTimeout(() => doseText.style.transform = 'scale(1)', 200);
                     }
                 }
-            };
-
-            window.openDayEdit = (date) => {
-                const dateObj = new Date(date);
-                const formatOpts = { weekday: 'long', day: 'numeric', month: 'long' };
-                document.getElementById('editDayTitle').innerText = new Intl.DateTimeFormat('fr', formatOpts).format(dateObj);
-                openModal('editDayModal');
-                renderDayEditList(date);
             };
 
             function renderHistory() {
@@ -1286,17 +1398,23 @@
                 const pi = parseInt(document.getElementById('newMedPieces').value);
                 const pl = parseInt(document.getElementById('newMedPlates').value) || 1;
                 const c = document.getElementById('newMedColor').value;
+                const t = document.getElementById('newMedTime').value;
+                const days = Array.from(document.querySelectorAll('.day-btn.bg-indigo-500')).map(b => parseInt(b.dataset.day));
                 
                 if (!n || !pi) return showToast("Nom et doses/plq sont obligatoires");
                 
                 setSyncing(true);
                 try {
-                    const { error } = await sb.from('medications').insert({ user_key: user, name: n, pieces_per_plate: pi, plates_per_box: pl, color: c, active: true, box_count: 1 });
+                    const { data, error } = await sb.from('medications').insert({ user_key: user, name: n, pieces_per_plate: pi, plates_per_box: pl, color: c, active: true, box_count: 1 }).select('id').single();
                     
                     if (error) {
                         showToast("Erreur lors de l'ajout");
                         return;
                     }
+
+                    let sched = JSON.parse(localStorage.getItem('medSchedules') || '{}');
+                    sched[data.id] = { time: t, days: days };
+                    localStorage.setItem('medSchedules', JSON.stringify(sched));
                     
                     showToast("Médicament ajouté avec succès");
                     closeModal('addMedModal');
@@ -1304,6 +1422,11 @@
                     document.getElementById('newMedName').value = '';
                     document.getElementById('newMedPieces').value = '';
                     document.getElementById('newMedPlates').value = '';
+                    document.getElementById('newMedTime').value = '';
+                    document.querySelectorAll('.day-btn').forEach(b => {
+                        b.classList.remove('bg-indigo-500', 'text-white');
+                        b.classList.add('bg-slate-500/20', 'text-slate-500');
+                    });
                     document.getElementById('newMedColor').value = '#6366f1';
                     document.getElementById('colorPreview').style.background = '#6366f1';
                     document.getElementById('addMedBtn').classList.add('opacity-50', 'pointer-events-none');
