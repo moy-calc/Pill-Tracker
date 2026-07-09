@@ -28,7 +28,6 @@
 </head>
 <body class="p-3 antialiased">
     <div id="drawerOverlay" class="fixed inset-0 bg-black/40 z-[1500] hidden" onclick="closeDrawers()"></div>
-
     <nav class="max-w-4xl mx-auto flex justify-between items-center p-4 glass mb-6 relative z-[2000]">
         <button onclick="openModal('accountModal')" id="accBtn" class="w-10 h-10 rounded-xl bg-slate-500/5 flex items-center justify-center hidden">👤</button>
         <h1 class="text-xl font-black text-indigo-500 italic">MEDTRACKER PRO</h1>
@@ -39,7 +38,6 @@
             <button onclick="toggleTheme()" class="w-10 h-10 rounded-xl bg-slate-500/5 flex items-center justify-center">🌓</button>
         </div>
     </nav>
-
     <main class="max-w-4xl mx-auto space-y-6">
         <div id="loginBox" class="glass p-8 text-center space-y-4 max-w-sm mx-auto">
             <div class="space-y-3">
@@ -50,7 +48,6 @@
             </div>
             <button id="authBtn" onclick="handleAuth()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl opacity-50 pointer-events-none">VÉRIFIER</button>
         </div>
-
         <div id="appBody" class="hidden space-y-6">
             <div class="flex justify-between items-center px-2">
                 <h2 class="font-black text-[10px] uppercase opacity-40">Mes Médicaments</h2>
@@ -67,7 +64,6 @@
             </div>
         </div>
     </main>
-
     <div id="accountModal" class="modal-overlay" onclick="closeModal('accountModal')">
         <div class="glass p-6 w-full max-w-sm" onclick="event.stopPropagation()">
             <h3 class="font-bold mb-6 text-center uppercase text-sm">Profil</h3>
@@ -84,7 +80,6 @@
             </div>
         </div>
     </div>
-
     <div id="editDayModal" class="modal-overlay" onclick="closeModal('editDayModal')">
         <div class="glass p-6 w-full max-w-sm" onclick="event.stopPropagation()">
             <h3 id="editDayTitle" class="font-black mb-6 text-center uppercase text-xs text-indigo-500"></h3>
@@ -92,7 +87,6 @@
             <button onclick="closeModal('editDayModal')" class="w-full mt-8 py-4 bg-slate-500/10 font-bold rounded-2xl text-[10px] uppercase">Fermer</button>
         </div>
     </div>
-
     <div id="addMedModal" class="modal-overlay" onclick="closeModal('addMedModal')">
         <div class="glass p-6 w-full max-w-sm" onclick="event.stopPropagation()">
             <h3 class="font-bold mb-4">Nouveau Médicament</h3>
@@ -105,7 +99,6 @@
             <button onclick="confirmAddMed()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl uppercase text-xs">Ajouter</button>
         </div>
     </div>
-
     <div id="rightDrawer" class="fixed top-0 right-0 bottom-0 w-[320px] bg-white dark:bg-slate-900 z-[2500] translate-x-full transition-transform duration-300 p-6 glass border-l border-white/10">
         <h2 class="text-xl font-black italic mb-8 text-indigo-500">HISTORIQUE</h2>
         <div id="globalHistoryList" class="space-y-4 overflow-y-auto max-h-[80vh]"></div>
@@ -114,7 +107,7 @@
     <script>
         window.addEventListener('load', () => {
             if (typeof supabase === 'undefined') {
-                alert("Erreur de chargement de Supabase");
+                alert("Erreur : Supabase non chargé.");
                 return;
             }
 
@@ -147,11 +140,12 @@
                 const ln = document.getElementById('lastName').value.trim().toLowerCase(), fn = document.getElementById('firstName').value.trim().toLowerCase(), bd = document.getElementById('birthDate').value, pw = document.getElementById('passInput').value.trim();
                 const key = `${ln}_${fn}_${bd.replace(/-/g, '')}`;
                 const { data, error } = await sb.from('credentials').select('pw').eq('key', key).single();
-                if (error && error.code !== 'PGRST116') { alert("Erreur"); return; }
+                if (error && error.code !== 'PGRST116') { alert("Erreur base de données : " + error.message); return; }
                 if (data) {
                     if (data.pw !== pw) return alert("Mot de passe incorrect");
                 } else {
-                    await sb.from('credentials').insert({ key, pw, info: { ln, fn, bd } });
+                    const { error: insertErr } = await sb.from('credentials').insert({ key, pw, info: { ln, fn, bd } });
+                    if (insertErr) { alert("Erreur création compte : " + insertErr.message); return; }
                 }
                 user = key;
                 localStorage.setItem('medUser', user);
@@ -180,13 +174,19 @@
                 document.getElementById('appBody').classList.remove('hidden');
                 document.getElementById('accBtn').classList.remove('hidden');
                 const { data: u } = await sb.from('credentials').select('info').eq('key', user).single();
-                const i = u.info;
-                document.getElementById('editLN').value = i.ln; document.getElementById('editFN').value = i.fn; document.getElementById('editBD').value = i.bd;
+                if (u) {
+                    const i = u.info;
+                    document.getElementById('editLN').value = i.ln; document.getElementById('editFN').value = i.fn; document.getElementById('editBD').value = i.bd;
+                }
                 await loadMeds();
             }
 
             async function loadMeds() {
-                const { data: meds } = await sb.from('medications').select('*').eq('user_key', user);
+                const { data: meds, error } = await sb.from('medications').select('*').eq('user_key', user);
+                if (error) {
+                    alert("Erreur chargement médicaments : " + error.message);
+                    return;
+                }
                 medsData = {};
                 (meds || []).forEach(m => { medsData[m.id] = m; });
                 renderAllMeds();
@@ -195,22 +195,21 @@
             }
 
             function renderAllMeds() {
-                const grid = document.getElementById('medsGrid');
-                grid.innerHTML = "";
+                const grid = document.getElementById('medsGrid'); grid.innerHTML = "";
                 for (let id in medsData) {
                     if (medsData[id].active !== false) renderMedCard(medsData[id]);
                 }
             }
 
             async function renderMedCard(med) {
-                const card = document.createElement('div');
-                card.className = "glass p-5 relative";
+                const card = document.createElement('div'); card.className = "glass p-5 relative";
                 document.getElementById('medsGrid').appendChild(card);
 
-                const { count: doseCount } = await sb
+                const { count: doseCount, error } = await sb
                     .from('medication_doses')
                     .select('*', { count: 'exact', head: true })
                     .eq('medication_id', med.id);
+                if (error) { console.error(error); return; }
                 const count = doseCount || 0;
                 const total = med.pieces_per_plate * med.plates_per_box;
                 const prog = total ? (count / total) * 100 : 0;
@@ -240,7 +239,8 @@
                         await loadMeds();
                         return;
                     }
-                    await sb.from('medication_doses').insert({ medication_id: id });
+                    const { error: insertErr } = await sb.from('medication_doses').insert({ medication_id: id });
+                    if (insertErr) { alert("Erreur ajout dose : " + insertErr.message); return; }
                 } else {
                     const { data: last } = await sb.from('medication_doses').select('id').eq('medication_id', id).order('id', { ascending: false }).limit(1).single();
                     if (last) await sb.from('medication_doses').delete().eq('id', last.id);
@@ -271,9 +271,7 @@
 
                 for (let d = 1; d <= new Date(y, m + 1, 0).getDate(); d++) {
                     const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                    const cell = document.createElement('div');
-                    cell.className = "cal-cell glass";
-                    cell.onclick = () => openDayEdit(dateStr);
+                    const cell = document.createElement('div'); cell.className = "cal-cell glass"; cell.onclick = () => openDayEdit(dateStr);
                     let badges = '', total = 0;
                     for (let id in medsData) {
                         const h = map[`${dateStr}_${id}`];
@@ -288,14 +286,12 @@
             }
 
             window.openDayEdit = async (date) => {
-                const list = document.getElementById('editDayList');
-                list.innerHTML = "";
+                const list = document.getElementById('editDayList'); list.innerHTML = "";
                 document.getElementById('editDayTitle').innerText = date;
                 for (let id in medsData) {
                     if (medsData[id].active === false) continue;
                     const m = medsData[id];
-                    const item = document.createElement('div');
-                    item.className = "p-4 glass flex justify-between items-center";
+                    const item = document.createElement('div'); item.className = "p-4 glass flex justify-between items-center";
                     const { data: h } = await sb.from('medication_history').select('count').eq('medication_id', id).eq('date', date).single();
                     const val = h ? h.count : 0;
                     item.innerHTML = `<div><div class="text-[10px] font-black uppercase" style="color:${m.color}">${m.name}</div><div class="text-xs font-bold opacity-40">${val} prises</div></div><div class="flex gap-2"><button onclick="changeDose('${id}', -1, '${date}')" class="w-10 h-10 rounded-xl bg-slate-500/10 font-bold">-</button><button onclick="changeDose('${id}', 1, '${date}')" class="w-10 h-10 rounded-xl bg-slate-500/10 font-bold" style="color:${m.color}">+</button></div>`;
@@ -305,8 +301,7 @@
             };
 
             function renderHistory() {
-                const list = document.getElementById('globalHistoryList');
-                list.innerHTML = "";
+                const list = document.getElementById('globalHistoryList'); list.innerHTML = "";
                 for (let id in medsData) {
                     const m = medsData[id];
                     list.innerHTML += `<div class="p-4 glass mb-3"><div class="flex justify-between items-start mb-3"><span class="text-[10px] font-black" style="color:${m.color}">${m.name}</span><div class="flex gap-3"><button onclick="toggleArchive('${id}', ${m.active})" class="text-[8px] font-bold opacity-30 uppercase">${m.active ? 'Archiver' : 'Activer'}</button><button onclick="deleteMed('${id}')" class="text-red-500 text-[8px] font-bold uppercase">Suppr.</button></div></div><div class="flex justify-between items-center text-[10px] font-bold opacity-60"><span>BOÎTES :</span><input type="number" value="${m.box_count || 1}" onchange="updateBox('${id}', this.value)" class="w-12 bg-slate-500/10 rounded-lg p-1 text-center font-bold"></div></div>`;
@@ -329,11 +324,14 @@
                 const pi = parseInt(document.getElementById('newMedPieces').value);
                 const pl = parseInt(document.getElementById('newMedPlates').value) || 1;
                 const c = document.getElementById('newMedColor').value;
-                if (n && pi) {
-                    await sb.from('medications').insert({ user_key: user, name: n, pieces_per_plate: pi, plates_per_box: pl, color: c, active: true, box_count: 1 });
-                    closeModal('addMedModal');
-                    loadMeds();
+                if (!n || !pi) return alert("Nom et doses/plq obligatoires");
+                const { error } = await sb.from('medications').insert({ user_key: user, name: n, pieces_per_plate: pi, plates_per_box: pl, color: c, active: true, box_count: 1 });
+                if (error) {
+                    alert("Erreur ajout médicament : " + error.message);
+                    return;
                 }
+                closeModal('addMedModal');
+                loadMeds();
             };
 
             window.openRightDrawer = () => {
