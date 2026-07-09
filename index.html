@@ -42,7 +42,7 @@
             --card: rgba(255, 255, 255, 0.85); 
             --text: #0f172a; 
             --border: rgba(255, 255, 255, 0.8);
-            --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+            --shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.05);
         }
         
         .dark { 
@@ -50,7 +50,7 @@
             --card: rgba(30, 41, 59, 0.75); 
             --text: #f8fafc; 
             --border: rgba(255, 255, 255, 0.08);
-            --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            --shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
         }
         
         body { 
@@ -65,20 +65,19 @@
         
         .glass { 
             background: var(--card); 
-            backdrop-filter: blur(20px); 
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(24px); 
+            -webkit-backdrop-filter: blur(24px);
             border: 1px solid var(--border); 
             border-radius: 24px; 
             box-shadow: var(--shadow);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
         }
 
         .glass:hover {
-            box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
         }
-        
         .dark .glass:hover {
-            box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
         }
         
         .progress-container {
@@ -88,49 +87,53 @@
             border-radius: 99px; 
             overflow: hidden;
             position: relative;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
         }
         
         .progress-bar {
             height: 100%;
             border-radius: 99px;
-            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         
         .cal-cell { 
-            aspect-ratio: 1;
-            border-radius: 16px; 
+            min-height: 75px; 
+            border-radius: 14px; 
             display: flex; 
             flex-direction: column; 
             padding: 6px; 
             border: 1px solid var(--border); 
             cursor: pointer; 
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); 
         }
         
         .cal-cell:active {
-            transform: scale(0.95);
+            transform: scale(0.92);
         }
 
         .cal-cell:hover {
-            background: rgba(148, 163, 184, 0.1);
+            background: rgba(148, 163, 184, 0.08);
+            transform: translateY(-2px);
         }
         
         .ratio-badge { 
-            font-size: 0.6rem; 
-            padding: 2px 5px; 
+            font-size: 0.65rem; 
+            padding: 2px 6px; 
             border-radius: 6px; 
             color: white; 
+            margin-bottom: 2px; 
             font-weight: 800; 
             text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            letter-spacing: 0.5px;
         }
         
         .modal-overlay { 
             position: fixed; 
             inset: 0; 
             background: rgba(2, 6, 23, 0.6); 
-            backdrop-filter: blur(12px); 
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px);
             z-index: 6000; 
             display: flex; 
             align-items: center; 
@@ -139,7 +142,7 @@
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .modal-overlay.z-top {
@@ -153,38 +156,54 @@
         }
         
         .modal-content {
-            transform: translateY(30px) scale(0.95);
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: translateY(40px) scale(0.92);
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
         }
         
         .modal-overlay.open .modal-content {
             transform: translateY(0) scale(1);
+        }
+        
+        @keyframes pulse-soft { 
+            0%, 100% { opacity: 1; transform: scale(1); } 
+            50% { opacity: 0.85; transform: scale(1.05); } 
+        }
+        
+        .alert-stock { 
+            animation: pulse-soft 2.5s infinite cubic-bezier(0.4, 0, 0.2, 1); 
+            font-size: 10px; 
+            font-weight: 800; 
+            padding: 4px 10px; 
+            border-radius: 8px; 
+            letter-spacing: 0.5px;
         }
 
         .toast {
             position: fixed;
             top: 24px;
             left: 50%;
-            transform: translateX(-50%) translateY(-100px);
+            transform: translateX(-50%) translateY(-150px) scale(0.9);
             background: var(--text);
-            color: var(--bg-gradient);
-            padding: 12px 24px;
+            color: var(--bg);
+            padding: 14px 24px;
             border-radius: 100px;
             font-weight: 700;
             font-size: 13px;
             z-index: 9999;
-            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            width: max-content;
+            max-width: 90%;
             opacity: 0;
         }
 
         .toast.show {
-            transform: translateX(-50%) translateY(0);
+            transform: translateX(-50%) translateY(0) scale(1);
             opacity: 1;
         }
 
@@ -198,157 +217,178 @@
         input[type="color"] {
             padding: 0;
             border: none;
-            border-radius: 12px;
+            border-radius: 14px;
             overflow: hidden;
             cursor: pointer;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
         }
         
-        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-        input[type="color"]::-webkit-color-swatch { border: none; border-radius: 12px; }
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
         
-        .action-btn { transition: all 0.2s ease; }
-        .action-btn:active { transform: scale(0.9); }
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 14px;
+        }
         
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        .action-btn {
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .action-btn:active {
+            transform: scale(0.88);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .dose-anim {
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .hide-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .hide-scroll {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
 
         .valid-input {
             border-color: #22c55e !important;
-            background-color: rgba(34, 197, 94, 0.05) !important;
-        }
-
-        .anim-pop { animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-        @keyframes popIn {
-            0% { transform: scale(0.8); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        #calendar-wrapper { transition: all 0.3s ease; }
-
-        .sync-green { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
-        .sync-yellow { background: rgba(234, 179, 8, 0.15); color: #eab308; animation: pulseSync 1.5s infinite; }
-        @keyframes pulseSync {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
+            background-color: rgba(34, 197, 94, 0.08) !important;
         }
     </style>
 </head>
-<body class="p-3 sm:p-5">
+<body class="p-3 sm:p-5 lg:p-6">
     <div id="toastContainer" class="toast"><i class="ph ph-info text-xl"></i><span id="toastMsg"></span></div>
-    <div id="drawerOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2000] hidden transition-opacity duration-300 opacity-0" onclick="closeDrawers()"></div>
+
+    <div id="drawerOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[2000] hidden transition-opacity duration-400 opacity-0" onclick="closeDrawers()"></div>
     
-    <nav class="max-w-4xl mx-auto flex justify-between items-center p-3 sm:p-4 glass mb-6 relative z-[1000] rounded-full">
-        <button onclick="openModal('accountModal')" id="accBtn" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-500/10 items-center justify-center hidden action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
-            <i class="ph ph-user text-xl"></i>
+    <nav class="max-w-5xl mx-auto flex justify-between items-center p-3 sm:p-4 glass mb-6 sm:mb-8 relative z-[1000] rounded-3xl">
+        <button onclick="openModal('accountModal')" id="accBtn" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-500/10 items-center justify-center hidden action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
+            <i class="ph ph-user text-lg sm:text-xl"></i>
         </button>
-        <h1 class="text-lg sm:text-xl font-black text-indigo-500 tracking-tight flex items-center gap-2 pl-4">
+        <h1 class="text-lg sm:text-2xl font-black text-indigo-500 tracking-tight flex items-center gap-2 sm:gap-2 pl-2">
             <i class="ph-fill ph-pill"></i> MEDTRACKER
         </h1>
-        <div class="flex gap-2">
-            <button id="syncBtn" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full sync-green flex items-center justify-center transition-all shadow-sm hidden">
-                <i class="ph ph-cloud-check text-xl"></i>
+        <div class="flex gap-1.5 sm:gap-2">
+            <button id="syncBtn" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center action-btn transition-colors hidden">
+                <i class="ph ph-cloud-check text-lg sm:text-xl" id="syncIcon"></i>
             </button>
-            <button onclick="openRightDrawer()" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-500/10 flex items-center justify-center action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
-                <i class="ph ph-clock-counter-clockwise text-xl"></i>
+            <button onclick="triggerNotification()" id="notifBtn" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center action-btn hover:bg-indigo-500/20">
+                <i class="ph ph-bell-ringing text-lg sm:text-xl"></i>
             </button>
-            <button onclick="toggleTheme()" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-500/10 flex items-center justify-center action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
-                <i class="ph ph-moon text-xl" id="themeIcon"></i>
+            <button onclick="openRightDrawer()" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-500/10 flex items-center justify-center action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
+                <i class="ph ph-clock-counter-clockwise text-lg sm:text-xl"></i>
+            </button>
+            <button onclick="toggleTheme()" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-500/10 flex items-center justify-center action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
+                <i class="ph ph-moon text-lg sm:text-xl" id="themeIcon"></i>
             </button>
         </div>
     </nav>
 
-    <main class="max-w-4xl mx-auto space-y-6 pb-12">
-        <div id="loginBox" class="glass p-6 sm:p-10 text-center space-y-6 max-w-sm mx-auto mt-10 rounded-3xl">
-            <div class="w-20 h-20 bg-indigo-500/10 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-2">
-                <i class="ph ph-lock-key text-4xl"></i>
+    <main class="max-w-5xl mx-auto space-y-6 pb-12">
+        <div id="loginBox" class="glass p-6 sm:p-10 text-center space-y-6 max-w-md mx-auto mt-8 sm:mt-12 rounded-[2rem]">
+            <div class="w-20 h-20 sm:w-24 sm:h-24 bg-indigo-500/10 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                <i class="ph ph-lock-key text-4xl sm:text-5xl"></i>
             </div>
             <div>
-                <h2 class="text-2xl font-black mb-1">Bienvenue</h2>
-                <p class="text-sm opacity-60 font-semibold">Identifiez-vous</p>
+                <h2 class="text-2xl sm:text-3xl font-black mb-1 tracking-tight">Bienvenue</h2>
+                <p class="text-sm opacity-60 font-semibold">Veuillez vous identifier pour continuer</p>
             </div>
             <div class="space-y-4">
                 <div class="relative">
                     <i class="ph ph-text-aa absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl" id="iconLN"></i>
-                    <input type="text" id="lastName" oninput="validateInput('lastName', 'iconLN')" placeholder="Nom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 pl-12 font-bold outline-none focus:border-indigo-500 transition-all text-sm">
+                    <input type="text" id="lastName" oninput="validateInput('lastName', 'iconLN')" placeholder="Nom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-all text-base">
                 </div>
                 <div class="relative">
                     <i class="ph ph-text-a-underline absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl" id="iconFN"></i>
-                    <input type="text" id="firstName" oninput="validateInput('firstName', 'iconFN')" placeholder="Prénom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 pl-12 font-bold outline-none focus:border-indigo-500 transition-all text-sm">
+                    <input type="text" id="firstName" oninput="validateInput('firstName', 'iconFN')" placeholder="Prénom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-all text-base">
                 </div>
                 <div>
                     <div class="relative">
                         <i class="ph ph-calendar-blank absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl" id="iconBD"></i>
-                        <input type="text" id="birthDate" placeholder="Date de naissance" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 pl-12 font-bold outline-none focus:border-indigo-500 transition-all cursor-pointer text-sm">
+                        <input type="text" id="birthDate" placeholder="Date de naissance" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-all cursor-pointer text-base">
                     </div>
                     <div id="ageDisplay" class="text-xs font-bold text-indigo-500 mt-2 hidden text-right pr-3"></div>
                 </div>
                 <div class="relative">
                     <i class="ph ph-password absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
-                    <input type="password" id="passInput" placeholder="Mot de passe" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 pl-12 font-bold outline-none focus:border-indigo-500 transition-all hidden text-sm">
+                    <input type="password" id="passInput" placeholder="Mot de passe" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-all hidden text-base">
                 </div>
             </div>
-            <button id="authBtn" onclick="handleAuth()" class="w-full py-4 mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl opacity-50 pointer-events-none transition-all action-btn flex items-center justify-center gap-2 text-sm tracking-wide uppercase shadow-lg shadow-indigo-600/20">
-                VÉRIFIER <i class="ph ph-arrow-right font-bold text-lg"></i>
+            <button id="authBtn" onclick="handleAuth()" class="w-full py-4 sm:py-5 mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl opacity-50 pointer-events-none transition-all action-btn flex items-center justify-center gap-2 text-sm tracking-widest uppercase shadow-lg shadow-indigo-600/30">
+                VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>
             </button>
         </div>
 
         <div id="appBody" class="hidden space-y-6">
             <div>
-                <div class="flex justify-between items-center px-2 mb-4">
-                    <h2 class="font-black text-sm uppercase tracking-widest opacity-60 flex items-center gap-2">
-                        <i class="ph ph-pill text-lg"></i> Médicaments
+                <div class="flex justify-between items-center px-1 mb-4 sm:mb-6">
+                    <h2 class="font-black text-xs sm:text-sm uppercase tracking-widest opacity-60 flex items-center gap-2">
+                        <i class="ph ph-pill text-lg"></i> Mes Médicaments
                     </h2>
-                    <button onclick="openModal('addMedModal')" class="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-wider action-btn flex items-center gap-2 shadow-lg shadow-indigo-500/20">
+                    <button onclick="openModal('addMedModal')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-bold text-xs uppercase tracking-wider action-btn flex items-center gap-2 shadow-lg shadow-indigo-500/30">
                         <i class="ph ph-plus-circle text-lg"></i> AJOUTER
                     </button>
                 </div>
-                <div id="medsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+                <div id="medsGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6"></div>
             </div>
 
-            <div class="glass p-4 sm:p-6 rounded-3xl">
-                <div class="flex justify-between items-center mb-4 bg-slate-500/5 p-2 rounded-2xl">
+            <div class="glass p-4 sm:p-8 rounded-[2rem]">
+                <div class="flex justify-between items-center mb-6 bg-slate-500/5 p-2 rounded-2xl">
                     <button onclick="changeMonth(-1)" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-500/15 action-btn text-lg bg-white dark:bg-slate-800 shadow-sm">
                         <i class="ph ph-caret-left font-bold"></i>
                     </button>
-                    <h3 id="calMonth" class="font-black uppercase text-sm tracking-widest text-indigo-500"></h3>
+                    <h3 id="calMonth" class="font-black uppercase text-xs sm:text-sm tracking-widest text-indigo-500"></h3>
                     <button onclick="changeMonth(1)" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-500/15 action-btn text-lg bg-white dark:bg-slate-800 shadow-sm">
                         <i class="ph ph-caret-right font-bold"></i>
                     </button>
                 </div>
                 <div class="grid grid-cols-7 gap-1 sm:gap-2 mb-2 px-1">
-                    <div class="text-center text-[10px] font-bold opacity-40 uppercase">Lun</div>
-                    <div class="text-center text-[10px] font-bold opacity-40 uppercase">Mar</div>
-                    <div class="text-center text-[10px] font-bold opacity-40 uppercase">Mer</div>
-                    <div class="text-center text-[10px] font-bold opacity-40 uppercase">Jeu</div>
-                    <div class="text-center text-[10px] font-bold opacity-40 uppercase">Ven</div>
-                    <div class="text-center text-[10px] font-bold opacity-40 uppercase">Sam</div>
-                    <div class="text-center text-[10px] font-bold opacity-40 uppercase">Dim</div>
+                    <div class="text-center text-[10px] font-bold opacity-40 uppercase tracking-wider">Lun</div>
+                    <div class="text-center text-[10px] font-bold opacity-40 uppercase tracking-wider">Mar</div>
+                    <div class="text-center text-[10px] font-bold opacity-40 uppercase tracking-wider">Mer</div>
+                    <div class="text-center text-[10px] font-bold opacity-40 uppercase tracking-wider">Jeu</div>
+                    <div class="text-center text-[10px] font-bold opacity-40 uppercase tracking-wider">Ven</div>
+                    <div class="text-center text-[10px] font-bold opacity-40 uppercase tracking-wider">Sam</div>
+                    <div class="text-center text-[10px] font-bold opacity-40 uppercase tracking-wider">Dim</div>
                 </div>
-                <div id="calendar-wrapper">
-                    <div id="calendar" class="grid grid-cols-7 gap-1 sm:gap-2"></div>
-                </div>
+                <div id="calendar" class="grid grid-cols-7 gap-1.5 sm:gap-3"></div>
             </div>
         </div>
     </main>
 
     <div id="accountModal" class="modal-overlay" onclick="closeModal('accountModal')">
         <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
-            <div class="flex justify-center mb-4 text-indigo-500">
-                <i class="ph ph-user-circle text-5xl"></i>
+            <div class="flex justify-center mb-5 sm:mb-6 text-indigo-500">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-indigo-500/10 rounded-full flex items-center justify-center shadow-inner">
+                    <i class="ph ph-user-circle text-4xl sm:text-5xl"></i>
+                </div>
             </div>
-            <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest text-indigo-500">Profil</h3>
-            <div class="space-y-4 mb-6">
-                <input type="text" id="editLN" placeholder="Nom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-xl p-3 font-bold text-sm outline-none focus:border-indigo-500">
-                <input type="text" id="editFN" placeholder="Prénom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-xl p-3 font-bold text-sm outline-none focus:border-indigo-500">
-                <input type="text" id="editBD" placeholder="Date de naissance" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-xl p-3 font-bold text-sm outline-none focus:border-indigo-500 cursor-pointer">
-                <div class="h-px w-full bg-slate-500/20 my-4 rounded-full"></div>
-                <input type="password" id="oldPassCheck" placeholder="Ancien mot de passe" class="w-full bg-slate-500/5 border border-indigo-500/40 rounded-xl p-3 font-bold text-sm outline-none focus:border-indigo-500">
-                <input type="password" id="newPassSet" placeholder="Nouveau mot de passe" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-xl p-3 font-bold text-sm outline-none focus:border-indigo-500">
-                <div class="pt-2 space-y-2">
-                    <button onclick="updateAccount()" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl text-xs uppercase tracking-widest action-btn">Sauvegarder</button>
-                    <button onclick="handleLogout()" class="w-full py-3 bg-slate-500/10 font-bold rounded-xl text-xs uppercase tracking-widest action-btn flex items-center justify-center gap-2">
+            <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest text-indigo-500">Profil Utilisateur</h3>
+            <div class="space-y-3 sm:space-y-4 mb-6">
+                <input type="text" id="editLN" placeholder="Nom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-colors">
+                <input type="text" id="editFN" placeholder="Prénom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-colors">
+                <div>
+                    <input type="text" id="editBD" placeholder="Date de naissance" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-colors cursor-pointer">
+                    <div id="editAgeDisplay" class="text-xs font-bold text-indigo-500 mt-2 text-right pr-3"></div>
+                </div>
+                <div class="h-px w-full bg-slate-500/20 my-4 sm:my-6 rounded-full"></div>
+                
+                <input type="password" id="oldPassCheck" placeholder="Ancien mot de passe" class="w-full bg-slate-500/5 border border-indigo-500/40 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-colors">
+                <input type="password" id="newPassSet" placeholder="Nouveau mot de passe" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-colors">
+                
+                <div class="pt-3 space-y-2">
+                    <button onclick="updateAccount()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-xs uppercase tracking-widest action-btn shadow-lg shadow-indigo-600/30">Sauvegarder</button>
+                    <button onclick="handleLogout()" class="w-full py-3.5 bg-slate-500/10 hover:bg-slate-500/20 font-bold rounded-2xl text-xs uppercase tracking-widest action-btn flex items-center justify-center gap-2">
                         <i class="ph ph-sign-out text-lg"></i> Déconnexion
                     </button>
+                    <button onclick="deleteAccount()" class="w-full py-3.5 text-red-500 bg-red-500/10 hover:bg-red-500/20 font-bold rounded-2xl text-xs uppercase tracking-widest action-btn mt-1">Supprimer le compte</button>
                 </div>
             </div>
         </div>
@@ -356,458 +396,765 @@
 
     <div id="addMedModal" class="modal-overlay" onclick="closeModal('addMedModal')">
         <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
-            <div class="flex justify-center mb-4 text-indigo-500">
-                <i class="ph ph-pill text-4xl"></i>
+            <div class="flex justify-center mb-5 sm:mb-6 text-indigo-500">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-indigo-500/10 rounded-full flex items-center justify-center shadow-inner">
+                    <i class="ph ph-pill text-3xl sm:text-4xl"></i>
+                </div>
             </div>
-            <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest text-indigo-500">Nouveau</h3>
-            <div class="space-y-4 mb-6">
-                <div class="bg-slate-500/5 border border-slate-500/10 rounded-xl p-3 flex items-center justify-between cursor-pointer hover:bg-slate-500/15 transition-all" onclick="openModal('colorModal')">
-                    <span class="text-sm font-bold opacity-80">Couleur</span>
+            <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest text-indigo-500">Nouveau Médicament</h3>
+            
+            <div class="space-y-4 mb-6 flex flex-col">
+                <div class="relative bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:bg-slate-500/15 transition-all action-btn" onclick="openModal('colorModal')">
+                    <span class="text-sm font-bold opacity-80">Couleur associée</span>
                     <input type="hidden" id="newMedColor" value="#6366f1">
-                    <div id="colorPreview" class="w-8 h-8 rounded-lg shadow-md border border-white/30" style="background: #6366f1;"></div>
+                    <div id="colorPreview" class="w-10 h-10 rounded-xl shadow-lg border-2 border-white/30" style="background: #6366f1;"></div>
                 </div>
-                <input type="text" id="newMedName" oninput="validateMedForm()" placeholder="Nom du médicament" class="w-full p-3 bg-slate-500/5 border border-slate-500/10 rounded-xl font-bold text-sm outline-none focus:border-indigo-500">
-                <div class="grid grid-cols-2 gap-3">
+
+                <div class="relative">
+                    <i class="ph ph-text-aa absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl" id="iconMedName"></i>
+                    <input type="text" id="newMedName" oninput="validateMedForm()" placeholder="Nom du médicament" class="w-full p-4 pl-12 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-colors">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3 sm:gap-4">
                     <div class="relative">
-                        <label class="absolute text-[9px] font-black uppercase opacity-60 top-2 left-3">Doses/Plq</label>
-                        <input type="number" id="newMedPieces" oninput="validateMedForm()" class="w-full p-3 pt-6 bg-slate-500/5 border border-slate-500/10 rounded-xl font-bold outline-none focus:border-indigo-500 text-center text-base">
+                        <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4">Doses/Plq</label>
+                        <input type="number" id="newMedPieces" oninput="validateMedForm()" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-colors text-center text-lg">
                     </div>
                     <div class="relative">
-                        <label class="absolute text-[9px] font-black uppercase opacity-60 top-2 left-3">Plaques</label>
-                        <input type="number" id="newMedPlates" oninput="validateMedForm()" class="w-full p-3 pt-6 bg-slate-500/5 border border-slate-500/10 rounded-xl font-bold outline-none focus:border-indigo-500 text-center text-base">
+                        <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4">Plaques</label>
+                        <input type="number" id="newMedPlates" oninput="validateMedForm()" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-colors text-center text-lg">
                     </div>
                 </div>
             </div>
-            <button id="addMedBtn" onclick="confirmAddMed()" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl uppercase text-xs tracking-widest action-btn opacity-50 pointer-events-none transition-all">Ajouter</button>
+            
+            <button id="addMedBtn" onclick="confirmAddMed()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl uppercase text-xs tracking-widest action-btn shadow-lg shadow-indigo-600/30 opacity-50 pointer-events-none transition-all">Ajouter</button>
         </div>
     </div>
 
     <div id="colorModal" class="modal-overlay z-top" onclick="closeModal('colorModal')">
-        <div class="modal-content glass p-6" onclick="event.stopPropagation()">
-            <h3 class="font-black mb-4 text-center uppercase text-sm tracking-widest text-indigo-500">Couleur</h3>
-            <div id="colorGrid" class="grid grid-cols-5 gap-3 mb-6"></div>
-            <div class="flex items-center gap-3 mb-4 bg-slate-500/5 p-3 rounded-xl border border-slate-500/10">
-                <span class="text-sm font-bold opacity-80 flex-1">Personnalisée:</span>
-                <input type="color" id="customColorPicker" class="w-10 h-10 rounded-lg cursor-pointer" onchange="selectColor(this.value)">
+        <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
+            <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest text-indigo-500">Choisir une couleur</h3>
+            <div id="colorGrid" class="grid grid-cols-5 gap-3 sm:gap-4 mb-6"></div>
+            <div class="flex items-center gap-4 mb-6 bg-slate-500/5 p-4 rounded-2xl border border-slate-500/10">
+                <span class="text-sm font-bold opacity-80 flex-1">Personnalisée :</span>
+                <input type="color" id="customColorPicker" class="w-10 h-10 rounded-xl shadow-inner cursor-pointer" onchange="selectColor(this.value)">
             </div>
-            <button onclick="closeModal('colorModal')" class="w-full py-3 bg-slate-500/15 font-bold rounded-xl uppercase text-xs tracking-widest action-btn">Retour</button>
+            <button onclick="closeModal('colorModal')" class="w-full py-4 bg-slate-500/15 hover:bg-slate-500/25 font-bold rounded-2xl uppercase text-xs tracking-widest action-btn">Retour</button>
         </div>
     </div>
 
     <div id="editDayModal" class="modal-overlay" onclick="closeModal('editDayModal')">
-        <div class="modal-content glass p-6" onclick="event.stopPropagation()">
-            <h3 id="editDayTitle" class="font-black mb-4 text-center uppercase text-xs tracking-widest text-indigo-500 bg-indigo-500/10 py-2 rounded-xl"></h3>
-            <div id="editDayList" class="space-y-3 max-h-[50vh] overflow-y-auto pr-2 hide-scroll"></div>
-            <button onclick="closeModal('editDayModal')" class="w-full mt-4 py-3 bg-slate-500/10 font-bold rounded-xl text-xs uppercase tracking-widest action-btn">Fermer</button>
+        <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
+            <div class="flex justify-center mb-5 text-indigo-500">
+                <i class="ph ph-calendar-check text-4xl"></i>
+            </div>
+            <h3 id="editDayTitle" class="font-black mb-6 text-center uppercase text-xs sm:text-sm tracking-widest text-indigo-500 bg-indigo-500/10 py-2.5 rounded-2xl"></h3>
+            <div id="editDayList" class="space-y-3 sm:space-y-4 max-h-[50vh] overflow-y-auto pr-2 hide-scroll"></div>
+            <button onclick="closeModal('editDayModal')" class="w-full mt-6 py-4 bg-slate-500/10 hover:bg-slate-500/20 font-bold rounded-2xl text-xs uppercase tracking-widest action-btn">Fermer</button>
         </div>
     </div>
 
-    <div id="rightDrawer" class="fixed top-0 right-0 bottom-0 w-full sm:w-[400px] bg-white dark:bg-slate-900 z-[2500] translate-x-full transition-transform duration-400 ease-out p-6 border-l border-slate-500/10 shadow-2xl flex flex-col">
-        <div class="flex justify-between items-center mb-6 mt-2">
-            <h2 class="text-lg font-black tracking-tight text-indigo-500 flex items-center gap-2">
+    <div id="rightDrawer" class="fixed top-0 right-0 bottom-0 w-full sm:w-[420px] bg-white dark:bg-slate-900 z-[2500] translate-x-full transition-transform duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) p-5 sm:p-8 border-l border-slate-500/10 shadow-2xl overflow-hidden flex flex-col">
+        <div class="flex justify-between items-center mb-8 mt-1">
+            <h2 class="text-lg sm:text-xl font-black tracking-tight text-indigo-500 flex items-center gap-2">
                 <i class="ph ph-clock-counter-clockwise"></i> HISTORIQUE
             </h2>
-            <button onclick="closeDrawers()" class="w-10 h-10 rounded-full bg-slate-500/10 flex items-center justify-center action-btn">
+            <button onclick="closeDrawers()" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-500/10 flex items-center justify-center action-btn hover:bg-slate-500/20">
                 <i class="ph ph-x font-bold text-lg"></i>
             </button>
         </div>
-        <div id="globalHistoryList" class="space-y-4 overflow-y-auto flex-1 pr-2 pb-8 hide-scroll"></div>
+        <div id="globalHistoryList" class="space-y-4 overflow-y-auto flex-1 pr-2 pb-10 hide-scroll"></div>
     </div>
 
     <script>
-        const sb = supabase.createClient(
-            'https://jyjjlaqmmfmoqrxcbizy.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5ampsYXFtbWZtb3FyeGNiaXp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MDIzMTksImV4cCI6MjA5OTE3ODMxOX0.XPVACZLMNcdYcZBhNbuHdql6NBMRdgZDuhHKZfxNM6I'
-        );
-
-        let user = localStorage.getItem('medUser') || "";
-        let medsData = {};
-        let historyData = {}; 
-        let currentDate = new Date();
-        let toastTimeout;
-        let isSyncing = false;
-
-        const extendedColors = [
-            '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e', 
-            '#10b981', '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1', 
-            '#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e'
-        ];
-
-        window.showToast = (msg) => {
-            const t = document.getElementById('toastContainer');
-            document.getElementById('toastMsg').innerText = msg;
-            t.classList.add('show');
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => t.classList.remove('show'), 3000);
-        };
-
-        window.setSyncState = (state) => {
-            const btn = document.getElementById('syncBtn');
-            btn.classList.remove('hidden');
-            if(state === 'synced') {
-                btn.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-full sync-green flex items-center justify-center transition-all shadow-sm";
-                btn.innerHTML = '<i class="ph ph-cloud-check text-xl"></i>';
-            } else {
-                btn.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-full sync-yellow flex items-center justify-center transition-all shadow-sm";
-                btn.innerHTML = '<i class="ph ph-cloud-arrow-up text-xl"></i>';
-            }
-        };
-
-        function calculateAge(dateStr) {
-            if(!dateStr) return "";
-            const today = new Date();
-            const birthDate = new Date(dateStr);
-            let age = today.getFullYear() - birthDate.getFullYear();
-            const m = today.getMonth() - birthDate.getMonth();
-            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
-            return `Âge : ${age} ans`;
-        }
-
-        function initUI() {
-            document.getElementById('colorGrid').innerHTML = extendedColors.map(c => 
-                `<div onclick="selectColor('${c}')" class="w-10 h-10 rounded-xl cursor-pointer hover:scale-110 shadow-sm border border-white/20" style="background:${c}"></div>`
-            ).join('');
-
-            flatpickr("#birthDate", {
-                locale: "fr", dateFormat: "Y-m-d",
-                onChange: (d, str) => {
-                    document.getElementById('ageDisplay').innerText = calculateAge(str);
-                    document.getElementById('ageDisplay').classList.remove('hidden');
-                    validateInput('birthDate', 'iconBD');
-                }
-            });
-            flatpickr("#editBD", {
-                locale: "fr", dateFormat: "Y-m-d"
-            });
-        }
-
-        window.validateInput = (id, iconId) => {
-            const el = document.getElementById(id), icon = document.getElementById(iconId);
-            if(el.value.trim()) {
-                el.classList.add('valid-input');
-                if(icon) { icon.classList.add('ph-check-circle', 'text-green-500'); icon.classList.remove('opacity-50', 'ph-text-aa', 'ph-text-a-underline', 'ph-calendar-blank'); }
-            } else {
-                el.classList.remove('valid-input');
-                if(icon) { icon.classList.remove('ph-check-circle', 'text-green-500'); icon.classList.add('opacity-50', id === 'lastName' ? 'ph-text-aa' : id === 'firstName' ? 'ph-text-a-underline' : 'ph-calendar-blank'); }
-            }
-            updateKey();
-        };
-
-        window.validateMedForm = () => {
-            const n = document.getElementById('newMedName').value.trim(), pi = document.getElementById('newMedPieces').value, btn = document.getElementById('addMedBtn');
-            (n && pi) ? btn.classList.remove('opacity-50', 'pointer-events-none') : btn.classList.add('opacity-50', 'pointer-events-none');
-        };
-
-        window.selectColor = (c) => {
-            document.getElementById('newMedColor').value = c;
-            document.getElementById('colorPreview').style.background = c;
-            closeModal('colorModal');
-        };
-
-        window.updateKey = () => {
-            const ln = document.getElementById('lastName').value.trim(), fn = document.getElementById('firstName').value.trim(), bd = document.getElementById('birthDate').value;
-            if (ln && fn && bd) { document.getElementById('passInput').classList.remove('hidden'); document.getElementById('authBtn').classList.remove('opacity-50', 'pointer-events-none'); }
-            else { document.getElementById('passInput').classList.add('hidden'); document.getElementById('authBtn').classList.add('opacity-50', 'pointer-events-none'); }
-        };
-
-        window.handleAuth = async () => {
-            const btn = document.getElementById('authBtn');
-            btn.innerHTML = '<i class="ph ph-spinner animate-spin text-xl"></i>';
-            const ln = document.getElementById('lastName').value.trim().toLowerCase(), fn = document.getElementById('firstName').value.trim().toLowerCase(), bd = document.getElementById('birthDate').value, pw = document.getElementById('passInput').value.trim(), key = `${ln}_${fn}_${bd.replace(/-/g, '')}`;
-            const { data, error } = await sb.from('credentials').select('pw').eq('key', key).single();
-            if (error && error.code !== 'PGRST116') { btn.innerHTML = 'VÉRIFIER'; return showToast("Erreur DB"); }
-            if (data && data.pw !== pw) { btn.innerHTML = 'VÉRIFIER'; return showToast("Mot de passe incorrect"); }
-            if (!data) {
-                const { error: err } = await sb.from('credentials').insert({ key, pw, info: { ln, fn, bd } });
-                if (err) { btn.innerHTML = 'VÉRIFIER'; return showToast("Erreur création"); }
-            }
-            localStorage.setItem('medUser', key);
-            location.reload();
-        };
-
-        window.updateAccount = async () => {
-            const oldP = document.getElementById('oldPassCheck').value, newP = document.getElementById('newPassSet').value, ln = document.getElementById('editLN').value, fn = document.getElementById('editFN').value, bd = document.getElementById('editBD').value;
-            const { data: u } = await sb.from('credentials').select('pw').eq('key', user).single();
-            if (u.pw !== oldP) return showToast("Ancien mdp requis.");
-            const newKey = `${ln.toLowerCase()}_${fn.toLowerCase()}_${bd.replace(/-/g, '')}`;
-            await sb.from('credentials').update({ pw: newP || oldP, info: { ln, fn, bd } }).eq('key', user);
-            if (newKey !== user) handleLogout(); else { showToast("Mise à jour OK"); closeModal('accountModal'); }
-        };
-
-        window.handleLogout = () => { localStorage.removeItem('medUser'); location.reload(); };
-
-        async function initApp() {
-            if (!user) return;
-            document.getElementById('loginBox').classList.add('hidden');
-            document.getElementById('appBody').classList.remove('hidden');
-            document.getElementById('accBtn').classList.remove('hidden'); document.getElementById('accBtn').classList.add('flex');
-            document.getElementById('syncBtn').classList.remove('hidden');
-            
-            if (localStorage.getItem('theme') === 'dark') { document.body.classList.add('dark'); document.getElementById('themeIcon').classList.replace('ph-moon', 'ph-sun'); }
-            
-            await loadAllData();
-        }
-
-        async function loadAllData() {
-            setSyncState('syncing');
-            const { data: meds } = await sb.from('medications').select('*').eq('user_key', user);
-            medsData = {}; historyData = {};
-            
-            if (meds) {
-                for(let m of meds) {
-                    m.currentCount = 0;
-                    medsData[m.id] = m;
-                    const { count } = await sb.from('medication_doses').select('*', { count: 'exact', head: true }).eq('medication_id', m.id);
-                    medsData[m.id].currentCount = count || 0;
-                }
-            }
-            
-            const startStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth()+1).padStart(2,'0')}-01`;
-            const { data: hist } = await sb.from('medication_history').select('*').in('medication_id', Object.keys(medsData)).gte('date', startStr);
-            if(hist) hist.forEach(h => { historyData[`${h.date}_${h.medication_id}`] = {count: h.count, color: h.color}; });
-
-            renderCardsUI();
-            renderCalendarUI();
-            renderHistoryUI();
-            setSyncState('synced');
-        }
-
-        function renderCardsUI() {
-            const grid = document.getElementById('medsGrid'); grid.innerHTML = "";
-            for (let id in medsData) if (medsData[id].active !== false) grid.innerHTML += generateCardHTML(medsData[id]);
-        }
-
-        function generateCardHTML(med) {
-            const total = med.pieces_per_plate * med.plates_per_box, prog = total ? (med.currentCount / total) * 100 : 0;
-            const plateIdx = Math.floor(med.currentCount / med.pieces_per_plate) + 1, remaining = total - med.currentCount;
-            let tag = prog >= 90 ? `<span class="text-[9px] font-black bg-red-500 text-white px-2 py-1 rounded">URGENT</span>` : prog >= 80 ? `<span class="text-[9px] font-black bg-orange-500 text-white px-2 py-1 rounded">BAS</span>` : `<span class="text-[9px] font-black opacity-60 uppercase">${remaining} rest.</span>`;
-            
-            return `
-                <div id="card-${med.id}" class="glass p-5 relative rounded-3xl overflow-hidden group">
-                    <div class="absolute top-0 right-0 w-24 h-24 opacity-10 rounded-bl-3xl pointer-events-none" style="background:${med.color}"></div>
-                    <div class="flex justify-between items-start mb-4 relative z-10">
-                        <div class="font-black text-lg uppercase truncate w-2/3" style="color:${med.color}">${med.name}</div>
-                        ${tag}
-                    </div>
-                    <div class="progress-container mb-4"><div class="progress-bar" style="width:${prog}%; background:${med.color}"></div></div>
-                    <div class="flex justify-between items-center mb-4 relative z-10">
-                        <span class="text-[10px] font-bold opacity-60 bg-slate-500/10 px-3 py-1.5 rounded-lg">Plaque ${plateIdx}</span>
-                        <span class="text-sm font-black" style="color:${med.color}">${Math.round(prog)}%</span>
-                    </div>
-                    <div class="flex items-center justify-between bg-slate-500/5 p-2 rounded-2xl relative z-10 border border-slate-500/10">
-                        <button onclick="changeDose('${med.id}', -1)" class="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white shadow-sm flex items-center justify-center font-black action-btn hover:text-red-500 text-lg"><i class="ph ph-minus"></i></button>
-                        <div class="text-center px-2">
-                            <div class="text-2xl font-black">${med.currentCount % med.pieces_per_plate}</div>
-                            <div class="text-[10px] opacity-50 font-bold uppercase">/ ${med.pieces_per_plate}</div>
-                        </div>
-                        <button onclick="changeDose('${med.id}', 1)" class="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center font-black text-lg action-btn" style="color:${med.color}"><i class="ph ph-plus"></i></button>
-                    </div>
-                </div>`;
-        }
-
-        window.updateCardUI = (id) => {
-            const card = document.getElementById(`card-${id}`);
-            if(card) {
-                card.outerHTML = generateCardHTML(medsData[id]);
-                document.getElementById(`card-${id}`).classList.add('anim-pop');
-                setTimeout(() => { const c = document.getElementById(`card-${id}`); if(c) c.classList.remove('anim-pop'); }, 300);
-            }
-        };
-
-        window.changeDose = (id, val, date = null) => {
-            const med = medsData[id]; if (!med) return;
-            const d = date || new Date().toISOString().split('T')[0];
-            const maxTotal = med.pieces_per_plate * med.plates_per_box;
-            
-            if (val > 0 && med.currentCount >= maxTotal) {
-                if(confirm("Boîte terminée. Entamer une nouvelle ?")) renewBox(id);
+        window.addEventListener('load', () => {
+            if (typeof supabase === 'undefined') {
+                showToast("Erreur : Supabase non chargé.");
                 return;
             }
 
-            med.currentCount = Math.max(0, med.currentCount + val);
-            const hKey = `${d}_${id}`;
-            if(!historyData[hKey]) historyData[hKey] = {count: 0, color: med.color};
-            historyData[hKey].count = Math.max(0, historyData[hKey].count + val);
+            const sb = supabase.createClient(
+                'https://jyjjlaqmmfmoqrxcbizy.supabase.co',
+                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5ampsYXFtbWZtb3FyeGNiaXp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MDIzMTksImV4cCI6MjA5OTE3ODMxOX0.XPVACZLMNcdYcZBhNbuHdql6NBMRdgZDuhHKZfxNM6I'
+            );
 
-            updateCardUI(id);
-            updateCalendarCellUI(d);
-            if(date) openDayEdit(date);
-            
-            syncDose(id, val, d, med.currentCount);
-        };
+            let user = localStorage.getItem('medUser') || "";
+            let medsData = {}, currentDate = new Date();
+            let toastTimeout;
+            let pendingRequests = 0;
+            window.medsHistoryMap = {};
 
-        async function renewBox(id) {
-            setSyncState('syncing');
-            medsData[id].currentCount = 0; medsData[id].box_count = (medsData[id].box_count || 1) + 1;
-            updateCardUI(id); renderHistoryUI();
-            await sb.from('medication_doses').delete().eq('medication_id', id);
-            await sb.from('medications').update({ box_count: medsData[id].box_count }).eq('id', id);
-            setSyncState('synced'); showToast("Nouvelle boîte");
-        }
+            const extendedColors = [
+                '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e', 
+                '#10b981', '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1', 
+                '#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e',
+                '#f87171', '#fb923c', '#fbbf24', '#a3e635', '#4ade80',
+                '#34d399', '#22d3ee', '#38bdf8', '#60a5fa', '#818cf8'
+            ];
 
-        async function syncDose(id, val, d, newTotal) {
-            setSyncState('syncing');
-            try {
-                if (val > 0) await sb.from('medication_doses').insert({ medication_id: id });
-                else {
-                    const { data: last } = await sb.from('medication_doses').select('id').eq('medication_id', id).order('id', { ascending: false }).limit(1).single();
-                    if (last) await sb.from('medication_doses').delete().eq('id', last.id);
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').catch(() => {});
+            }
+
+            window.setSyncing = (isSyncing) => {
+                const btn = document.getElementById('syncBtn');
+                const icon = document.getElementById('syncIcon');
+                
+                if (!navigator.onLine) {
+                    btn.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center action-btn transition-colors";
+                    icon.className = "ph ph-wifi-slash text-lg sm:text-xl";
+                    return;
                 }
                 
-                const { data: exist } = await sb.from('medication_history').select('count').eq('medication_id', id).eq('date', d).single();
-                if (exist) await sb.from('medication_history').update({ count: Math.max(0, exist.count + val), cumulative: newTotal, color: medsData[id].color }).eq('medication_id', id).eq('date', d);
-                else if (val > 0) await sb.from('medication_history').insert({ medication_id: id, date: d, count: 1, cumulative: newTotal, color: medsData[id].color });
+                if (isSyncing) {
+                    pendingRequests++;
+                    btn.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center action-btn transition-colors";
+                    icon.className = "ph ph-arrows-clockwise text-lg sm:text-xl animate-spin";
+                } else {
+                    pendingRequests = Math.max(0, pendingRequests - 1);
+                    if (pendingRequests === 0) {
+                        btn.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center action-btn transition-colors";
+                        icon.className = "ph ph-cloud-check text-lg sm:text-xl";
+                    }
+                }
+            };
+
+            window.addEventListener('online', () => {
+                setSyncing(false);
+                processQueue();
+            });
+            window.addEventListener('offline', () => setSyncing(false));
+
+            window.processQueue = async () => {
+                if(!navigator.onLine) return;
+                let q = JSON.parse(localStorage.getItem('medQueue') || '[]');
+                if(q.length === 0) return;
                 
-                setSyncState('synced');
-            } catch(e) { setSyncState('error'); }
-        }
+                localStorage.removeItem('medQueue');
+                for(let i of q) {
+                    if(i.type === 'dose') await syncDoseToDB(i.id, i.val, i.date, i.med);
+                }
+                loadMeds(); 
+            };
 
-        function renderCalendarUI() {
-            const cal = document.getElementById('calendar'), y = currentDate.getFullYear(), m = currentDate.getMonth();
-            cal.innerHTML = ""; document.getElementById('calMonth').innerText = new Intl.DateTimeFormat('fr', { month: 'long', year: 'numeric' }).format(currentDate);
-            
-            let first = new Date(y, m, 1).getDay() - 1; if (first === -1) first = 6; 
-            for (let i = 0; i < first; i++) cal.innerHTML += '<div></div>';
+            window.showToast = (msg) => {
+                const t = document.getElementById('toastContainer');
+                document.getElementById('toastMsg').innerText = msg;
+                t.classList.add('show');
+                clearTimeout(toastTimeout);
+                toastTimeout = setTimeout(() => t.classList.remove('show'), 4000);
+            };
 
-            const todayStr = new Date().toISOString().split('T')[0];
-            for (let d = 1; d <= new Date(y, m + 1, 0).getDate(); d++) {
-                const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                cal.innerHTML += `
-                    <div id="cal-cell-${dateStr}" class="cal-cell glass ${dateStr === todayStr ? 'border-indigo-500 bg-indigo-500/10' : ''}" onclick="openDayEdit('${dateStr}')">
-                        <span class="text-[10px] font-black ${dateStr === todayStr ? 'text-indigo-500' : 'opacity-60'} mb-1">${d}</span>
-                        <div class="badge-container flex flex-wrap gap-1 content-start flex-1 overflow-hidden"></div>
-                        <div class="total-container text-center font-black text-[9px] opacity-40 mt-auto"></div>
-                    </div>`;
-                updateCalendarCellUI(dateStr);
+            window.triggerNotification = async () => {
+                if (!("Notification" in window)) {
+                    showToast("Notifications non supportées sur cet appareil.");
+                    return;
+                }
+                if (Notification.permission === "granted") {
+                    try {
+                        if (navigator.serviceWorker) {
+                            const reg = await navigator.serviceWorker.ready;
+                            reg.showNotification('MedTracker', { body: 'Notifications actives !', icon: 'icon.png' });
+                        } else {
+                            new Notification('MedTracker', { body: 'Notifications actives !', icon: 'icon.png' });
+                        }
+                    } catch(e) {
+                        new Notification('MedTracker', { body: 'Notifications actives !', icon: 'icon.png' });
+                    }
+                } else if (Notification.permission !== "denied") {
+                    const p = await Notification.requestPermission();
+                    if (p === "granted") {
+                        new Notification('MedTracker', { body: 'Notifications autorisées !', icon: 'icon.png' });
+                    } else {
+                        showToast("Notifications refusées.");
+                    }
+                } else {
+                    showToast("Autorisation des notifications refusée.");
+                }
+            };
+
+            function calculateAge(dateStr) {
+                if(!dateStr) return "";
+                const today = new Date();
+                const birthDate = new Date(dateStr);
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const m = today.getMonth() - birthDate.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+                return `Âge : ${age} ans`;
             }
-        }
 
-        window.updateCalendarCellUI = (dateStr) => {
-            const cell = document.getElementById(`cal-cell-${dateStr}`); if(!cell) return;
-            let b = '', t = 0;
-            for (let id in medsData) {
-                const h = historyData[`${dateStr}_${id}`];
-                if (h && h.count > 0) { b += `<div class="ratio-badge" style="background:${h.color}">${h.count}</div>`; t += h.count; }
+            function initUI() {
+                const cGrid = document.getElementById('colorGrid');
+                cGrid.innerHTML = extendedColors.map(c => 
+                    `<div onclick="selectColor('${c}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl cursor-pointer hover:scale-110 transition-transform shadow-lg border-2 border-white/20" style="background:${c}"></div>`
+                ).join('');
+
+                flatpickr("#birthDate", {
+                    locale: "fr",
+                    dateFormat: "Y-m-d",
+                    disableMobile: false,
+                    onChange: function(selectedDates, dateStr) {
+                        const ageDiv = document.getElementById('ageDisplay');
+                        ageDiv.innerText = calculateAge(dateStr);
+                        ageDiv.classList.remove('hidden');
+                        validateInput('birthDate', 'iconBD');
+                    }
+                });
+
+                flatpickr("#editBD", {
+                    locale: "fr",
+                    dateFormat: "Y-m-d",
+                    disableMobile: false,
+                    onChange: function(selectedDates, dateStr) {
+                        document.getElementById('editAgeDisplay').innerText = calculateAge(dateStr);
+                    }
+                });
             }
-            cell.querySelector('.badge-container').innerHTML = b;
-            cell.querySelector('.total-container').innerText = t > 0 ? t + ' pr.' : '';
-        };
 
-        window.openDayEdit = (date) => {
-            const list = document.getElementById('editDayList');
-            document.getElementById('editDayTitle').innerText = new Intl.DateTimeFormat('fr', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(date));
-            openModal('editDayModal');
-            
-            let html = '';
-            for (let id in medsData) {
-                if (medsData[id].active === false) continue;
-                const m = medsData[id], h = historyData[`${date}_${id}`], val = h ? h.count : 0;
-                html += `
-                    <div class="p-3 bg-slate-500/5 rounded-xl flex justify-between items-center border border-slate-500/10">
-                        <div>
-                            <div class="text-sm font-black uppercase" style="color:${m.color}">${m.name}</div>
-                            <div class="text-xs font-bold opacity-70 mt-1">${val} prises</div>
+            window.validateInput = (id, iconId) => {
+                const el = document.getElementById(id);
+                const icon = document.getElementById(iconId);
+                if(el.value.trim() !== "") {
+                    el.classList.add('valid-input');
+                    if(icon) {
+                        icon.classList.remove('ph-text-aa', 'ph-text-a-underline', 'ph-calendar-blank');
+                        icon.classList.add('ph-check-circle', 'text-green-500');
+                        icon.classList.remove('opacity-50');
+                    }
+                } else {
+                    el.classList.remove('valid-input');
+                    if(icon) {
+                        icon.classList.add(id === 'lastName' ? 'ph-text-aa' : id === 'firstName' ? 'ph-text-a-underline' : 'ph-calendar-blank');
+                        icon.classList.remove('ph-check-circle', 'text-green-500');
+                        icon.classList.add('opacity-50');
+                    }
+                }
+                updateKey();
+            };
+
+            window.validateMedForm = () => {
+                const n = document.getElementById('newMedName').value.trim();
+                const pi = document.getElementById('newMedPieces').value;
+                const btn = document.getElementById('addMedBtn');
+                
+                if (n && pi) {
+                    btn.classList.remove('opacity-50', 'pointer-events-none');
+                } else {
+                    btn.classList.add('opacity-50', 'pointer-events-none');
+                }
+            };
+
+            window.selectColor = (c) => {
+                document.getElementById('newMedColor').value = c;
+                document.getElementById('colorPreview').style.background = c;
+                closeModal('colorModal');
+            };
+
+            window.updateKey = () => {
+                const ln = document.getElementById('lastName').value.trim();
+                const fn = document.getElementById('firstName').value.trim();
+                const bd = document.getElementById('birthDate').value;
+                if (ln && fn && bd) {
+                    document.getElementById('passInput').classList.remove('hidden');
+                    document.getElementById('authBtn').classList.remove('opacity-50', 'pointer-events-none');
+                } else {
+                    document.getElementById('passInput').classList.add('hidden');
+                    document.getElementById('authBtn').classList.add('opacity-50', 'pointer-events-none');
+                }
+            };
+
+            window.handleAuth = async () => {
+                const btn = document.getElementById('authBtn');
+                btn.innerHTML = '<i class="ph ph-spinner animate-spin text-2xl"></i>';
+                
+                const ln = document.getElementById('lastName').value.trim().toLowerCase();
+                const fn = document.getElementById('firstName').value.trim().toLowerCase();
+                const bd = document.getElementById('birthDate').value;
+                const pw = document.getElementById('passInput').value.trim();
+                const key = `${ln}_${fn}_${bd.replace(/-/g, '')}`;
+                
+                const { data, error } = await sb.from('credentials').select('pw').eq('key', key).single();
+                
+                if (error && error.code !== 'PGRST116') { 
+                    showToast("Erreur base de données"); 
+                    btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>';
+                    return; 
+                }
+                
+                if (data) {
+                    if (data.pw !== pw) {
+                        showToast("Mot de passe incorrect");
+                        btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>';
+                        return;
+                    }
+                } else {
+                    const { error: insertErr } = await sb.from('credentials').insert({ key, pw, info: { ln, fn, bd } });
+                    if (insertErr) { 
+                        showToast("Erreur création compte"); 
+                        btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>';
+                        return; 
+                    }
+                }
+                
+                user = key;
+                localStorage.setItem('medUser', user);
+                location.reload();
+            };
+
+            window.updateAccount = async () => {
+                const oldP = document.getElementById('oldPassCheck').value;
+                const newP = document.getElementById('newPassSet').value;
+                const ln = document.getElementById('editLN').value;
+                const fn = document.getElementById('editFN').value;
+                const bd = document.getElementById('editBD').value;
+                const { data: u } = await sb.from('credentials').select('pw').eq('key', user).single();
+                
+                if (u.pw !== oldP) return showToast("Ancien mot de passe requis.");
+                
+                const newKey = `${ln.toLowerCase()}_${fn.toLowerCase()}_${bd.replace(/-/g, '')}`;
+                await sb.from('credentials').update({ pw: newP || oldP, info: { ln, fn, bd } }).eq('key', user);
+                
+                if (newKey !== user) { 
+                    handleLogout(); 
+                } else { 
+                    showToast("Profil mis à jour avec succès !"); 
+                    closeModal('accountModal'); 
+                }
+            };
+
+            window.deleteAccount = async () => {
+                if (confirm("Supprimer le compte définitivement ?")) {
+                    await sb.from('credentials').delete().eq('key', user);
+                    handleLogout();
+                }
+            };
+
+            async function initApp() {
+                if (!user) return;
+                document.getElementById('loginBox').classList.add('hidden');
+                document.getElementById('appBody').classList.remove('hidden');
+                document.getElementById('accBtn').classList.remove('hidden');
+                document.getElementById('accBtn').classList.add('flex');
+                document.getElementById('syncBtn').classList.remove('hidden');
+                document.getElementById('syncBtn').classList.add('flex');
+                
+                const { data: u } = await sb.from('credentials').select('info').eq('key', user).single();
+                if (u) {
+                    const i = u.info;
+                    document.getElementById('editLN').value = i.ln; 
+                    document.getElementById('editFN').value = i.fn; 
+                    document.getElementById('editBD').value = i.bd;
+                    document.getElementById('editAgeDisplay').innerText = calculateAge(i.bd);
+                }
+                
+                if (localStorage.getItem('theme') === 'dark') {
+                    document.body.classList.add('dark');
+                    document.getElementById('themeIcon').classList.replace('ph-moon', 'ph-sun');
+                }
+                
+                processQueue();
+                await loadMeds();
+            }
+
+            async function loadMeds() {
+                setSyncing(true);
+                const { data: meds, error } = await sb.from('medications').select('*').eq('user_key', user);
+                if (error) {
+                    showToast("Erreur chargement des données");
+                    setSyncing(false);
+                    return;
+                }
+                medsData = {};
+                
+                const countPromises = (meds || []).map(async m => {
+                    const { count } = await sb.from('medication_doses').select('*', { count: 'exact', head: true }).eq('medication_id', m.id);
+                    m._count = count || 0;
+                    medsData[m.id] = m;
+                });
+                await Promise.all(countPromises);
+                
+                const y = currentDate.getFullYear();
+                const m = currentDate.getMonth();
+                const startDate = `${y}-${String(m+1).padStart(2,'0')}-01`;
+                const endDate = `${y}-${String(m+1).padStart(2,'0')}-${new Date(y, m+1, 0).getDate()}`;
+                const { data: hist } = await sb.from('medication_history').select('*').in('medication_id', Object.keys(medsData)).gte('date', startDate).lte('date', endDate);
+                
+                window.medsHistoryMap = {};
+                (hist || []).forEach(h => { window.medsHistoryMap[`${h.date}_${h.medication_id}`] = h; });
+
+                renderAllMeds();
+                renderCalendar();
+                renderHistory();
+                setSyncing(false);
+            }
+
+            function renderAllMeds() {
+                const grid = document.getElementById('medsGrid');
+                for (let id in medsData) {
+                    if (medsData[id].active !== false) {
+                        renderMedCard(medsData[id]);
+                    } else {
+                        const existingCard = document.getElementById(`med-card-${id}`);
+                        if(existingCard) existingCard.remove();
+                    }
+                }
+            }
+
+            function renderMedCard(med) {
+                let card = document.getElementById(`med-card-${med.id}`);
+                if(!card) {
+                    card = document.createElement('div'); 
+                    card.id = `med-card-${med.id}`;
+                    card.className = "glass p-5 sm:p-7 relative rounded-3xl overflow-hidden group transition-all duration-300 transform hover:-translate-y-1";
+                    document.getElementById('medsGrid').appendChild(card);
+                }
+                updateMedCardDOM(med.id);
+            }
+
+            function updateMedCardDOM(id) {
+                const med = medsData[id];
+                const card = document.getElementById(`med-card-${id}`);
+                if(!card) return;
+                
+                const count = med._count || 0;
+                const total = med.pieces_per_plate * med.plates_per_box;
+                const prog = total ? (count / total) * 100 : 0;
+                const plateIdx = Math.floor(count / med.pieces_per_plate) + 1;
+                const remaining = total - count;
+                
+                let tag = prog >= 90 ? `<div class="alert-stock bg-red-500 text-white shadow-lg shadow-red-500/40">URGENT</div>` : prog >= 80 ? `<div class="alert-stock bg-orange-500 text-white shadow-lg shadow-orange-500/40">STOCK BAS</div>` : `<div class="text-[10px] font-black opacity-60 uppercase tracking-widest">${remaining} restantes</div>`;
+                
+                card.innerHTML = `
+                    <div class="absolute top-0 right-0 w-28 h-28 sm:w-36 sm:h-36 opacity-15 rounded-bl-[3rem] pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:opacity-20" style="background:${med.color}"></div>
+                    <div class="flex justify-between items-start mb-4 relative z-10">
+                        <div class="font-black text-lg sm:text-xl uppercase tracking-wide truncate max-w-[65%]" style="color:${med.color}">${med.name}</div>
+                        ${tag}
+                    </div>
+                    <div class="progress-container mb-4">
+                        <div class="progress-bar" style="width:${prog}%; background:${med.color}"></div>
+                    </div>
+                    <div class="flex justify-between items-center mb-6 relative z-10">
+                        <span class="text-xs font-bold opacity-60 bg-slate-500/10 px-3 py-1.5 rounded-lg">Plaque ${plateIdx}</span>
+                        <span class="text-base sm:text-lg font-black" style="color:${med.color}">${Math.round(prog)}%</span>
+                    </div>
+                    <div class="flex items-center justify-between bg-slate-500/5 p-2 sm:p-3 rounded-2xl relative z-10 border border-slate-500/10 shadow-inner">
+                        <button onclick="changeDose('${med.id}', -1)" class="w-12 h-12 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white shadow-md flex items-center justify-center font-black action-btn hover:text-red-500 text-xl">
+                            <i class="ph ph-minus"></i>
+                        </button>
+                        <div class="text-center px-2 sm:px-4">
+                            <div class="text-3xl sm:text-4xl font-black tracking-tighter dose-anim" id="dose-text-${med.id}">${count % med.pieces_per_plate}</div>
+                            <div class="text-[10px] opacity-50 font-bold uppercase tracking-widest mt-1">/ ${med.pieces_per_plate}</div>
                         </div>
-                        <div class="flex gap-2">
-                            <button onclick="changeDose('${id}', -1, '${date}')" class="w-10 h-10 rounded-lg bg-white dark:bg-slate-800 shadow-sm font-bold action-btn flex items-center justify-center text-lg"><i class="ph ph-minus"></i></button>
-                            <button onclick="changeDose('${id}', 1, '${date}')" class="w-10 h-10 rounded-lg bg-white dark:bg-slate-800 shadow-sm font-bold action-btn flex items-center justify-center text-lg" style="color:${m.color}"><i class="ph ph-plus"></i></button>
-                        </div>
+                        <button onclick="changeDose('${med.id}', 1)" class="w-12 h-12 rounded-xl bg-white dark:bg-slate-800 shadow-md flex items-center justify-center font-black text-xl action-btn" style="color:${med.color}">
+                            <i class="ph ph-plus"></i>
+                        </button>
                     </div>`;
+                
+                const doseText = document.getElementById(`dose-text-${med.id}`);
+                if(doseText) {
+                    doseText.style.transform = 'scale(1.2)';
+                    setTimeout(() => doseText.style.transform = 'scale(1)', 200);
+                }
             }
-            list.innerHTML = html || '<p class="text-center text-xs opacity-60 font-bold py-4">Aucun.</p>';
-        };
 
-        function renderHistoryUI() {
-            const list = document.getElementById('globalHistoryList'); list.innerHTML = "";
-            for (let id in medsData) {
-                const m = medsData[id];
-                list.innerHTML += `
-                    <div class="p-4 bg-slate-500/5 rounded-2xl relative overflow-hidden group shadow-sm">
-                        <div class="absolute left-0 top-0 bottom-0 w-2" style="background:${m.color}"></div>
-                        <div class="flex justify-between items-start mb-3 pl-3">
-                            <span class="text-sm font-black" style="color:${m.color}">${m.name}</span>
-                            <div class="flex gap-2">
-                                <button onclick="toggleArchive('${id}', ${m.active})" class="px-2 py-1 rounded bg-slate-500/10 text-[10px] font-bold uppercase action-btn">${m.active ? 'Archiver' : 'Activer'}</button>
-                                <button onclick="deleteMed('${id}')" class="w-6 h-6 rounded bg-red-500/10 text-red-500 flex items-center justify-center action-btn"><i class="ph ph-trash text-xs"></i></button>
+            window.syncDoseToDB = async (id, val, d, med) => {
+                setSyncing(true);
+                try {
+                    if (val > 0) {
+                        await sb.from('medication_doses').insert({ medication_id: id });
+                    } else {
+                        const { data: last } = await sb.from('medication_doses').select('id').eq('medication_id', id).order('id', { ascending: false }).limit(1).single();
+                        if (last) await sb.from('medication_doses').delete().eq('id', last.id);
+                    }
+                    
+                    const { count: newCount } = await sb.from('medication_doses').select('*', { count: 'exact', head: true }).eq('medication_id', id);
+                    const { data: exist } = await sb.from('medication_history').select('count').eq('medication_id', id).eq('date', d).single();
+                    
+                    if (exist) {
+                        await sb.from('medication_history').update({ count: Math.max(0, exist.count + val), cumulative: newCount, color: med.color }).eq('medication_id', id).eq('date', d);
+                    } else if (val > 0) {
+                        await sb.from('medication_history').insert({ medication_id: id, date: d, count: 1, cumulative: newCount, color: med.color });
+                    }
+                } catch(e) {}
+                setSyncing(false);
+            };
+
+            window.changeDose = async (id, val, date = null) => {
+                const med = medsData[id];
+                if (!med) return;
+                const d = date || new Date().toISOString().split('T')[0];
+                
+                if(!med._count) med._count = 0;
+                const maxTotal = med.pieces_per_plate * med.plates_per_box;
+                
+                if (val > 0 && med._count >= maxTotal) {
+                    if (confirm("Boîte terminée. Entamer une nouvelle ?")) {
+                        med.box_count = (med.box_count || 1) + 1;
+                        med._count = 0;
+                        if(navigator.onLine) {
+                            setSyncing(true);
+                            await sb.from('medication_doses').delete().eq('medication_id', id);
+                            await sb.from('medications').update({ box_count: med.box_count }).eq('id', id);
+                            showToast("Nouvelle boîte entamée");
+                            await loadMeds();
+                        } else {
+                            showToast("Hors ligne : action reportée");
+                        }
+                    }
+                    return;
+                }
+
+                med._count = Math.max(0, med._count + val);
+                
+                const hKey = `${d}_${id}`;
+                if(!window.medsHistoryMap) window.medsHistoryMap = {};
+                if(!window.medsHistoryMap[hKey]) window.medsHistoryMap[hKey] = {count: 0, color: med.color};
+                window.medsHistoryMap[hKey].count = Math.max(0, window.medsHistoryMap[hKey].count + val);
+                
+                updateMedCardDOM(id);
+                renderCalendar(); 
+                if(date) renderDayEditList(date);
+
+                if(!navigator.onLine) {
+                    let q = JSON.parse(localStorage.getItem('medQueue') || '[]');
+                    q.push({ type: 'dose', id, val, date: d, med });
+                    localStorage.setItem('medQueue', JSON.stringify(q));
+                    setSyncing(true);
+                    return;
+                }
+                
+                await syncDoseToDB(id, val, d, med);
+            };
+
+            function renderCalendar() {
+                const cal = document.getElementById('calendar');
+                const y = currentDate.getFullYear();
+                const m = currentDate.getMonth();
+                cal.innerHTML = "";
+                
+                const monthName = new Intl.DateTimeFormat('fr', { month: 'long', year: 'numeric' }).format(currentDate);
+                document.getElementById('calMonth').innerText = monthName;
+                
+                let first = (new Date(y, m, 1).getDay() - 1);
+                if (first === -1) first = 6; 
+                
+                for (let i = 0; i < first; i++) cal.innerHTML += '<div class="opacity-0"></div>';
+
+                const todayStr = new Date().toISOString().split('T')[0];
+
+                for (let d = 1; d <= new Date(y, m + 1, 0).getDate(); d++) {
+                    const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                    const isToday = dateStr === todayStr;
+                    
+                    const cell = document.createElement('div'); 
+                    cell.className = `cal-cell glass ${isToday ? 'border-indigo-500 border-[2px] bg-indigo-500/10 shadow-md' : ''}`; 
+                    cell.onclick = () => openDayEdit(dateStr);
+                    
+                    let badges = '', total = 0;
+                    for (let id in medsData) {
+                        const h = window.medsHistoryMap[`${dateStr}_${id}`];
+                        if (h && h.count > 0) {
+                            badges += `<div class="ratio-badge" style="background:${h.color || medsData[id].color}">${h.count}</div>`;
+                            total += h.count;
+                        }
+                    }
+                    
+                    const dayNumClass = isToday ? 'text-indigo-500 opacity-100 text-sm' : 'opacity-60';
+                    
+                    cell.innerHTML = `
+                        <span class="text-xs sm:text-sm font-black ${dayNumClass} mb-1">${d}</span>
+                        <div class="flex flex-wrap gap-1">${badges}</div>
+                        <div class="mt-auto text-center font-black text-[10px] opacity-40 pt-1">${total > 0 ? total + ' pr.' : ''}</div>
+                    `;
+                    cal.appendChild(cell);
+                }
+            }
+
+            function renderDayEditList(date) {
+                const list = document.getElementById('editDayList'); 
+                let html = '';
+                for (let id in medsData) {
+                    if (medsData[id].active === false) continue;
+                    const m = medsData[id];
+                    const hKey = `${date}_${id}`;
+                    const val = (window.medsHistoryMap && window.medsHistoryMap[hKey]) ? window.medsHistoryMap[hKey].count : 0;
+                    
+                    html += `
+                        <div class="p-4 bg-slate-500/5 border border-slate-500/10 rounded-2xl flex justify-between items-center hover:bg-slate-500/10 transition-colors shadow-sm">
+                            <div>
+                                <div class="text-sm font-black uppercase tracking-wide" style="color:${m.color}">${m.name}</div>
+                                <div class="text-xs font-bold opacity-70 mt-1 flex items-center gap-2"><i class="ph ph-check-circle text-lg"></i> <span class="dose-anim inline-block">${val}</span> prises</div>
                             </div>
-                        </div>
-                        <div class="flex justify-between items-center text-[10px] font-bold opacity-90 pl-3">
-                            <span>Boîtes :</span>
-                            <input type="number" value="${m.box_count || 1}" onchange="updateBox('${id}', this.value)" class="w-16 bg-white dark:bg-slate-800 border border-slate-500/10 rounded p-1 text-center shadow-sm outline-none">
-                        </div>
-                    </div>`;
+                            <div class="flex gap-2 bg-white dark:bg-slate-800 p-1.5 rounded-xl shadow-md border border-slate-500/10">
+                                <button onclick="changeDose('${id}', -1, '${date}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-slate-500/5 hover:bg-slate-500/15 text-slate-800 dark:text-white font-bold action-btn flex items-center justify-center text-lg"><i class="ph ph-minus"></i></button>
+                                <button onclick="changeDose('${id}', 1, '${date}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-slate-500/5 hover:bg-slate-500/15 font-bold action-btn flex items-center justify-center text-lg" style="color:${m.color}"><i class="ph ph-plus"></i></button>
+                            </div>
+                        </div>`;
+                }
+                list.innerHTML = html || '<p class="text-center text-sm opacity-60 font-bold py-6">Aucun médicament actif.</p>';
             }
-        }
 
-        window.updateBox = async (id, val) => {
-            medsData[id].box_count = parseInt(val); setSyncState('syncing');
-            await sb.from('medications').update({ box_count: medsData[id].box_count }).eq('id', id);
-            setSyncState('synced');
-        };
-        
-        window.toggleArchive = async (id, s) => {
-            medsData[id].active = s === false; renderCardsUI(); renderHistoryUI(); setSyncState('syncing');
-            await sb.from('medications').update({ active: medsData[id].active }).eq('id', id);
-            setSyncState('synced');
-        };
-        
-        window.deleteMed = async (id) => {
-            if (confirm("Supprimer définitivement ?")) { 
-                delete medsData[id]; renderCardsUI(); renderHistoryUI(); setSyncState('syncing');
-                await sb.from('medications').delete().eq('id', id); setSyncState('synced');
-            }
-        };
-        
-        window.confirmAddMed = async () => {
-            const n = document.getElementById('newMedName').value.trim(), pi = parseInt(document.getElementById('newMedPieces').value), pl = parseInt(document.getElementById('newMedPlates').value) || 1, c = document.getElementById('newMedColor').value;
-            setSyncState('syncing');
-            const { data, error } = await sb.from('medications').insert({ user_key: user, name: n, pieces_per_plate: pi, plates_per_box: pl, color: c, active: true, box_count: 1 }).select().single();
-            if (!error && data) {
-                data.currentCount = 0; medsData[data.id] = data;
-                closeModal('addMedModal'); renderCardsUI(); renderHistoryUI();
-                document.getElementById('newMedName').value = ''; document.getElementById('newMedPieces').value = ''; document.getElementById('newMedPlates').value = '';
-            }
-            setSyncState('synced');
-        };
+            window.openDayEdit = (date) => {
+                const dateObj = new Date(date);
+                const formatOpts = { weekday: 'long', day: 'numeric', month: 'long' };
+                document.getElementById('editDayTitle').innerText = new Intl.DateTimeFormat('fr', formatOpts).format(dateObj);
+                openModal('editDayModal');
+                renderDayEditList(date);
+            };
 
-        window.changeMonth = async (v) => {
-            const wrap = document.getElementById('calendar-wrapper');
-            wrap.style.opacity = '0'; wrap.style.transform = v > 0 ? 'translateX(-15px)' : 'translateX(15px)';
-            setTimeout(async () => {
-                currentDate.setMonth(currentDate.getMonth() + v);
-                const startStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth()+1).padStart(2,'0')}-01`;
-                const endStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth()+1).padStart(2,'0')}-${new Date(currentDate.getFullYear(), currentDate.getMonth()+1, 0).getDate()}`;
+            function renderHistory() {
+                const list = document.getElementById('globalHistoryList'); list.innerHTML = "";
+                for (let id in medsData) {
+                    const m = medsData[id];
+                    list.innerHTML += `
+                        <div class="p-4 sm:p-5 bg-slate-500/5 border border-slate-500/10 rounded-[1.25rem] mb-3 sm:mb-4 relative overflow-hidden group shadow-sm hover:shadow-md transition-all">
+                            <div class="absolute left-0 top-0 bottom-0 w-2" style="background:${m.color}"></div>
+                            <div class="flex justify-between items-start mb-4 pl-3">
+                                <span class="text-sm sm:text-base font-black tracking-wide" style="color:${m.color}">${m.name}</span>
+                                <div class="flex gap-2">
+                                    <button onclick="toggleArchive('${id}', ${m.active})" class="px-3 py-1.5 rounded-lg bg-slate-500/10 text-[10px] sm:text-xs font-bold opacity-80 hover:opacity-100 uppercase tracking-widest action-btn transition-opacity flex items-center shadow-sm">
+                                        ${m.active ? '<i class="ph ph-archive text-sm mr-1.5"></i> Archiver' : '<i class="ph ph-check text-sm mr-1.5"></i> Activer'}
+                                    </button>
+                                    <button onclick="deleteMed('${id}')" class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-red-500/10 text-red-500 flex items-center justify-center hover:bg-red-500/20 action-btn transition-colors shadow-sm">
+                                        <i class="ph ph-trash font-bold text-base"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center font-bold opacity-90 pl-3 bg-slate-500/5 p-3 rounded-xl shadow-inner">
+                                <span class="flex items-center gap-2 uppercase tracking-widest text-[9px] sm:text-[10px]"><i class="ph ph-package text-base"></i> Boîtes utilisées :</span>
+                                <input type="number" value="${m.box_count || 1}" onchange="updateBox('${id}', this.value)" class="w-16 sm:w-20 bg-white dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-500/10 rounded-lg p-1.5 sm:p-2 text-center font-black shadow-sm outline-none focus:border-indigo-500 text-xs sm:text-sm">
+                            </div>
+                        </div>`;
+                }
+            }
+
+            window.updateBox = async (id, val) => {
+                setSyncing(true);
+                await sb.from('medications').update({ box_count: parseInt(val) }).eq('id', id);
+                showToast("Quantité de boîtes mise à jour");
+                loadMeds();
+            };
+            
+            window.toggleArchive = async (id, s) => {
+                setSyncing(true);
+                await sb.from('medications').update({ active: s === false }).eq('id', id);
+                showToast(s ? "Médicament archivé" : "Médicament réactivé");
+                loadMeds();
+            };
+            
+            window.deleteMed = async (id) => {
+                if (confirm("Voulez-vous supprimer ce médicament définitivement ?")) { 
+                    setSyncing(true);
+                    await sb.from('medications').delete().eq('id', id); 
+                    showToast("Médicament supprimé");
+                    loadMeds(); 
+                }
+            };
+            
+            window.confirmAddMed = async () => {
+                const n = document.getElementById('newMedName').value.trim();
+                const pi = parseInt(document.getElementById('newMedPieces').value);
+                const pl = parseInt(document.getElementById('newMedPlates').value) || 1;
+                const c = document.getElementById('newMedColor').value;
                 
-                const { data: hist } = await sb.from('medication_history').select('*').in('medication_id', Object.keys(medsData)).gte('date', startStr).lte('date', endStr);
-                for(let key in historyData) if(key.startsWith(startStr.substring(0,7))) delete historyData[key];
-                if(hist) hist.forEach(h => { historyData[`${h.date}_${h.medication_id}`] = {count: h.count, color: h.color}; });
+                if (!n || !pi) return showToast("Nom et doses/plq sont obligatoires");
                 
-                renderCalendarUI();
-                wrap.style.transform = v > 0 ? 'translateX(15px)' : 'translateX(-15px)';
-                setTimeout(() => { wrap.style.opacity = '1'; wrap.style.transform = 'translateX(0)'; }, 50);
-            }, 300);
-        };
+                setSyncing(true);
+                const { error } = await sb.from('medications').insert({ user_key: user, name: n, pieces_per_plate: pi, plates_per_box: pl, color: c, active: true, box_count: 1 });
+                
+                if (error) {
+                    showToast("Erreur lors de l'ajout");
+                    setSyncing(false);
+                    return;
+                }
+                
+                showToast("Médicament ajouté avec succès");
+                closeModal('addMedModal');
+                
+                document.getElementById('newMedName').value = '';
+                document.getElementById('newMedPieces').value = '';
+                document.getElementById('newMedPlates').value = '';
+                document.getElementById('newMedColor').value = '#6366f1';
+                document.getElementById('colorPreview').style.background = '#6366f1';
+                document.getElementById('addMedBtn').classList.add('opacity-50', 'pointer-events-none');
+                
+                loadMeds();
+            };
 
-        window.openRightDrawer = () => {
-            const drawer = document.getElementById('rightDrawer'), overlay = document.getElementById('drawerOverlay');
-            overlay.classList.remove('hidden'); requestAnimationFrame(() => { overlay.classList.add('opacity-100'); drawer.classList.remove('translate-x-full'); });
-        };
-        window.closeDrawers = () => {
-            document.getElementById('rightDrawer').classList.add('translate-x-full');
-            const overlay = document.getElementById('drawerOverlay'); overlay.classList.remove('opacity-100');
-            setTimeout(() => overlay.classList.add('hidden'), 300);
-        };
-        window.openModal = (id) => document.getElementById(id).classList.add('open');
-        window.closeModal = (id) => document.getElementById(id).classList.remove('open');
-        window.toggleTheme = () => {
-            const isDark = document.body.classList.toggle('dark');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            document.getElementById('themeIcon').classList.replace(isDark ? 'ph-moon' : 'ph-sun', isDark ? 'ph-sun' : 'ph-moon');
-        };
+            window.openRightDrawer = () => {
+                const drawer = document.getElementById('rightDrawer');
+                const overlay = document.getElementById('drawerOverlay');
+                overlay.classList.remove('hidden');
+                
+                requestAnimationFrame(() => {
+                    overlay.classList.add('opacity-100');
+                    drawer.classList.remove('translate-x-full');
+                });
+            };
+            
+            window.closeDrawers = () => {
+                const drawer = document.getElementById('rightDrawer');
+                const overlay = document.getElementById('drawerOverlay');
+                drawer.classList.add('translate-x-full');
+                overlay.classList.remove('opacity-100');
+                
+                setTimeout(() => overlay.classList.add('hidden'), 400);
+            };
+            
+            window.openModal = (id) => {
+                const modal = document.getElementById(id);
+                modal.classList.add('open');
+            };
+            
+            window.closeModal = (id) => {
+                const modal = document.getElementById(id);
+                modal.classList.remove('open');
+            };
+            
+            window.changeMonth = async (v) => { 
+                currentDate.setMonth(currentDate.getMonth() + v); 
+                const monthName = new Intl.DateTimeFormat('fr', { month: 'long', year: 'numeric' }).format(currentDate);
+                document.getElementById('calMonth').innerText = monthName;
+                
+                if(!navigator.onLine) {
+                    renderCalendar();
+                    return;
+                }
+                
+                setSyncing(true);
+                const y = currentDate.getFullYear();
+                const m = currentDate.getMonth();
+                const startDate = `${y}-${String(m+1).padStart(2,'0')}-01`;
+                const endDate = `${y}-${String(m+1).padStart(2,'0')}-${new Date(y, m+1, 0).getDate()}`;
+                
+                const { data: hist } = await sb.from('medication_history').select('*').in('medication_id', Object.keys(medsData)).gte('date', startDate).lte('date', endDate);
+                (hist || []).forEach(h => { window.medsHistoryMap[`${h.date}_${h.medication_id}`] = h; });
+                
+                renderCalendar(); 
+                setSyncing(false);
+            };
+            
+            window.toggleTheme = () => {
+                const isDark = document.body.classList.toggle('dark');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                const icon = document.getElementById('themeIcon');
+                if (isDark) {
+                    icon.classList.replace('ph-moon', 'ph-sun');
+                } else {
+                    icon.classList.replace('ph-sun', 'ph-moon');
+                }
+            };
+            
+            window.handleLogout = () => { 
+                localStorage.removeItem('medUser'); 
+                location.reload(); 
+            };
 
-        window.addEventListener('load', () => { initUI(); if (user) initApp(); });
-        window.addEventListener('online', () => setSyncState('synced'));
-        window.addEventListener('offline', () => setSyncState('error'));
+            initUI();
+            if (user) initApp();
+        });
     </script>
 </body>
 </html>
