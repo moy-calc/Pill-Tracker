@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
         :root { --bg: #f8fafc; --card: rgba(255, 255, 255, 0.95); --text: #1e293b; --border: rgba(148, 163, 184, 0.1); }
@@ -24,36 +24,33 @@
         .modal-overlay.open { display: flex; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .alert-stock { animation: pulse 1.5s infinite; font-size: 8px; font-weight: 900; padding: 2px 6px; border-radius: 6px; }
-        .date-input::-webkit-calendar-picker-indicator { filter: invert(0.5); opacity: 0.6; }
-        .dark .date-input::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.8; }
     </style>
 </head>
 <body class="p-3 antialiased">
     <div id="drawerOverlay" class="fixed inset-0 bg-black/40 z-[1500] hidden" onclick="closeDrawers()"></div>
+
     <nav class="max-w-4xl mx-auto flex justify-between items-center p-4 glass mb-6 relative z-[2000]">
         <button onclick="openModal('accountModal')" id="accBtn" class="w-10 h-10 rounded-xl bg-slate-500/5 flex items-center justify-center hidden">👤</button>
         <h1 class="text-xl font-black text-indigo-500 italic">MEDTRACKER PRO</h1>
         <div class="flex gap-2">
-            <button onclick="testNotification()" class="w-10 h-10 rounded-xl bg-green-500/5 flex items-center justify-center">🧪</button>
+            <button onclick="new Notification('MedTracker', {body: 'Notifications actives !', icon: 'icon.png'})" class="w-10 h-10 rounded-xl bg-green-500/5 flex items-center justify-center">🧪</button>
             <button onclick="requestNotificationPermission()" id="notifBtn" class="w-10 h-10 rounded-xl bg-slate-500/5 flex items-center justify-center">🔔</button>
             <button onclick="openRightDrawer()" class="w-10 h-10 rounded-xl bg-slate-500/5 flex items-center justify-center">🕒</button>
             <button onclick="toggleTheme()" class="w-10 h-10 rounded-xl bg-slate-500/5 flex items-center justify-center">🌓</button>
         </div>
     </nav>
+
     <main class="max-w-4xl mx-auto space-y-6">
         <div id="loginBox" class="glass p-8 text-center space-y-4 max-w-sm mx-auto">
-            <p class="text-xs opacity-60 font-medium">Connectez‑vous ou créez un compte</p>
             <div class="space-y-3">
                 <input type="text" id="lastName" oninput="updateKey()" placeholder="Nom" class="w-full bg-slate-500/10 rounded-xl p-4 font-bold outline-none">
                 <input type="text" id="firstName" oninput="updateKey()" placeholder="Prénom" class="w-full bg-slate-500/10 rounded-xl p-4 font-bold outline-none">
-                <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-lg opacity-50 pointer-events-none">📅</span>
-                    <input type="date" id="birthDate" oninput="updateKey()" class="date-input w-full bg-slate-500/10 rounded-xl p-4 pl-12 font-bold outline-none">
-                </div>
+                <input type="date" id="birthDate" oninput="updateKey()" class="w-full bg-slate-500/10 rounded-xl p-4 font-bold outline-none">
                 <input type="password" id="passInput" placeholder="Mot de passe" class="w-full bg-slate-500/10 rounded-xl p-4 text-center font-bold outline-none hidden">
             </div>
-            <button id="authBtn" onclick="handleAuth()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl opacity-50 pointer-events-none">VALIDER</button>
+            <button id="authBtn" onclick="handleAuth()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl opacity-50 pointer-events-none">VÉRIFIER</button>
         </div>
+
         <div id="appBody" class="hidden space-y-6">
             <div class="flex justify-between items-center px-2">
                 <h2 class="font-black text-[10px] uppercase opacity-40">Mes Médicaments</h2>
@@ -70,16 +67,14 @@
             </div>
         </div>
     </main>
+
     <div id="accountModal" class="modal-overlay" onclick="closeModal('accountModal')">
         <div class="glass p-6 w-full max-w-sm" onclick="event.stopPropagation()">
             <h3 class="font-bold mb-6 text-center uppercase text-sm">Profil</h3>
             <div class="space-y-3 mb-6">
                 <input type="text" id="editLN" placeholder="Nom" class="w-full bg-slate-500/10 rounded-xl p-3 font-bold text-sm">
                 <input type="text" id="editFN" placeholder="Prénom" class="w-full bg-slate-500/10 rounded-xl p-3 font-bold text-sm">
-                <div class="relative">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm opacity-40 pointer-events-none">📅</span>
-                    <input type="date" id="editBD" class="date-input w-full bg-slate-500/10 rounded-xl p-3 pl-10 font-bold text-sm">
-                </div>
+                <input type="date" id="editBD" class="w-full bg-slate-500/10 rounded-xl p-3 font-bold text-sm">
                 <hr class="opacity-5 my-4">
                 <input type="password" id="oldPassCheck" placeholder="Ancien mot de passe" class="w-full bg-slate-500/5 border border-indigo-500/20 rounded-xl p-3 font-bold text-sm">
                 <input type="password" id="newPassSet" placeholder="Nouveau mot de passe" class="w-full bg-slate-500/10 rounded-xl p-3 font-bold text-sm">
@@ -89,6 +84,7 @@
             </div>
         </div>
     </div>
+
     <div id="editDayModal" class="modal-overlay" onclick="closeModal('editDayModal')">
         <div class="glass p-6 w-full max-w-sm" onclick="event.stopPropagation()">
             <h3 id="editDayTitle" class="font-black mb-6 text-center uppercase text-xs text-indigo-500"></h3>
@@ -96,527 +92,266 @@
             <button onclick="closeModal('editDayModal')" class="w-full mt-8 py-4 bg-slate-500/10 font-bold rounded-2xl text-[10px] uppercase">Fermer</button>
         </div>
     </div>
+
     <div id="addMedModal" class="modal-overlay" onclick="closeModal('addMedModal')">
         <div class="glass p-6 w-full max-w-sm" onclick="event.stopPropagation()">
             <h3 class="font-bold mb-4">Nouveau Médicament</h3>
             <input type="text" id="newMedName" placeholder="Nom" class="w-full p-4 bg-slate-500/10 rounded-xl mb-3 font-bold">
-            <select id="newMedType" onchange="toggleMedTypeFields()" class="w-full p-4 bg-slate-500/10 rounded-xl mb-3 font-bold">
-                <option value="plaquette">Plaquettes</option>
-                <option value="pomade">Pomade/Liquide</option>
-            </select>
-            <div id="plaquetteFields" class="grid grid-cols-2 gap-3 mb-4">
+            <div class="grid grid-cols-2 gap-3 mb-4">
                 <input type="number" id="newMedPieces" placeholder="Doses/Plq" class="p-4 bg-slate-500/10 rounded-xl font-bold">
                 <input type="number" id="newMedPlates" placeholder="Nb Plaques" class="p-4 bg-slate-500/10 rounded-xl font-bold">
-            </div>
-            <div id="pomadeFields" class="hidden mb-4 text-center">
-                <p class="text-xs opacity-60">Sans limite - ajout libre au jour le jour</p>
             </div>
             <input type="color" id="newMedColor" value="#6366f1" class="w-full h-12 mb-6 bg-transparent cursor-pointer">
             <button onclick="confirmAddMed()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl uppercase text-xs">Ajouter</button>
         </div>
     </div>
-    <div id="alarmModal" class="modal-overlay" onclick="closeModal('alarmModal')">
-        <div class="glass p-6 w-full max-w-sm max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
-            <h3 class="font-bold mb-4">Configurer les Rappels</h3>
-            <label class="flex items-center gap-3 mb-4 cursor-pointer">
-                <input type="checkbox" id="alarmEnabled" onchange="toggleAlarmFields()" class="w-4 h-4">
-                <span class="text-xs font-bold uppercase">Activer les rappels</span>
-            </label>
-            <div id="alarmFields" class="hidden space-y-4">
-                <div>
-                    <label class="text-xs font-bold uppercase opacity-60 block mb-2">Jours de la semaine</label>
-                    <div class="space-y-2">
-                        <label class="flex items-center gap-2"><input type="checkbox" value="1" class="alarmDay"> Lundi</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="2" class="alarmDay"> Mardi</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="3" class="alarmDay"> Mercredi</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="4" class="alarmDay"> Jeudi</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="5" class="alarmDay"> Vendredi</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="6" class="alarmDay"> Samedi</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="0" class="alarmDay"> Dimanche</label>
-                    </div>
-                </div>
-                <div>
-                    <label class="text-xs font-bold uppercase opacity-60 block mb-2">Nombre de prises par jour</label>
-                    <input type="number" id="alarmTimesPerDay" min="1" max="10" value="1" class="w-full p-3 bg-slate-500/10 rounded-xl font-bold">
-                </div>
-                <div id="alarmTimesContainer" class="space-y-3">
-                    <label class="text-xs font-bold uppercase opacity-60 block mb-2">Horaires</label>
-                    <div class="alarmTime space-y-2">
-                        <input type="time" class="alarmTimeInput w-full p-3 bg-slate-500/10 rounded-xl font-bold" value="09:00">
-                    </div>
-                </div>
-            </div>
-            <div class="flex gap-2 mt-6">
-                <button onclick="saveAlarm(currentEditingMedId)" class="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl uppercase text-xs">Sauvegarder</button>
-                <button onclick="closeModal('alarmModal')" class="flex-1 py-3 bg-slate-500/10 font-bold rounded-xl uppercase text-xs">Annuler</button>
-            </div>
-        </div>
-    </div>
+
     <div id="rightDrawer" class="fixed top-0 right-0 bottom-0 w-[320px] bg-white dark:bg-slate-900 z-[2500] translate-x-full transition-transform duration-300 p-6 glass border-l border-white/10">
         <h2 class="text-xl font-black italic mb-8 text-indigo-500">HISTORIQUE</h2>
         <div id="globalHistoryList" class="space-y-4 overflow-y-auto max-h-[80vh]"></div>
     </div>
 
     <script>
-        const supabase = supabase.createClient('https://jyjjlaqmmfmoqrxcbizy.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5ampsYXFtbWZtb3FyeGNiaXp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MDIzMTksImV4cCI6MjA5OTE3ODMxOX0.XPVACZLMNcdYcZBhNbuHdql6NBMRdgZDuhHKZfxNM6I');
-
-        let user = localStorage.getItem('medUser') || "";
-        let medsData = {}, currentDate = new Date();
-        let currentEditingMedId = null;
-        let subscriptions = [];
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log("SW ok"))
-                    .catch(err => console.error("SW erreur"));
-            });
-        }
-
-        window.requestNotificationPermission = async () => {
-            if (!("Notification" in window)) { alert("Navigateur non supporté."); return; }
-            if (Notification.permission === "granted") { alert("Notifications déjà autorisées !"); return; }
-            const permission = await Notification.requestPermission();
-            if (permission === "granted") alert("Notifications autorisées !");
-        };
-
-        window.testNotification = () => {
-            if (!("Notification" in window)) { alert("Navigateur non supporté."); return; }
-            if (Notification.permission !== "granted") { alert("Autorisez d'abord avec 🔔"); return; }
-            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                navigator.serviceWorker.ready.then(reg => {
-                    reg.showNotification("MedTracker Pro", {
-                        body: "Test réussi !",
-                        icon: "icon.png",
-                        badge: "icon.png",
-                        tag: "test-notif"
-                    }).catch(() => {
-                        new Notification("MedTracker Pro", { body: "Test réussi !", icon: "icon.png" });
-                    });
-                });
-            } else {
-                new Notification("MedTracker Pro", { body: "Test réussi !", icon: "icon.png" });
+        window.addEventListener('load', () => {
+            if (typeof supabase === 'undefined') {
+                alert("Erreur de chargement de Supabase");
+                return;
             }
-        };
 
-        window.updateKey = () => {
-            const ln = document.getElementById('lastName').value.trim(), fn = document.getElementById('firstName').value.trim(), bd = document.getElementById('birthDate').value;
-            const passInput = document.getElementById('passInput');
-            const authBtn = document.getElementById('authBtn');
-            if (ln && fn && bd) {
-                passInput.classList.remove('hidden');
-                authBtn.classList.remove('opacity-50', 'pointer-events-none');
-                authBtn.textContent = 'VALIDER';
-            } else {
-                passInput.classList.add('hidden');
-                authBtn.classList.add('opacity-50', 'pointer-events-none');
-                authBtn.textContent = 'VALIDER';
+            const sb = supabase.createClient(
+                'https://jyjjlaqmmfmoqrxcbizy.supabase.co',
+                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5ampsYXFtbWZtb3FyeGNiaXp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MDIzMTksImV4cCI6MjA5OTE3ODMxOX0.XPVACZLMNcdYcZBhNbuHdql6NBMRdgZDuhHKZfxNM6I'
+            );
+
+            let user = localStorage.getItem('medUser') || "";
+            let medsData = {}, currentDate = new Date();
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').then(() => console.log("SW OK"));
             }
-        };
 
-        window.handleAuth = async () => {
-            const ln = document.getElementById('lastName').value.trim().toLowerCase(), fn = document.getElementById('firstName').value.trim().toLowerCase(), bd = document.getElementById('birthDate').value, pw = document.getElementById('passInput').value.trim();
-            const key = `${ln}_${fn}_${bd.replace(/-/g, '')}`;
-            const { data, error } = await supabase.from('credentials').select('pw').eq('key', key).single();
-            if (error && error.code !== 'PGRST116') { alert("Erreur"); return; }
-            if (data) {
-                if (data.pw !== pw) { alert("Mot de passe incorrect"); return; }
-            } else {
-                const { error: insertErr } = await supabase.from('credentials').insert({ key, pw, info: { ln, fn, bd } });
-                if (insertErr) { alert("Erreur création compte"); return; }
+            window.requestNotificationPermission = async () => {
+                const permission = await Notification.requestPermission();
+                if (permission === "granted") alert("Notifications autorisées !");
+            };
+
+            window.updateKey = () => {
+                const ln = document.getElementById('lastName').value.trim(), fn = document.getElementById('firstName').value.trim(), bd = document.getElementById('birthDate').value;
+                if (ln && fn && bd) {
+                    document.getElementById('passInput').classList.remove('hidden');
+                    document.getElementById('authBtn').classList.remove('opacity-50', 'pointer-events-none');
+                }
+            };
+
+            window.handleAuth = async () => {
+                const ln = document.getElementById('lastName').value.trim().toLowerCase(), fn = document.getElementById('firstName').value.trim().toLowerCase(), bd = document.getElementById('birthDate').value, pw = document.getElementById('passInput').value.trim();
+                const key = `${ln}_${fn}_${bd.replace(/-/g, '')}`;
+                const { data, error } = await sb.from('credentials').select('pw').eq('key', key).single();
+                if (error && error.code !== 'PGRST116') { alert("Erreur"); return; }
+                if (data) {
+                    if (data.pw !== pw) return alert("Mot de passe incorrect");
+                } else {
+                    await sb.from('credentials').insert({ key, pw, info: { ln, fn, bd } });
+                }
+                user = key;
+                localStorage.setItem('medUser', user);
+                location.reload();
+            };
+
+            window.updateAccount = async () => {
+                const oldP = document.getElementById('oldPassCheck').value, newP = document.getElementById('newPassSet').value, ln = document.getElementById('editLN').value, fn = document.getElementById('editFN').value, bd = document.getElementById('editBD').value;
+                const { data: u } = await sb.from('credentials').select('pw').eq('key', user).single();
+                if (u.pw !== oldP) return alert("Ancien mot de passe requis.");
+                const newKey = `${ln.toLowerCase()}_${fn.toLowerCase()}_${bd.replace(/-/g, '')}`;
+                await sb.from('credentials').update({ pw: newP || oldP, info: { ln, fn, bd } }).eq('key', user);
+                if (newKey !== user) { handleLogout(); } else { alert("Profil mis à jour !"); closeModal('accountModal'); }
+            };
+
+            window.deleteAccount = async () => {
+                if (confirm("Supprimer le compte ?")) {
+                    await sb.from('credentials').delete().eq('key', user);
+                    handleLogout();
+                }
+            };
+
+            async function initApp() {
+                if (!user) return;
+                document.getElementById('loginBox').classList.add('hidden');
+                document.getElementById('appBody').classList.remove('hidden');
+                document.getElementById('accBtn').classList.remove('hidden');
+                const { data: u } = await sb.from('credentials').select('info').eq('key', user).single();
+                const i = u.info;
+                document.getElementById('editLN').value = i.ln; document.getElementById('editFN').value = i.fn; document.getElementById('editBD').value = i.bd;
+                await loadMeds();
             }
-            user = key;
-            localStorage.setItem('medUser', user);
-            location.reload();
-        };
 
-        window.updateAccount = async () => {
-            const oldP = document.getElementById('oldPassCheck').value, newP = document.getElementById('newPassSet').value, ln = document.getElementById('editLN').value, fn = document.getElementById('editFN').value, bd = document.getElementById('editBD').value;
-            const { data: u } = await supabase.from('credentials').select('pw').eq('key', user).single();
-            if (u.pw !== oldP) return alert("Ancien mot de passe requis.");
-            const newKey = `${ln.toLowerCase()}_${fn.toLowerCase()}_${bd.replace(/-/g, '')}`;
-            await supabase.from('credentials').update({ pw: newP || oldP, info: { ln, fn, bd } }).eq('key', user);
-            if (newKey !== user) { handleLogout(); } else { alert("Profil mis à jour !"); closeModal('accountModal'); }
-        };
-
-        window.deleteAccount = async () => {
-            if (confirm("Supprimer le compte ?")) {
-                await supabase.from('credentials').delete().eq('key', user);
-                handleLogout();
+            async function loadMeds() {
+                const { data: meds } = await sb.from('medications').select('*').eq('user_key', user);
+                medsData = {};
+                (meds || []).forEach(m => { medsData[m.id] = m; });
+                renderAllMeds();
+                renderCalendar();
+                renderHistory();
             }
-        };
 
-        async function initApp() {
-            if (!user) return;
-            document.getElementById('loginBox').classList.add('hidden');
-            document.getElementById('appBody').classList.remove('hidden');
-            document.getElementById('accBtn').classList.remove('hidden');
-            const { data: u } = await supabase.from('credentials').select('info').eq('key', user).single();
-            const i = u.info;
-            document.getElementById('editLN').value = i.ln; document.getElementById('editFN').value = i.fn; document.getElementById('editBD').value = i.bd;
-            await loadMedsAndSub();
-        }
-
-        async function loadMedsAndSub() {
-            subscriptions.forEach(sub => supabase.removeChannel(sub));
-            subscriptions = [];
-
-            const { data: meds, error } = await supabase.from('medications').select('*').eq('user_key', user);
-            if (error) { console.error(error); return; }
-            medsData = {};
-            meds.forEach(m => { medsData[m.id] = m; });
-            renderAllMeds();
-            renderCalendar();
-            renderHistory();
-
-            const channel = supabase.channel('meds-changes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'medications', filter: `user_key=eq.${user}` }, payload => {
-                    loadMedsAndSub();
-                })
-                .subscribe();
-            subscriptions.push(channel);
-
-            const dosesChannel = supabase.channel('doses-changes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'medication_doses' }, payload => {
-                    loadMedsAndSub();
-                })
-                .subscribe();
-            subscriptions.push(dosesChannel);
-
-            const historyChannel = supabase.channel('history-changes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'medication_history' }, payload => {
-                    loadMedsAndSub();
-                })
-                .subscribe();
-            subscriptions.push(historyChannel);
-        }
-
-        function renderAllMeds() {
-            const grid = document.getElementById('medsGrid'); grid.innerHTML = "";
-            for (let id in medsData) {
-                if (medsData[id].active !== false) renderMedCard(medsData[id]);
+            function renderAllMeds() {
+                const grid = document.getElementById('medsGrid');
+                grid.innerHTML = "";
+                for (let id in medsData) {
+                    if (medsData[id].active !== false) renderMedCard(medsData[id]);
+                }
             }
-        }
 
-        async function renderMedCard(med) {
-            const card = document.createElement('div'); card.className = "glass p-5 relative";
-            document.getElementById('medsGrid').appendChild(card);
-            const { count: doseCount, error } = await supabase
-                .from('medication_doses')
-                .select('*', { count: 'exact', head: true })
-                .eq('medication_id', med.id);
-            const count = doseCount || 0;
+            async function renderMedCard(med) {
+                const card = document.createElement('div');
+                card.className = "glass p-5 relative";
+                document.getElementById('medsGrid').appendChild(card);
 
-            if (med.type === 'pomade') {
-                card.innerHTML = `<div class="flex justify-between items-start mb-2"><div class="font-black text-[10px] uppercase truncate" style="color:${med.color}">${med.name}</div></div>
-                    <div class="text-center mb-4"><div class="text-3xl font-black">${count}</div><div class="text-[9px] opacity-30 font-bold">prises</div></div>
-                    <div class="flex items-center justify-center gap-6 mb-3"><button onclick="changeDose('${med.id}', -1)" class="w-12 h-12 rounded-2xl bg-slate-500/10 font-black">-</button>
-                    <button onclick="changeDose('${med.id}', 1)" class="w-12 h-12 rounded-2xl bg-slate-500/10 font-black text-lg" style="color:${med.color}">+</button></div>
-                    <button onclick="openAlarmModal('${med.id}')" class="w-full py-2 text-[9px] font-bold uppercase opacity-60 rounded-lg hover:opacity-100">⏰ Rappels</button>`;
-            } else {
+                const { count: doseCount } = await sb
+                    .from('medication_doses')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('medication_id', med.id);
+                const count = doseCount || 0;
                 const total = med.pieces_per_plate * med.plates_per_box;
-                const prog = (count / total) * 100;
+                const prog = total ? (count / total) * 100 : 0;
                 const plateIdx = Math.floor(count / med.pieces_per_plate) + 1;
                 let tag = prog >= 90 ? `<div class="alert-stock bg-red-500 text-white">URGENT</div>` : prog >= 80 ? `<div class="alert-stock bg-orange-500 text-white">STOCK BAS</div>` : "";
                 card.innerHTML = `<div class="flex justify-between items-start mb-2"><div class="font-black text-[10px] uppercase truncate" style="color:${med.color}">${med.name}</div>${tag}</div>
                     <div class="progress-bar mb-3"><div class="h-full transition-all duration-700" style="width:${prog}%; background:${med.color}"></div></div>
                     <div class="flex justify-between items-center mb-4"><span class="text-[9px] font-bold opacity-30">Plq ${plateIdx}</span><span class="text-[9px] font-black" style="color:${med.color}">${Math.round(prog)}%</span></div>
-                    <div class="flex items-center justify-center gap-6 mb-3"><button onclick="changeDose('${med.id}', -1)" class="w-12 h-12 rounded-2xl bg-slate-500/10 font-black">-</button>
+                    <div class="flex items-center justify-center gap-6"><button onclick="changeDose('${med.id}', -1)" class="w-12 h-12 rounded-2xl bg-slate-500/10 font-black">-</button>
                     <div class="text-center"><div class="text-3xl font-black">${count % med.pieces_per_plate}</div><div class="text-[9px] opacity-30 font-bold">/ ${med.pieces_per_plate}</div></div>
-                    <button onclick="changeDose('${med.id}', 1)" class="w-12 h-12 rounded-2xl bg-slate-500/10 font-black text-lg" style="color:${med.color}">+</button></div>
-                    <button onclick="openAlarmModal('${med.id}')" class="w-full py-2 text-[9px] font-bold uppercase opacity-60 rounded-lg hover:opacity-100">⏰ Rappels</button>`;
-            }
-        }
-
-        window.changeDose = async (id, val, date = null) => {
-            const med = medsData[id];
-            const d = date || new Date().toISOString().split('T')[0];
-            const { count: doseCount } = await supabase
-                .from('medication_doses')
-                .select('*', { count: 'exact', head: true })
-                .eq('medication_id', id);
-            const currentCount = doseCount || 0;
-            const maxTotal = med.type === 'pomade' ? null : (med.pieces_per_plate * med.plates_per_box);
-
-            if (val > 0) {
-                if (maxTotal && currentCount >= maxTotal) {
-                    if (confirm("Boîte terminée. Nouvelle ?")) {
-                        await supabase.from('medication_doses').delete().eq('medication_id', id);
-                        await supabase.from('medications').update({ box_count: (med.box_count || 1) + 1 }).eq('id', id);
-                    } return;
-                }
-                await supabase.from('medication_doses').insert({ medication_id: id });
-            } else {
-                const { data: lastDose } = await supabase
-                    .from('medication_doses')
-                    .select('id')
-                    .eq('medication_id', id)
-                    .order('id', { ascending: false })
-                    .limit(1)
-                    .single();
-                if (lastDose) {
-                    await supabase.from('medication_doses').delete().eq('id', lastDose.id);
-                }
+                    <button onclick="changeDose('${med.id}', 1)" class="w-12 h-12 rounded-2xl bg-slate-500/10 font-black text-lg" style="color:${med.color}">+</button></div>`;
             }
 
-            const { count: newCount } = await supabase
-                .from('medication_doses')
-                .select('*', { count: 'exact', head: true })
-                .eq('medication_id', id);
-            const updatedCount = newCount || 0;
+            window.changeDose = async (id, val, date = null) => {
+                const med = medsData[id];
+                if (!med) return;
+                const d = date || new Date().toISOString().split('T')[0];
+                const { count: currentCount } = await sb.from('medication_doses').select('*', { count: 'exact', head: true }).eq('medication_id', id);
+                const maxTotal = med.pieces_per_plate * med.plates_per_box;
 
-            const { data: existing } = await supabase
-                .from('medication_history')
-                .select('count')
-                .eq('medication_id', id)
-                .eq('date', d)
-                .single();
-            if (existing) {
-                await supabase
-                    .from('medication_history')
-                    .update({ count: existing.count + val, cumulative: updatedCount, color: med.color })
-                    .eq('medication_id', id)
-                    .eq('date', d);
-            } else if (val > 0) {
-                await supabase
-                    .from('medication_history')
-                    .insert({ medication_id: id, date: d, count: 1, cumulative: updatedCount, color: med.color });
-            }
-            await loadMedsAndSub();
-        };
-
-        async function renderCalendar() {
-            const cal = document.getElementById('calendar'), y = currentDate.getFullYear(), m = currentDate.getMonth();
-            cal.innerHTML = "";
-            document.getElementById('calMonth').innerText = new Intl.DateTimeFormat('fr', { month: 'long', year: 'numeric' }).format(currentDate);
-            const first = (new Date(y, m, 1).getDay() + 6) % 7;
-            for (let i = 0; i < first; i++) cal.innerHTML += '<div></div>';
-
-            const startDate = `${y}-${String(m+1).padStart(2,'0')}-01`;
-            const endDate = `${y}-${String(m+1).padStart(2,'0')}-${new Date(y, m+1, 0).getDate()}`;
-            const { data: historyData } = await supabase
-                .from('medication_history')
-                .select('medication_id, date, count, cumulative, color')
-                .in('medication_id', Object.keys(medsData))
-                .gte('date', startDate)
-                .lte('date', endDate);
-            const historyMap = {};
-            (historyData || []).forEach(h => {
-                const key = `${h.date}_${h.medication_id}`;
-                historyMap[key] = h;
-            });
-
-            for (let d = 1; d <= new Date(y, m + 1, 0).getDate(); d++) {
-                const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                const cell = document.createElement('div');
-                cell.className = "cal-cell glass";
-                cell.onclick = () => openDayEdit(dateStr);
-                let badges = '';
-                let dayTotal = 0;
-                for (let id in medsData) {
-                    const hKey = `${dateStr}_${id}`;
-                    if (historyMap[hKey]) {
-                        const h = historyMap[hKey];
-                        badges += `<div class="ratio-badge" style="background:${h.color || medsData[id].color}">${h.cumulative || h.count}</div>`;
-                        dayTotal += h.count;
+                if (val > 0) {
+                    if ((currentCount || 0) >= maxTotal) {
+                        if (confirm("Boîte terminée. Nouvelle ?")) {
+                            await sb.from('medication_doses').delete().eq('medication_id', id);
+                            await sb.from('medications').update({ box_count: (med.box_count || 1) + 1 }).eq('id', id);
+                        }
+                        await loadMeds();
+                        return;
                     }
+                    await sb.from('medication_doses').insert({ medication_id: id });
+                } else {
+                    const { data: last } = await sb.from('medication_doses').select('id').eq('medication_id', id).order('id', { ascending: false }).limit(1).single();
+                    if (last) await sb.from('medication_doses').delete().eq('id', last.id);
                 }
-                cell.innerHTML = `<span class="text-[10px] font-bold opacity-20">${d}</span>${badges}<div class="mt-auto text-center font-black text-[10px] text-indigo-500">${dayTotal > 0 ? '+' + dayTotal : ''}</div>`;
-                cal.appendChild(cell);
-            }
-        }
 
-        window.openDayEdit = async (date) => {
-            const list = document.getElementById('editDayList'); list.innerHTML = "";
-            document.getElementById('editDayTitle').innerText = date;
-            for (let id in medsData) {
-                if (medsData[id].active === false) continue;
-                const m = medsData[id];
-                const item = document.createElement('div'); item.className = "p-4 glass flex justify-between items-center";
-                const { data: h } = await supabase
-                    .from('medication_history')
-                    .select('count')
-                    .eq('medication_id', id)
-                    .eq('date', date)
-                    .single();
-                const val = h ? h.count : 0;
-                item.innerHTML = `<div><div class="text-[10px] font-black uppercase" style="color:${m.color}">${m.name}</div><div class="text-xs font-bold opacity-40">${val} prises</div></div><div class="flex gap-2"><button onclick="changeDose('${id}', -1, '${date}')" class="w-10 h-10 rounded-xl bg-slate-500/10 font-bold">-</button><button onclick="changeDose('${id}', 1, '${date}')" class="w-10 h-10 rounded-xl bg-slate-500/10 font-bold" style="color:${m.color}">+</button></div>`;
-                list.appendChild(item);
-            }
-            openModal('editDayModal');
-        };
-
-        function renderHistory() {
-            const list = document.getElementById('globalHistoryList'); list.innerHTML = "";
-            for (let id in medsData) {
-                const m = medsData[id];
-                list.innerHTML += `<div class="p-4 glass mb-3"><div class="flex justify-between items-start mb-3"><span class="text-[10px] font-black" style="color:${m.color}">${m.name}</span><div class="flex gap-3"><button onclick="toggleArchive('${id}', ${m.active})" class="text-[8px] font-bold opacity-30 uppercase">${m.active?'Archiver':'Activer'}</button><button onclick="deleteMed('${id}')" class="text-red-500 text-[8px] font-bold uppercase">Suppr.</button></div></div><div class="flex justify-between items-center text-[10px] font-bold opacity-60"><span>BOÎTES :</span><input type="number" value="${m.box_count || 1}" onchange="updateBox('${id}', this.value)" class="w-12 bg-slate-500/10 rounded-lg p-1 text-center font-bold"></div></div>`;
-            }
-        }
-
-        window.toggleMedTypeFields = () => {
-            const type = document.getElementById('newMedType').value;
-            document.getElementById('plaquetteFields').classList.toggle('hidden', type === 'pomade');
-            document.getElementById('pomadeFields').classList.toggle('hidden', type !== 'pomade');
-        };
-
-        window.updateBox = async (id, val) => {
-            await supabase.from('medications').update({ box_count: parseInt(val) }).eq('id', id);
-            await loadMedsAndSub();
-        };
-
-        window.toggleArchive = async (id, status) => {
-            await supabase.from('medications').update({ active: status === false }).eq('id', id);
-            await loadMedsAndSub();
-        };
-
-        window.deleteMed = async (id) => {
-            if (confirm("Supprimer ?")) {
-                await supabase.from('medications').delete().eq('id', id);
-                await loadMedsAndSub();
-            }
-        };
-
-        window.confirmAddMed = async () => {
-            const n = document.getElementById('newMedName').value;
-            const type = document.getElementById('newMedType').value;
-            const c = document.getElementById('newMedColor').value;
-            if (!n) return;
-            if (type === 'pomade') {
-                await supabase.from('medications').insert({ user_key: user, name: n, type: 'pomade', color: c, active: true, box_count: 1, alarm_enabled: false });
-            } else {
-                const pi = parseInt(document.getElementById('newMedPieces').value);
-                const pl = parseInt(document.getElementById('newMedPlates').value);
-                if (!pi) return;
-                await supabase.from('medications').insert({ user_key: user, name: n, type: 'plaquette', pieces_per_plate: pi, plates_per_box: pl || 1, color: c, active: true, box_count: 1, alarm_enabled: false });
-            }
-            closeModal('addMedModal');
-            await loadMedsAndSub();
-        };
-
-        window.openAlarmModal = (medId) => {
-            currentEditingMedId = medId;
-            const med = medsData[medId];
-            document.getElementById('alarmEnabled').checked = med.alarm_enabled || false;
-            toggleAlarmFields();
-            if (med.alarm_enabled && med.alarm_config) {
-                const config = med.alarm_config;
-                document.getElementById('alarmTimesPerDay').value = config.timesPerDay || 1;
-                document.querySelectorAll('.alarmDay').forEach(cb => cb.checked = false);
-                if (config.days) {
-                    config.days.forEach(day => {
-                        document.querySelectorAll('.alarmDay').forEach(cb => {
-                            if (parseInt(cb.value) === day) cb.checked = true;
-                        });
-                    });
+                const { count: newCount } = await sb.from('medication_doses').select('*', { count: 'exact', head: true }).eq('medication_id', id);
+                const { data: exist } = await sb.from('medication_history').select('count').eq('medication_id', id).eq('date', d).single();
+                if (exist) {
+                    await sb.from('medication_history').update({ count: Math.max(0, exist.count + val), cumulative: newCount, color: med.color }).eq('medication_id', id).eq('date', d);
+                } else if (val > 0) {
+                    await sb.from('medication_history').insert({ medication_id: id, date: d, count: 1, cumulative: newCount, color: med.color });
                 }
-                updateAlarmTimeInputs();
-                const timeInputs = document.querySelectorAll('.alarmTimeInput');
-                if (config.times) {
-                    config.times.forEach((time, i) => { if (timeInputs[i]) timeInputs[i].value = time; });
-                }
-            } else {
-                document.getElementById('alarmTimesPerDay').value = 1;
-                document.querySelectorAll('.alarmDay').forEach(cb => cb.checked = false);
-                updateAlarmTimeInputs();
-            }
-            openModal('alarmModal');
-        };
+                await loadMeds();
+            };
 
-        window.toggleAlarmFields = () => {
-            const enabled = document.getElementById('alarmEnabled').checked;
-            document.getElementById('alarmFields').classList.toggle('hidden', !enabled);
-        };
+            async function renderCalendar() {
+                const cal = document.getElementById('calendar'), y = currentDate.getFullYear(), m = currentDate.getMonth();
+                cal.innerHTML = "";
+                document.getElementById('calMonth').innerText = new Intl.DateTimeFormat('fr', { month: 'long', year: 'numeric' }).format(currentDate);
+                const first = (new Date(y, m, 1).getDay() + 6) % 7;
+                for (let i = 0; i < first; i++) cal.innerHTML += '<div></div>';
 
-        window.updateAlarmTimeInputs = () => {
-            const timesPerDay = parseInt(document.getElementById('alarmTimesPerDay').value) || 1;
-            const container = document.querySelector('.alarmTime');
-            const currentInputs = container.querySelectorAll('.alarmTimeInput');
-            while (currentInputs.length < timesPerDay) {
-                const input = document.createElement('input');
-                input.type = 'time';
-                input.className = 'alarmTimeInput w-full p-3 bg-slate-500/10 rounded-xl font-bold';
-                input.value = '09:00';
-                container.appendChild(input);
-            }
-            while (currentInputs.length > timesPerDay) {
-                currentInputs[currentInputs.length - 1].remove();
-            }
-        };
+                const startDate = `${y}-${String(m+1).padStart(2,'0')}-01`;
+                const endDate = `${y}-${String(m+1).padStart(2,'0')}-${new Date(y, m+1, 0).getDate()}`;
+                const { data: hist } = await sb.from('medication_history').select('*').in('medication_id', Object.keys(medsData)).gte('date', startDate).lte('date', endDate);
+                const map = {};
+                (hist || []).forEach(h => { const key = `${h.date}_${h.medication_id}`; map[key] = h; });
 
-        document.getElementById('alarmTimesPerDay')?.addEventListener('change', updateAlarmTimeInputs);
-
-        window.saveAlarm = async (medId) => {
-            if (!medId) return;
-            const enabled = document.getElementById('alarmEnabled').checked;
-            if (!enabled) {
-                await supabase.from('medications').update({ alarm_enabled: false }).eq('id', medId);
-                closeModal('alarmModal');
-                await loadMedsAndSub();
-                return;
-            }
-            const selectedDays = Array.from(document.querySelectorAll('.alarmDay:checked')).map(cb => parseInt(cb.value));
-            if (selectedDays.length === 0) { alert('Sélectionnez au moins un jour'); return; }
-            const timeInputs = Array.from(document.querySelectorAll('.alarmTimeInput')).map(input => input.value);
-            if (timeInputs.some(t => !t)) { alert('Complétez tous les horaires'); return; }
-            const config = { days: selectedDays, timesPerDay: timeInputs.length, times: timeInputs };
-            await supabase.from('medications').update({ alarm_enabled: true, alarm_config: config }).eq('id', medId);
-            scheduleNotifications();
-            closeModal('alarmModal');
-            await loadMedsAndSub();
-        };
-
-        window.scheduleNotifications = () => {
-            if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
-            const checkAndNotify = () => {
-                const now = new Date();
-                const today = now.getDay();
-                const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-                for (let id in medsData) {
-                    const med = medsData[id];
-                    if (!med.alarm_enabled || !med.alarm_config) continue;
-                    const config = med.alarm_config;
-                    if (!config.days.includes(today)) continue;
-                    if (!config.times.includes(timeStr)) continue;
-                    if (Notification.permission === 'granted') {
-                        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                            navigator.serviceWorker.ready.then(reg => {
-                                reg.showNotification(`${med.name} - Prise de médicament`, {
-                                    body: 'Temps de prendre votre médicament!',
-                                    icon: 'icon.png',
-                                    badge: 'icon.png',
-                                    tag: `med-${id}`,
-                                    requireInteraction: true
-                                }).catch(() => {
-                                    new Notification(`${med.name} - Prise de médicament`, { body: 'Temps de prendre votre médicament!', icon: 'icon.png' });
-                                });
-                            });
-                        } else {
-                            new Notification(`${med.name} - Prise de médicament`, { body: 'Temps de prendre votre médicament!', icon: 'icon.png' });
+                for (let d = 1; d <= new Date(y, m + 1, 0).getDate(); d++) {
+                    const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                    const cell = document.createElement('div');
+                    cell.className = "cal-cell glass";
+                    cell.onclick = () => openDayEdit(dateStr);
+                    let badges = '', total = 0;
+                    for (let id in medsData) {
+                        const h = map[`${dateStr}_${id}`];
+                        if (h) {
+                            badges += `<div class="ratio-badge" style="background:${h.color || medsData[id].color}">${h.cumulative || h.count}</div>`;
+                            total += h.count;
                         }
                     }
+                    cell.innerHTML = `<span class="text-[10px] font-bold opacity-20">${d}</span>${badges}<div class="mt-auto text-center font-black text-[10px] text-indigo-500">${total > 0 ? '+' + total : ''}</div>`;
+                    cal.appendChild(cell);
+                }
+            }
+
+            window.openDayEdit = async (date) => {
+                const list = document.getElementById('editDayList');
+                list.innerHTML = "";
+                document.getElementById('editDayTitle').innerText = date;
+                for (let id in medsData) {
+                    if (medsData[id].active === false) continue;
+                    const m = medsData[id];
+                    const item = document.createElement('div');
+                    item.className = "p-4 glass flex justify-between items-center";
+                    const { data: h } = await sb.from('medication_history').select('count').eq('medication_id', id).eq('date', date).single();
+                    const val = h ? h.count : 0;
+                    item.innerHTML = `<div><div class="text-[10px] font-black uppercase" style="color:${m.color}">${m.name}</div><div class="text-xs font-bold opacity-40">${val} prises</div></div><div class="flex gap-2"><button onclick="changeDose('${id}', -1, '${date}')" class="w-10 h-10 rounded-xl bg-slate-500/10 font-bold">-</button><button onclick="changeDose('${id}', 1, '${date}')" class="w-10 h-10 rounded-xl bg-slate-500/10 font-bold" style="color:${m.color}">+</button></div>`;
+                    list.appendChild(item);
+                }
+                openModal('editDayModal');
+            };
+
+            function renderHistory() {
+                const list = document.getElementById('globalHistoryList');
+                list.innerHTML = "";
+                for (let id in medsData) {
+                    const m = medsData[id];
+                    list.innerHTML += `<div class="p-4 glass mb-3"><div class="flex justify-between items-start mb-3"><span class="text-[10px] font-black" style="color:${m.color}">${m.name}</span><div class="flex gap-3"><button onclick="toggleArchive('${id}', ${m.active})" class="text-[8px] font-bold opacity-30 uppercase">${m.active ? 'Archiver' : 'Activer'}</button><button onclick="deleteMed('${id}')" class="text-red-500 text-[8px] font-bold uppercase">Suppr.</button></div></div><div class="flex justify-between items-center text-[10px] font-bold opacity-60"><span>BOÎTES :</span><input type="number" value="${m.box_count || 1}" onchange="updateBox('${id}', this.value)" class="w-12 bg-slate-500/10 rounded-lg p-1 text-center font-bold"></div></div>`;
+                }
+            }
+
+            window.updateBox = async (id, val) => {
+                await sb.from('medications').update({ box_count: parseInt(val) }).eq('id', id);
+                loadMeds();
+            };
+            window.toggleArchive = async (id, s) => {
+                await sb.from('medications').update({ active: s === false }).eq('id', id);
+                loadMeds();
+            };
+            window.deleteMed = async (id) => {
+                if (confirm("Supprimer ?")) { await sb.from('medications').delete().eq('id', id); loadMeds(); }
+            };
+            window.confirmAddMed = async () => {
+                const n = document.getElementById('newMedName').value.trim();
+                const pi = parseInt(document.getElementById('newMedPieces').value);
+                const pl = parseInt(document.getElementById('newMedPlates').value) || 1;
+                const c = document.getElementById('newMedColor').value;
+                if (n && pi) {
+                    await sb.from('medications').insert({ user_key: user, name: n, pieces_per_plate: pi, plates_per_box: pl, color: c, active: true, box_count: 1 });
+                    closeModal('addMedModal');
+                    loadMeds();
                 }
             };
-            setInterval(checkAndNotify, 60000);
-            checkAndNotify();
-        };
 
-        window.openRightDrawer = () => { document.getElementById('rightDrawer').classList.remove('translate-x-full'); document.getElementById('drawerOverlay').classList.remove('hidden'); };
-        window.closeDrawers = () => { document.getElementById('rightDrawer').classList.add('translate-x-full'); document.getElementById('drawerOverlay').classList.add('hidden'); };
-        window.openModal = (id) => document.getElementById(id).classList.add('open');
-        window.closeModal = (id) => document.getElementById(id).classList.remove('open');
-        window.changeMonth = (v) => { currentDate.setMonth(currentDate.getMonth() + v); renderCalendar(); };
-        window.toggleTheme = () => document.body.classList.toggle('dark');
-        window.handleLogout = () => { localStorage.removeItem('medUser'); location.reload(); };
+            window.openRightDrawer = () => {
+                document.getElementById('rightDrawer').classList.remove('translate-x-full');
+                document.getElementById('drawerOverlay').classList.remove('hidden');
+            };
+            window.closeDrawers = () => {
+                document.getElementById('rightDrawer').classList.add('translate-x-full');
+                document.getElementById('drawerOverlay').classList.add('hidden');
+            };
+            window.openModal = (id) => document.getElementById(id).classList.add('open');
+            window.closeModal = (id) => document.getElementById(id).classList.remove('open');
+            window.changeMonth = (v) => { currentDate.setMonth(currentDate.getMonth() + v); renderCalendar(); };
+            window.toggleTheme = () => document.body.classList.toggle('dark');
+            window.handleLogout = () => { localStorage.removeItem('medUser'); location.reload(); };
 
-        async function startApp() {
-            if (user) {
-                await initApp();
-                scheduleNotifications();
-            }
-        }
-
-        if (user) startApp();
+            if (user) initApp();
+        });
     </script>
 </body>
 </html>
