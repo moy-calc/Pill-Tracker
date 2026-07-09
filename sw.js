@@ -1,4 +1,4 @@
-const CACHE_NAME = 'medtracker-v3'; // Incrémenté à v3 pour forcer le nettoyage
+const CACHE_NAME = 'medtracker-v4';
 const ASSETS = [
   'Index.html',
   'manifest.json',
@@ -7,7 +7,6 @@ const ASSETS = [
   'https://cdn.tailwindcss.com'
 ];
 
-// INSTALLATION
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(
@@ -15,7 +14,6 @@ self.addEventListener('install', event => {
   );
 });
 
-// ACTIVATION : Nettoie radicalement les anciens caches
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => {
@@ -27,9 +25,7 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// FETCH : Stratégie Stale-While-Revalidate
 self.addEventListener('fetch', event => {
-  // Ignorer les requêtes Firebase/Analytics pour ne pas bloquer la synchro cloud
   if (event.request.url.includes('firestore.googleapis.com') || event.request.url.includes('google')) {
     return;
   }
@@ -37,7 +33,6 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
       const fetchPromise = fetch(event.request).then(networkResponse => {
-        // Si la réponse est valide, on met à jour le cache en arrière-plan
         if (networkResponse && networkResponse.status === 200 && event.request.method === 'GET') {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then(cache => {
@@ -49,23 +44,47 @@ self.addEventListener('fetch', event => {
         if (event.request.destination === 'document') return caches.match('Index.html');
       });
 
-      // Retourne le cache s'il existe, sinon attend le réseau
       return cachedResponse || fetchPromise;
     })
   );
 });
 
-// PUSH NOTIFICATIONS (Inchangé pour préserver tes réglages)
-self.addEventListener('push', event => {
-  const data = event.data ? event.data.json() : {
-    title: 'Rappel Médicament',
-    body: "Il est l'heure de votre prise."
-  };
+self.addEventListener('push', (event) => {
+  let data = { title: 'Rappel Médicament', body: "Il est l'heure de votre prise." };
+  
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch (e) {
+      data = { title: 'Rappel Médicament', body: event.data.text() };
+    }
+  }
+
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
       icon: 'icon.png',
-      badge: 'icon.png'
+      badge: 'icon.png',
+      vibrate: [200, 100, 200]
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      if (clientList.length > 0) {
+        let client = clientList[0];
+        for (let i = 0; i < clientList.length; i++) {
+          if (clientList[i].focused) {
+            client = clientList[i];
+          }
+        }
+        return client.focus();
+      }
+      return clients.openWindow('/');
     })
   );
 });
