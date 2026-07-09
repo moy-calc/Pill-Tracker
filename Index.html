@@ -329,9 +329,6 @@
             <button onclick="triggerNotification()" id="notifBtn" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center action-btn hover:bg-indigo-500/20">
                 <i class="ph ph-bell-ringing text-lg sm:text-xl"></i>
             </button>
-            <button onclick="triggerNotification()" class="w-10 h-10 sm:w-auto sm:px-4 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center gap-1 action-btn hover:bg-indigo-500/20 font-bold text-xs sm:text-sm">
-                <i class="ph ph-bell-ringing text-lg sm:text-xl"></i><span class="hidden sm:inline">Test Notif</span>
-            </button>
             <button onclick="openRightDrawer()" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-500/10 flex items-center justify-center action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
                 <i class="ph ph-clock-counter-clockwise text-lg sm:text-xl"></i>
             </button>
@@ -1018,6 +1015,13 @@
                     document.getElementById('themeIcon').classList.replace('ph-moon', 'ph-sun');
                 }
 
+                if ('serviceWorker' in navigator) {
+                    const reg = await navigator.serviceWorker.ready;
+                    if (reg) {
+                        swRegistration = reg;
+                    }
+                }
+
                 setInterval(() => {
                     if (!swRegistration) return;
                     const now = new Date();
@@ -1167,8 +1171,8 @@
                             <i class="ph ph-plus"></i>
                         </button>
                     </div>
-                    <button onclick="openEditMedModal('${med.id}')" class="absolute top-4 right-4 w-9 h-9 rounded-lg bg-white/70 dark:bg-slate-800/70 flex items-center justify-center text-indigo-500 shadow-sm action-btn opacity-80 hover:opacity-100 z-20">
-                        <i class="ph ph-pencil-simple text-base"></i>
+                    <button onclick="openEditMedModal('${med.id}')" class="absolute bottom-4 right-4 w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-white/80 dark:bg-slate-800/80 flex items-center justify-center text-indigo-500 shadow-md action-btn opacity-70 hover:opacity-100 z-20">
+                        <i class="ph ph-pencil-simple text-sm sm:text-base"></i>
                     </button>`;
 
                 const doseText = document.getElementById(`dose-text-${med.id}`);
@@ -1750,4 +1754,4 @@
         });
     </script>
 </body>
-    </html>
+</html>
