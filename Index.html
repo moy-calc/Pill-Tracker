@@ -723,18 +723,15 @@
                     }
 
                     if (perm === "granted") {
-                        if (navigator.serviceWorker) {
-                            const reg = await navigator.serviceWorker.ready;
-                            if (reg && reg.showNotification) {
-                                await reg.showNotification('MedTracker Pro', {
-                                    body: 'Notifications parfaitement actives !',
-                                    icon: 'icon.png',
-                                    badge: 'icon.png',
-                                    vibrate: [200, 100, 200]
-                                });
-                                showToast("Notification envoyée");
-                                return;
-                            }
+                        if (swRegistration && swRegistration.showNotification) {
+                            await swRegistration.showNotification('MedTracker Pro', {
+                                body: 'Notifications parfaitement actives !',
+                                icon: 'icon.png',
+                                badge: 'icon.png',
+                                vibrate: [200, 100, 200]
+                            });
+                            showToast("Notification envoyée");
+                            return;
                         }
                         new Notification('MedTracker Pro', { body: 'Notifications actives !', icon: 'icon.png' });
                         showToast("Notification envoyée");
@@ -1016,6 +1013,12 @@
                 if (localStorage.getItem('theme') === 'dark') {
                     document.body.classList.add('dark');
                     document.getElementById('themeIcon').classList.replace('ph-moon', 'ph-sun');
+                }
+
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.ready.then(reg => {
+                        swRegistration = reg;
+                    });
                 }
 
                 setInterval(() => {
@@ -1750,4 +1753,4 @@
         });
     </script>
 </body>
-</html>
+    </html>
