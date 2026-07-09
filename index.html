@@ -12,6 +12,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/fr.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
@@ -109,6 +113,10 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
+
+        .modal-overlay.z-top {
+            z-index: 7000;
+        }
         
         .modal-overlay.open { 
             display: flex; 
@@ -171,6 +179,23 @@
             -webkit-appearance: none;
             font-size: 16px !important;
         }
+
+        input[type="color"] {
+            padding: 0;
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 12px;
+        }
         
         .action-btn {
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -187,6 +212,11 @@
         .hide-scroll {
             -ms-overflow-style: none;
             scrollbar-width: none;
+        }
+
+        .valid-input {
+            border-color: #22c55e !important;
+            background-color: rgba(34, 197, 94, 0.05) !important;
         }
     </style>
 </head>
@@ -229,20 +259,23 @@
             </div>
             <div class="space-y-4">
                 <div class="relative">
-                    <i class="ph ph-text-aa absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
-                    <input type="text" id="lastName" oninput="updateKey()" placeholder="Nom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-all text-base">
+                    <i class="ph ph-text-aa absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl" id="iconLN"></i>
+                    <input type="text" id="lastName" oninput="validateInput('lastName', 'iconLN')" placeholder="Nom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 transition-all text-base">
                 </div>
                 <div class="relative">
-                    <i class="ph ph-text-a-underline absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
-                    <input type="text" id="firstName" oninput="updateKey()" placeholder="Prénom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-all text-base">
+                    <i class="ph ph-text-a-underline absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl" id="iconFN"></i>
+                    <input type="text" id="firstName" oninput="validateInput('firstName', 'iconFN')" placeholder="Prénom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 transition-all text-base">
                 </div>
-                <div class="relative">
-                    <i class="ph ph-calendar-blank absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
-                    <input type="text" id="birthDate" readonly onclick="openDateModal('birthDate')" placeholder="Date de naissance" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-all cursor-pointer text-base">
+                <div>
+                    <div class="relative">
+                        <i class="ph ph-calendar-blank absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl" id="iconBD"></i>
+                        <input type="text" id="birthDate" placeholder="Date de naissance" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 transition-all cursor-pointer text-base">
+                    </div>
+                    <div id="ageDisplay" class="text-xs font-bold text-indigo-500 mt-2 hidden text-right pr-2"></div>
                 </div>
                 <div class="relative">
                     <i class="ph ph-password absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
-                    <input type="password" id="passInput" placeholder="Mot de passe" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 transition-all hidden text-base">
+                    <input type="password" id="passInput" placeholder="Mot de passe" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 transition-all hidden text-base">
                 </div>
             </div>
             <button id="authBtn" onclick="handleAuth()" class="w-full py-4 sm:py-5 mt-4 sm:mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl opacity-50 pointer-events-none transition-all action-btn flex items-center justify-center gap-2 text-sm tracking-widest uppercase">
@@ -287,35 +320,6 @@
         </div>
     </main>
 
-    <div id="dateModal" class="modal-overlay" onclick="closeModal('dateModal')">
-        <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
-            <div class="flex justify-center mb-4 sm:mb-6 text-indigo-500">
-                <i class="ph ph-calendar-blank text-4xl"></i>
-            </div>
-            <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest">Sélectionner la date</h3>
-            <div class="flex gap-2 sm:gap-3 mb-6">
-                <div class="relative flex-1">
-                    <select id="selDay" class="w-full bg-slate-500/5 border border-slate-500/10 p-3 sm:p-4 rounded-2xl outline-none font-bold text-center cursor-pointer hover:bg-slate-500/10 transition-colors text-base"></select>
-                </div>
-                <div class="relative flex-1">
-                    <select id="selMonth" class="w-full bg-slate-500/5 border border-slate-500/10 p-3 sm:p-4 rounded-2xl outline-none font-bold text-center cursor-pointer hover:bg-slate-500/10 transition-colors text-base"></select>
-                </div>
-                <div class="relative flex-1">
-                    <select id="selYear" class="w-full bg-slate-500/5 border border-slate-500/10 p-3 sm:p-4 rounded-2xl outline-none font-bold text-center cursor-pointer hover:bg-slate-500/10 transition-colors text-base"></select>
-                </div>
-            </div>
-            <button onclick="confirmDate()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl uppercase text-xs tracking-widest action-btn shadow-lg shadow-indigo-500/25">Confirmer</button>
-        </div>
-    </div>
-
-    <div id="colorModal" class="modal-overlay" onclick="closeModal('colorModal')">
-        <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
-            <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest">Choisir une couleur</h3>
-            <div id="colorGrid" class="grid grid-cols-5 gap-3 sm:gap-4 mb-6"></div>
-            <button onclick="closeModal('colorModal')" class="w-full py-4 bg-slate-500/10 hover:bg-slate-500/20 font-bold rounded-2xl uppercase text-xs tracking-widest action-btn">Fermer</button>
-        </div>
-    </div>
-
     <div id="accountModal" class="modal-overlay" onclick="closeModal('accountModal')">
         <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
             <div class="flex justify-center mb-4 sm:mb-6 text-indigo-500">
@@ -327,8 +331,10 @@
             <div class="space-y-3 sm:space-y-4 mb-6">
                 <input type="text" id="editLN" placeholder="Nom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 transition-colors">
                 <input type="text" id="editFN" placeholder="Prénom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 transition-colors">
-                <input type="text" id="editBD" readonly onclick="openDateModal('editBD')" placeholder="Date de naissance" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 transition-colors cursor-pointer">
-                
+                <div>
+                    <input type="text" id="editBD" placeholder="Date de naissance" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 transition-colors cursor-pointer">
+                    <div id="editAgeDisplay" class="text-xs font-bold text-indigo-500 mt-2 text-right pr-2"></div>
+                </div>
                 <div class="h-px w-full bg-slate-500/10 my-4 sm:my-6"></div>
                 
                 <input type="password" id="oldPassCheck" placeholder="Ancien mot de passe" class="w-full bg-slate-500/5 border border-indigo-500/30 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 transition-colors">
@@ -343,17 +349,6 @@
         </div>
     </div>
 
-    <div id="editDayModal" class="modal-overlay" onclick="closeModal('editDayModal')">
-        <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
-            <div class="flex justify-center mb-4 text-indigo-500">
-                <i class="ph ph-calendar-check text-4xl"></i>
-            </div>
-            <h3 id="editDayTitle" class="font-black mb-6 text-center uppercase text-xs sm:text-sm tracking-widest text-indigo-500"></h3>
-            <div id="editDayList" class="space-y-3 sm:space-y-4 max-h-[50vh] overflow-y-auto pr-2 hide-scroll"></div>
-            <button onclick="closeModal('editDayModal')" class="w-full mt-6 py-4 bg-slate-500/10 hover:bg-slate-500/20 font-bold rounded-2xl text-xs uppercase tracking-widest action-btn">Fermer</button>
-        </div>
-    </div>
-
     <div id="addMedModal" class="modal-overlay" onclick="closeModal('addMedModal')">
         <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
             <div class="flex justify-center mb-4 sm:mb-6 text-indigo-500">
@@ -363,28 +358,54 @@
             </div>
             <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest">Nouveau Médicament</h3>
             
-            <div class="space-y-4 mb-6">
-                <input type="text" id="newMedName" placeholder="Nom du médicament" class="w-full p-4 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold text-base outline-none focus:border-indigo-500 transition-colors">
-                
-                <div class="grid grid-cols-2 gap-3 sm:gap-4">
-                    <div class="relative">
-                        <label class="absolute text-[10px] font-bold uppercase opacity-50 top-2 left-4">Doses/Plq</label>
-                        <input type="number" id="newMedPieces" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 transition-colors text-center text-base">
-                    </div>
-                    <div class="relative">
-                        <label class="absolute text-[10px] font-bold uppercase opacity-50 top-2 left-4">Plaques</label>
-                        <input type="number" id="newMedPlates" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 transition-colors text-center text-base">
-                    </div>
-                </div>
-                
+            <div class="space-y-4 mb-6 flex flex-col">
                 <div class="relative bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:bg-slate-500/10 transition-colors" onclick="openModal('colorModal')">
                     <span class="text-sm font-bold opacity-70">Couleur associée</span>
                     <input type="hidden" id="newMedColor" value="#6366f1">
                     <div id="colorPreview" class="w-10 h-10 rounded-xl shadow-md border border-white/20" style="background: #6366f1;"></div>
                 </div>
+
+                <div class="relative">
+                    <i class="ph ph-text-aa absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl" id="iconMedName"></i>
+                    <input type="text" id="newMedName" oninput="validateMedForm()" placeholder="Nom du médicament" class="w-full p-4 pl-12 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold text-base outline-none focus:border-indigo-500 transition-colors">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3 sm:gap-4">
+                    <div class="relative">
+                        <label class="absolute text-[10px] font-bold uppercase opacity-50 top-2 left-4">Doses/Plq</label>
+                        <input type="number" id="newMedPieces" oninput="validateMedForm()" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 transition-colors text-center text-base">
+                    </div>
+                    <div class="relative">
+                        <label class="absolute text-[10px] font-bold uppercase opacity-50 top-2 left-4">Plaques</label>
+                        <input type="number" id="newMedPlates" oninput="validateMedForm()" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 transition-colors text-center text-base">
+                    </div>
+                </div>
             </div>
             
-            <button onclick="confirmAddMed()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl uppercase text-xs tracking-widest action-btn shadow-lg shadow-indigo-500/25">Ajouter</button>
+            <button id="addMedBtn" onclick="confirmAddMed()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl uppercase text-xs tracking-widest action-btn shadow-lg shadow-indigo-500/25 opacity-50 pointer-events-none transition-all">Ajouter</button>
+        </div>
+    </div>
+
+    <div id="colorModal" class="modal-overlay z-top" onclick="closeModal('colorModal')">
+        <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
+            <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest">Choisir une couleur</h3>
+            <div id="colorGrid" class="grid grid-cols-5 gap-3 sm:gap-4 mb-6"></div>
+            <div class="flex items-center gap-4 mb-6 bg-slate-500/5 p-4 rounded-2xl border border-slate-500/10">
+                <span class="text-sm font-bold opacity-70 flex-1">Personnalisée :</span>
+                <input type="color" id="customColorPicker" class="w-12 h-12 rounded-xl" onchange="selectColor(this.value)">
+            </div>
+            <button onclick="closeModal('colorModal')" class="w-full py-4 bg-slate-500/10 hover:bg-slate-500/20 font-bold rounded-2xl uppercase text-xs tracking-widest action-btn">Retour</button>
+        </div>
+    </div>
+
+    <div id="editDayModal" class="modal-overlay" onclick="closeModal('editDayModal')">
+        <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
+            <div class="flex justify-center mb-4 text-indigo-500">
+                <i class="ph ph-calendar-check text-4xl"></i>
+            </div>
+            <h3 id="editDayTitle" class="font-black mb-6 text-center uppercase text-xs sm:text-sm tracking-widest text-indigo-500"></h3>
+            <div id="editDayList" class="space-y-3 sm:space-y-4 max-h-[50vh] overflow-y-auto pr-2 hide-scroll"></div>
+            <button onclick="closeModal('editDayModal')" class="w-full mt-6 py-4 bg-slate-500/10 hover:bg-slate-500/20 font-bold rounded-2xl text-xs uppercase tracking-widest action-btn">Fermer</button>
         </div>
     </div>
 
@@ -415,9 +436,14 @@
             let user = localStorage.getItem('medUser') || "";
             let medsData = {}, currentDate = new Date();
             let toastTimeout;
-            let activeDateField = '';
 
-            const tailwindColors = ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e', '#10b981', '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e'];
+            const extendedColors = [
+                '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e', 
+                '#10b981', '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1', 
+                '#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e',
+                '#f87171', '#fb923c', '#fbbf24', '#a3e635', '#4ade80',
+                '#34d399', '#22d3ee', '#38bdf8', '#60a5fa', '#818cf8'
+            ];
 
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('sw.js').catch(() => {});
@@ -436,48 +462,77 @@
                 if (permission === "granted") showToast("Notifications autorisées !");
             };
 
-            function initCustomPickers() {
-                const daySel = document.getElementById('selDay');
-                const monthSel = document.getElementById('selMonth');
-                const yearSel = document.getElementById('selYear');
-                
-                for(let i=1; i<=31; i++) {
-                    daySel.innerHTML += `<option value="${i}">${String(i).padStart(2, '0')}</option>`;
+            function calculateAge(dateStr) {
+                if(!dateStr) return "";
+                const today = new Date();
+                const birthDate = new Date(dateStr);
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const m = today.getMonth() - birthDate.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
                 }
-                for(let i=1; i<=12; i++) {
-                    monthSel.innerHTML += `<option value="${i}">${String(i).padStart(2, '0')}</option>`;
-                }
-                const currentY = new Date().getFullYear();
-                for(let i=currentY; i>=1900; i--) {
-                    yearSel.innerHTML += `<option value="${i}">${i}</option>`;
-                }
-
-                const cGrid = document.getElementById('colorGrid');
-                cGrid.innerHTML = tailwindColors.map(c => 
-                    `<div onclick="selectColor('${c}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl cursor-pointer hover:scale-110 transition-transform shadow-md border border-white/20" style="background:${c}"></div>`
-                ).join('');
+                return `Âge : ${age} ans`;
             }
 
-            window.openDateModal = (fieldId) => {
-                activeDateField = fieldId;
-                const currentVal = document.getElementById(fieldId).value;
-                const d = currentVal ? new Date(currentVal) : new Date('2000-01-01');
-                
-                document.getElementById('selDay').value = d.getDate();
-                document.getElementById('selMonth').value = d.getMonth() + 1;
-                document.getElementById('selYear').value = d.getFullYear();
-                
-                openModal('dateModal');
+            function initUI() {
+                const cGrid = document.getElementById('colorGrid');
+                cGrid.innerHTML = extendedColors.map(c => 
+                    `<div onclick="selectColor('${c}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl cursor-pointer hover:scale-110 transition-transform shadow-md border border-white/20" style="background:${c}"></div>`
+                ).join('');
+
+                flatpickr("#birthDate", {
+                    locale: "fr",
+                    dateFormat: "Y-m-d",
+                    disableMobile: false,
+                    onChange: function(selectedDates, dateStr) {
+                        const ageDiv = document.getElementById('ageDisplay');
+                        ageDiv.innerText = calculateAge(dateStr);
+                        ageDiv.classList.remove('hidden');
+                        validateInput('birthDate', 'iconBD');
+                    }
+                });
+
+                flatpickr("#editBD", {
+                    locale: "fr",
+                    dateFormat: "Y-m-d",
+                    disableMobile: false,
+                    onChange: function(selectedDates, dateStr) {
+                        document.getElementById('editAgeDisplay').innerText = calculateAge(dateStr);
+                    }
+                });
+            }
+
+            window.validateInput = (id, iconId) => {
+                const el = document.getElementById(id);
+                const icon = document.getElementById(iconId);
+                if(el.value.trim() !== "") {
+                    el.classList.add('valid-input');
+                    if(icon) {
+                        icon.classList.remove('ph-text-aa', 'ph-text-a-underline', 'ph-calendar-blank');
+                        icon.classList.add('ph-check-circle', 'text-green-500');
+                        icon.classList.remove('opacity-50');
+                    }
+                } else {
+                    el.classList.remove('valid-input');
+                    if(icon) {
+                        icon.classList.add(id === 'lastName' ? 'ph-text-aa' : id === 'firstName' ? 'ph-text-a-underline' : 'ph-calendar-blank');
+                        icon.classList.remove('ph-check-circle', 'text-green-500');
+                        icon.classList.add('opacity-50');
+                    }
+                }
+                updateKey();
             };
 
-            window.confirmDate = () => {
-                const y = document.getElementById('selYear').value;
-                const m = String(document.getElementById('selMonth').value).padStart(2, '0');
-                const d = String(document.getElementById('selDay').value).padStart(2, '0');
-                document.getElementById(activeDateField).value = `${y}-${m}-${d}`;
+            window.validateMedForm = () => {
+                const n = document.getElementById('newMedName').value.trim();
+                const pi = document.getElementById('newMedPieces').value;
+                const btn = document.getElementById('addMedBtn');
                 
-                if (activeDateField === 'birthDate') updateKey();
-                closeModal('dateModal');
+                if (n && pi) {
+                    btn.classList.remove('opacity-50', 'pointer-events-none');
+                } else {
+                    btn.classList.add('opacity-50', 'pointer-events-none');
+                }
             };
 
             window.selectColor = (c) => {
@@ -493,6 +548,9 @@
                 if (ln && fn && bd) {
                     document.getElementById('passInput').classList.remove('hidden');
                     document.getElementById('authBtn').classList.remove('opacity-50', 'pointer-events-none');
+                } else {
+                    document.getElementById('passInput').classList.add('hidden');
+                    document.getElementById('authBtn').classList.add('opacity-50', 'pointer-events-none');
                 }
             };
 
@@ -575,6 +633,7 @@
                     document.getElementById('editLN').value = i.ln; 
                     document.getElementById('editFN').value = i.fn; 
                     document.getElementById('editBD').value = i.bd;
+                    document.getElementById('editAgeDisplay').innerText = calculateAge(i.bd);
                 }
                 
                 if (localStorage.getItem('theme') === 'dark') {
@@ -621,8 +680,9 @@
                 const total = med.pieces_per_plate * med.plates_per_box;
                 const prog = total ? (count / total) * 100 : 0;
                 const plateIdx = Math.floor(count / med.pieces_per_plate) + 1;
+                const remaining = total - count;
                 
-                let tag = prog >= 90 ? `<div class="alert-stock bg-red-500 text-white shadow-lg shadow-red-500/30">URGENT</div>` : prog >= 80 ? `<div class="alert-stock bg-orange-500 text-white shadow-lg shadow-orange-500/30">STOCK BAS</div>` : "";
+                let tag = prog >= 90 ? `<div class="alert-stock bg-red-500 text-white shadow-lg shadow-red-500/30">URGENT</div>` : prog >= 80 ? `<div class="alert-stock bg-orange-500 text-white shadow-lg shadow-orange-500/30">STOCK BAS</div>` : `<div class="text-[9px] font-bold opacity-50 uppercase tracking-widest">${remaining} restantes</div>`;
                 
                 card.innerHTML = `
                     <div class="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 opacity-10 rounded-bl-full pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:opacity-15" style="background:${med.color}"></div>
@@ -843,6 +903,7 @@
                 document.getElementById('newMedPlates').value = '';
                 document.getElementById('newMedColor').value = '#6366f1';
                 document.getElementById('colorPreview').style.background = '#6366f1';
+                document.getElementById('addMedBtn').classList.add('opacity-50', 'pointer-events-none');
                 
                 loadMeds();
             };
@@ -898,7 +959,7 @@
                 location.reload(); 
             };
 
-            initCustomPickers();
+            initUI();
             if (user) initApp();
         });
     </script>
