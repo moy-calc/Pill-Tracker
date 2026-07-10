@@ -54,14 +54,15 @@
             background-attachment: fixed;
             color: var(--text);
             font-family: 'Plus Jakarta Sans', sans-serif;
-            transition: background 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: background 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
             min-height: 100vh;
             -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
         }
 
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(40px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         @keyframes slideInRight {
@@ -69,121 +70,142 @@
             to { opacity: 1; transform: translateX(0); }
         }
 
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
         @keyframes popIn {
-            from { opacity: 0; transform: scale(0.85); }
-            to { opacity: 1; transform: scale(1); }
+            from { opacity: 0; transform: scale(0.7) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
 
         @keyframes scaleBounce {
             0% { transform: scale(1); }
-            50% { transform: scale(1.3); }
-            100% { transform: scale(1); }
+            50% { transform: scale(1.4) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        @keyframes floatUpFade {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-60px) scale(1.5); }
         }
 
         @keyframes ringBell {
             0%, 100% { transform: rotate(0deg); }
-            20% { transform: rotate(15deg); }
-            40% { transform: rotate(-10deg); }
-            60% { transform: rotate(5deg); }
+            20% { transform: rotate(20deg); }
+            40% { transform: rotate(-15deg); }
+            60% { transform: rotate(10deg); }
             80% { transform: rotate(-5deg); }
         }
 
         .dose-pop {
-            animation: scaleBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+            animation: scaleBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        }
+        
+        .floating-dose {
+            position: fixed;
+            font-size: 1.5rem;
+            font-weight: 900;
+            pointer-events: none;
+            z-index: 9999;
+            animation: floatUpFade 0.8s cubic-bezier(0.2, 1, 0.3, 1) forwards;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         .bell-shake {
-            animation: ringBell 0.5s ease-in-out;
+            animation: ringBell 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .glass {
             background: var(--card);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--border);
-            border-radius: 24px;
+            border-radius: 28px;
             box-shadow: var(--shadow);
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
             will-change: transform, box-shadow;
         }
 
         .glass:hover {
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-            transform: translateY(-4px);
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.15);
+            transform: translateY(-6px);
         }
 
         .dark .glass:hover {
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8);
         }
 
         .progress-container {
-            height: 8px;
+            height: 10px;
             width: 100%;
-            background: rgba(148, 163, 184, 0.15);
+            background: rgba(148, 163, 184, 0.2);
             border-radius: 99px;
             overflow: hidden;
             position: relative;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.1);
         }
 
         .progress-bar {
             height: 100%;
             border-radius: 99px;
-            transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
             will-change: width;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: translateX(-100%);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
         }
 
         .cal-cell {
-            min-height: 75px;
-            border-radius: 14px;
+            min-height: 80px;
+            border-radius: 18px;
             display: flex;
             flex-direction: column;
-            padding: 6px;
+            padding: 8px;
             border: 1px solid var(--border);
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            will-change: transform;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: transform, background-color;
         }
 
         .cal-cell:active {
-            transform: scale(0.85) !important;
+            transform: scale(0.8) !important;
         }
 
         .cal-cell:hover {
-            background: rgba(148, 163, 184, 0.15);
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
-        }
-
-        .ratio-badge {
-            font-size: 0.65rem;
-            padding: 2px 6px;
-            border-radius: 6px;
-            color: white;
-            margin-bottom: 2px;
-            font-weight: 800;
-            text-align: center;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-            letter-spacing: 0.5px;
-            animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            background: rgba(148, 163, 184, 0.2);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.15);
         }
 
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(2, 6, 23, 0.6);
+            background: rgba(2, 6, 23, 0.7);
             backdrop-filter: blur(0px);
             -webkit-backdrop-filter: blur(0px);
             z-index: 6000;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 16px;
+            padding: 20px;
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            will-change: opacity;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .modal-overlay.z-top {
@@ -194,17 +216,18 @@
             opacity: 1;
             visibility: visible;
             pointer-events: auto;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
 
         .modal-content {
             opacity: 0;
-            transform: translateY(40px) scale(0.9);
-            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: translateY(60px) scale(0.9);
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
             width: 100%;
-            max-width: 420px;
-            will-change: transform, opacity;
+            max-width: 440px;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .modal-overlay.open .modal-content {
@@ -214,40 +237,39 @@
 
         @keyframes pulse-soft {
             0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.85; transform: scale(1.08); }
+            50% { opacity: 0.8; transform: scale(1.05); }
         }
 
         .alert-stock {
             animation: pulse-soft 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
-            font-size: 10px;
-            font-weight: 800;
-            padding: 4px 10px;
-            border-radius: 8px;
-            letter-spacing: 0.5px;
+            font-size: 11px;
+            font-weight: 900;
+            padding: 5px 12px;
+            border-radius: 10px;
+            letter-spacing: 0.8px;
             display: inline-block;
         }
 
         .toast {
             position: fixed;
-            top: 24px;
+            top: 30px;
             left: 50%;
             transform: translateX(-50%) translateY(-150px) scale(0.5);
             background: #0f172a;
             color: #ffffff;
-            padding: 14px 24px;
+            padding: 16px 28px;
             border-radius: 100px;
-            font-weight: 700;
-            font-size: 13px;
+            font-weight: 800;
+            font-size: 14px;
             z-index: 9999;
             transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
             width: max-content;
             max-width: 90%;
             opacity: 0;
-            will-change: transform, opacity;
         }
 
         .dark .toast {
@@ -264,51 +286,26 @@
             color: var(--text);
             appearance: none;
             -webkit-appearance: none;
-            font-size: 15px !important;
+            font-size: 16px !important;
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            will-change: transform, box-shadow;
         }
 
         input:focus {
-            transform: scale(1.02);
-            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.15);
-        }
-
-        input[type="color"] {
-            padding: 0;
-            border: none;
-            border-radius: 14px;
-            overflow: hidden;
-            cursor: pointer;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        input[type="color"]::-webkit-color-swatch-wrapper {
-            padding: 0;
-        }
-
-        input[type="color"]::-webkit-color-swatch {
-            border: none;
-            border-radius: 14px;
+            transform: scale(1.03);
+            box-shadow: 0 15px 35px -5px rgba(99, 102, 241, 0.2);
         }
 
         .action-btn {
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            will-change: transform;
         }
 
         .action-btn:active {
-            transform: scale(0.85) !important;
+            transform: scale(0.8) !important;
         }
 
         .action-btn:hover {
-            transform: translateY(-4px) scale(1.03);
-            box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.2);
-        }
-
-        .dose-anim {
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            display: inline-block;
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.25);
         }
 
         .hide-scroll::-webkit-scrollbar {
@@ -322,323 +319,343 @@
 
         .valid-input {
             border-color: #22c55e !important;
-            background-color: rgba(34, 197, 94, 0.08) !important;
-        }
-
-        #drawerOverlay {
-            transition: opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .custom-grid-btn {
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .custom-grid-btn:active {
-            transform: scale(0.9);
+            background-color: rgba(34, 197, 94, 0.1) !important;
         }
     </style>
 </head>
-<body class="p-3 sm:p-5 lg:p-6">
-    <div id="toastContainer" class="toast"><i class="ph ph-info text-xl"></i><span id="toastMsg"></span></div>
+<body class="p-3 sm:p-6 lg:p-8">
+    <div id="toastContainer" class="toast"><i class="ph ph-info text-2xl"></i><span id="toastMsg"></span></div>
 
-    <div id="drawerOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[2000] hidden opacity-0" onclick="closeDrawers()"></div>
+    <div id="drawerOverlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-lg z-[2000] hidden opacity-0 transition-opacity duration-500" onclick="closeDrawers()"></div>
 
-    <nav class="max-w-5xl mx-auto flex justify-between items-center p-3 sm:p-4 glass mb-6 sm:mb-8 relative z-[1000] rounded-3xl" style="animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
-        <button onclick="openModal('accountModal')" id="accBtn" class="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-slate-500/10 items-center justify-center hidden action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
-            <i class="ph ph-user text-base sm:text-xl"></i>
+    <nav class="max-w-6xl mx-auto flex justify-between items-center p-4 sm:p-5 glass mb-8 relative z-[1000] rounded-[2rem]" style="animation: fadeInUp 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
+        <button onclick="openLeftDrawer()" id="archiveBtn" class="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-slate-500/10 items-center justify-center hidden action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
+            <i class="ph ph-archive text-xl sm:text-2xl"></i>
         </button>
-        <h1 class="text-base sm:text-2xl font-black text-indigo-500 tracking-tight flex items-center gap-1.5 sm:gap-2 pl-2">
-            <i class="ph-fill ph-pill text-xl sm:text-3xl"></i> MEDTRACKER
+        <h1 class="text-xl sm:text-3xl font-black text-indigo-500 tracking-tighter flex items-center gap-2 pl-2">
+            <i class="ph-fill ph-pill text-2xl sm:text-4xl"></i> MEDTRACKER
         </h1>
-        <div class="flex gap-1.5 sm:gap-2">
-            <button id="syncBtn" class="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center action-btn hidden">
-                <i class="ph ph-cloud-check text-base sm:text-xl" id="syncIcon"></i>
+        <div class="flex gap-2">
+            <button id="syncBtn" class="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-green-500/10 text-green-500 flex items-center justify-center action-btn hidden">
+                <i class="ph ph-cloud-check text-xl sm:text-2xl" id="syncIcon"></i>
             </button>
-            <button onclick="triggerNotification(this)" id="notifBtn" class="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center action-btn hover:bg-indigo-500/20">
-                <i class="ph ph-bell-ringing text-base sm:text-xl"></i>
+            <button onclick="triggerNotification(this)" id="notifBtn" class="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center action-btn hover:bg-indigo-500/20">
+                <i class="ph ph-bell-ringing text-xl sm:text-2xl"></i>
             </button>
-            <button onclick="openRightDrawer()" class="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-slate-500/10 flex items-center justify-center action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
-                <i class="ph ph-clock-counter-clockwise text-base sm:text-xl"></i>
+            <button onclick="openRightDrawer()" class="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-slate-500/10 flex items-center justify-center action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
+                <i class="ph ph-clock-counter-clockwise text-xl sm:text-2xl"></i>
             </button>
-            <button onclick="toggleTheme()" class="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-slate-500/10 flex items-center justify-center action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
-                <i class="ph ph-moon text-base sm:text-xl" id="themeIcon"></i>
+            <button onclick="openModal('accountModal')" id="accBtn" class="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-slate-500/10 items-center justify-center hidden action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
+                <i class="ph ph-user text-xl sm:text-2xl"></i>
+            </button>
+            <button onclick="toggleTheme()" class="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-slate-500/10 flex items-center justify-center action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
+                <i class="ph ph-moon text-xl sm:text-2xl" id="themeIcon"></i>
             </button>
         </div>
     </nav>
 
-    <main class="max-w-5xl mx-auto space-y-6 pb-12">
-        <div id="loginBox" class="glass p-6 sm:p-10 text-center space-y-6 max-w-md mx-auto mt-8 sm:mt-12 rounded-[2rem]" style="animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
-            <div class="w-20 h-20 sm:w-24 sm:h-24 bg-indigo-500/10 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-2 transition-transform duration-500 hover:scale-110 hover:rotate-12">
-                <i class="ph ph-lock-key text-4xl sm:text-5xl"></i>
+    <main class="max-w-6xl mx-auto space-y-8 pb-16">
+        <div id="loginBox" class="glass p-8 sm:p-12 text-center space-y-8 max-w-md mx-auto mt-12 rounded-[2.5rem]" style="animation: popIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
+            <div class="w-24 h-24 sm:w-28 sm:h-28 bg-indigo-500/10 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-2 transition-all duration-700 hover:scale-125 hover:rotate-12 hover:shadow-2xl hover:shadow-indigo-500/30">
+                <i class="ph ph-lock-key text-5xl sm:text-6xl"></i>
             </div>
             <div>
-                <h2 class="text-2xl sm:text-3xl font-black mb-1 tracking-tight">Bienvenue</h2>
-                <p class="text-sm opacity-60 font-semibold">Veuillez vous identifier pour continuer</p>
+                <h2 class="text-3xl sm:text-4xl font-black mb-2 tracking-tighter">Bienvenue</h2>
+                <p class="text-base opacity-60 font-bold">Veuillez vous identifier</p>
             </div>
-            <div class="space-y-4">
+            <div class="space-y-5">
                 <div class="relative">
-                    <i class="ph ph-text-aa absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl transition-all duration-300" id="iconLN"></i>
-                    <input type="text" id="lastName" oninput="validateInput('lastName', 'iconLN')" placeholder="Nom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
+                    <i class="ph ph-text-aa absolute left-5 top-1/2 -translate-y-1/2 opacity-50 text-2xl transition-all duration-500" id="iconLN"></i>
+                    <input type="text" id="lastName" oninput="validateInput('lastName', 'iconLN')" placeholder="Nom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-3xl p-5 pl-14 font-black outline-none focus:border-indigo-500 focus:bg-indigo-500/10 text-lg">
                 </div>
                 <div class="relative">
-                    <i class="ph ph-text-a-underline absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl transition-all duration-300" id="iconFN"></i>
-                    <input type="text" id="firstName" oninput="validateInput('firstName', 'iconFN')" placeholder="Prénom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
+                    <i class="ph ph-text-a-underline absolute left-5 top-1/2 -translate-y-1/2 opacity-50 text-2xl transition-all duration-500" id="iconFN"></i>
+                    <input type="text" id="firstName" oninput="validateInput('firstName', 'iconFN')" placeholder="Prénom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-3xl p-5 pl-14 font-black outline-none focus:border-indigo-500 focus:bg-indigo-500/10 text-lg">
                 </div>
                 <div>
                     <div class="relative">
-                        <i class="ph ph-calendar-blank absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl transition-all duration-300" id="iconBD"></i>
-                        <input type="text" id="birthDate" readonly onclick="openCustomDatePicker('birthDate')" placeholder="Date de naissance" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 cursor-pointer text-base">
+                        <i class="ph ph-calendar-blank absolute left-5 top-1/2 -translate-y-1/2 opacity-50 text-2xl transition-all duration-500" id="iconBD"></i>
+                        <input type="text" id="birthDate" readonly onclick="openCustomDatePicker('birthDate')" placeholder="Date de naissance" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-3xl p-5 pl-14 font-black outline-none focus:border-indigo-500 focus:bg-indigo-500/10 cursor-pointer text-lg">
                     </div>
-                    <div id="ageDisplay" class="text-xs font-bold text-indigo-500 mt-2 hidden text-right pr-3" style="animation: slideInRight 0.3s forwards;"></div>
+                    <div id="ageDisplay" class="text-sm font-black text-indigo-500 mt-3 hidden text-right pr-4" style="animation: slideInRight 0.4s forwards;"></div>
                 </div>
                 <div class="relative">
-                    <i class="ph ph-password absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
-                    <input type="password" id="passInput" placeholder="Mot de passe" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 hidden text-base">
+                    <i class="ph ph-password absolute left-5 top-1/2 -translate-y-1/2 opacity-50 text-2xl"></i>
+                    <input type="password" id="passInput" placeholder="Mot de passe" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-3xl p-5 pl-14 font-black outline-none focus:border-indigo-500 focus:bg-indigo-500/10 hidden text-lg">
                 </div>
             </div>
-            <button id="authBtn" onclick="handleAuth()" class="w-full py-4 sm:py-5 mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl opacity-50 pointer-events-none action-btn flex items-center justify-center gap-2 text-sm tracking-widest uppercase shadow-lg shadow-indigo-600/30">
-                VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>
+            <button id="authBtn" onclick="handleAuth()" class="w-full py-5 sm:py-6 mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-3xl opacity-50 pointer-events-none action-btn flex items-center justify-center gap-3 text-sm tracking-[0.2em] uppercase shadow-2xl shadow-indigo-600/40">
+                VÉRIFIER <i class="ph ph-arrow-right text-2xl"></i>
             </button>
         </div>
 
-        <div id="appBody" class="hidden space-y-6">
-            <div style="animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
-                <div class="flex justify-between items-center px-1 mb-4 sm:mb-6">
-                    <h2 class="font-black text-xs sm:text-sm uppercase tracking-widest opacity-60 flex items-center gap-2">
-                        <i class="ph ph-pill text-lg"></i> Mes Médicaments
+        <div id="appBody" class="hidden space-y-8">
+            <div style="animation: fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
+                <div class="flex justify-between items-center px-2 mb-6 sm:mb-8">
+                    <h2 class="font-black text-sm sm:text-base uppercase tracking-[0.2em] opacity-60 flex items-center gap-3">
+                        <i class="ph ph-pill text-2xl"></i> En cours
                     </h2>
-                    <button onclick="openModal('addMedModal')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-bold text-xs uppercase tracking-wider action-btn flex items-center gap-2 shadow-lg shadow-indigo-500/30">
-                        <i class="ph ph-plus-circle text-lg"></i> AJOUTER
+                    <button onclick="prepareAddMedModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 sm:px-8 py-3 sm:py-4 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-[0.15em] action-btn flex items-center gap-2 shadow-2xl shadow-indigo-500/40">
+                        <i class="ph ph-plus-circle text-xl sm:text-2xl"></i> NOUVEAU
                     </button>
                 </div>
-                <div id="medsGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6"></div>
+                <div id="medsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8"></div>
             </div>
 
-            <div class="glass p-4 sm:p-8 rounded-[2rem]" style="animation: fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: 0.1s;">
-                <div class="flex justify-between items-center mb-6 bg-slate-500/5 p-2 rounded-2xl">
-                    <button onclick="changeMonth(-1)" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-500/15 action-btn text-lg bg-white dark:bg-slate-800 shadow-sm">
-                        <i class="ph ph-caret-left font-bold"></i>
+            <div class="glass p-5 sm:p-10 rounded-[2.5rem]" style="animation: fadeInUp 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: 0.2s;">
+                <div class="flex justify-between items-center mb-8 bg-slate-500/5 p-3 rounded-3xl border border-slate-500/10 shadow-inner">
+                    <button onclick="changeMonth(-1)" class="w-12 h-12 flex items-center justify-center rounded-2xl hover:bg-indigo-500 hover:text-white action-btn text-xl bg-white dark:bg-slate-800 shadow-lg">
+                        <i class="ph ph-caret-left font-black"></i>
                     </button>
-                    <h3 id="calMonth" class="font-black uppercase text-xs sm:text-sm tracking-widest text-indigo-500 transition-all duration-300"></h3>
-                    <button onclick="changeMonth(1)" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-500/15 action-btn text-lg bg-white dark:bg-slate-800 shadow-sm">
-                        <i class="ph ph-caret-right font-bold"></i>
+                    <h3 id="calMonth" class="font-black uppercase text-sm sm:text-base tracking-[0.2em] text-indigo-500 transition-all duration-500"></h3>
+                    <button onclick="changeMonth(1)" class="w-12 h-12 flex items-center justify-center rounded-2xl hover:bg-indigo-500 hover:text-white action-btn text-xl bg-white dark:bg-slate-800 shadow-lg">
+                        <i class="ph ph-caret-right font-black"></i>
                     </button>
                 </div>
-                <div class="grid grid-cols-7 gap-1 sm:gap-2 mb-2 px-1">
-                    <div class="text-center text-[10px] font-bold opacity-40 uppercase tracking-wider">Lun</div>
-                    <div class="text-center text-[10px] font-bold opacity-40 uppercase tracking-wider">Mar</div>
-                    <div class="text-center text-[10px] font-bold opacity-40 uppercase tracking-wider">Mer</div>
-                    <div class="text-center text-[10px] font-bold opacity-40 uppercase tracking-wider">Jeu</div>
-                    <div class="text-center text-[10px] font-bold opacity-40 uppercase tracking-wider">Ven</div>
-                    <div class="text-center text-[10px] font-bold opacity-40 uppercase tracking-wider">Sam</div>
-                    <div class="text-center text-[10px] font-bold opacity-40 uppercase tracking-wider">Dim</div>
+                <div class="grid grid-cols-7 gap-2 sm:gap-3 mb-3 px-1">
+                    <div class="text-center text-[11px] sm:text-xs font-black opacity-40 uppercase tracking-widest">Lun</div>
+                    <div class="text-center text-[11px] sm:text-xs font-black opacity-40 uppercase tracking-widest">Mar</div>
+                    <div class="text-center text-[11px] sm:text-xs font-black opacity-40 uppercase tracking-widest">Mer</div>
+                    <div class="text-center text-[11px] sm:text-xs font-black opacity-40 uppercase tracking-widest">Jeu</div>
+                    <div class="text-center text-[11px] sm:text-xs font-black opacity-40 uppercase tracking-widest">Ven</div>
+                    <div class="text-center text-[11px] sm:text-xs font-black opacity-40 uppercase tracking-widest">Sam</div>
+                    <div class="text-center text-[11px] sm:text-xs font-black opacity-40 uppercase tracking-widest">Dim</div>
                 </div>
-                <div id="calendar" class="grid grid-cols-7 gap-1.5 sm:gap-3"></div>
+                <div id="calendar" class="grid grid-cols-7 gap-2 sm:gap-3"></div>
             </div>
         </div>
     </main>
 
+    <div id="leftDrawer" class="fixed top-0 left-0 bottom-0 w-full sm:w-[460px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl z-[2500] -translate-x-full transition-transform duration-700 p-6 sm:p-10 border-r border-slate-500/10 shadow-[30px_0_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col" style="transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);">
+        <div class="flex justify-between items-center mb-10">
+            <h2 class="text-xl sm:text-2xl font-black tracking-tighter text-slate-800 dark:text-white flex items-center gap-3">
+                <i class="ph ph-archive text-3xl opacity-50"></i> ARCHIVES
+            </h2>
+            <button onclick="closeDrawers()" class="w-12 h-12 rounded-2xl bg-slate-500/10 flex items-center justify-center action-btn hover:bg-slate-500/20 text-slate-800 dark:text-white">
+                <i class="ph ph-x font-black text-xl"></i>
+            </button>
+        </div>
+        <div id="archivedMedsList" class="space-y-5 overflow-y-auto flex-1 pr-3 pb-10 hide-scroll"></div>
+    </div>
+
+    <div id="rightDrawer" class="fixed top-0 right-0 bottom-0 w-full sm:w-[460px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl z-[2500] translate-x-full transition-transform duration-700 p-6 sm:p-10 border-l border-slate-500/10 shadow-[-30px_0_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col" style="transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);">
+        <div class="flex justify-between items-center mb-10">
+            <h2 class="text-xl sm:text-2xl font-black tracking-tighter text-indigo-500 flex items-center gap-3">
+                <i class="ph ph-clock-counter-clockwise text-3xl"></i> HISTORIQUE
+            </h2>
+            <button onclick="closeDrawers()" class="w-12 h-12 rounded-2xl bg-slate-500/10 flex items-center justify-center action-btn hover:bg-slate-500/20 text-slate-800 dark:text-white">
+                <i class="ph ph-x font-black text-xl"></i>
+            </button>
+        </div>
+        <div id="globalHistoryList" class="space-y-5 overflow-y-auto flex-1 pr-3 pb-10 hide-scroll"></div>
+    </div>
+
     <div id="accountModal" class="modal-overlay" onclick="closeModal('accountModal')">
-        <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
-            <div class="flex justify-center mb-5 sm:mb-6 text-indigo-500">
-                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-indigo-500/10 rounded-full flex items-center justify-center shadow-inner transition-transform duration-500 hover:scale-110 hover:rotate-12">
-                    <i class="ph ph-user-circle text-4xl sm:text-5xl"></i>
+        <div class="modal-content glass p-8 sm:p-10 rounded-[2.5rem] hide-scroll" onclick="event.stopPropagation()">
+            <div class="flex justify-center mb-8 text-indigo-500">
+                <div class="w-24 h-24 bg-indigo-500/10 rounded-full flex items-center justify-center shadow-inner transition-all duration-700 hover:scale-125 hover:rotate-12">
+                    <i class="ph ph-user-circle text-6xl"></i>
                 </div>
             </div>
-            <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest text-indigo-500">Profil Utilisateur</h3>
-            <div class="space-y-3 sm:space-y-4 mb-6">
-                <input type="text" id="editLN" placeholder="Nom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
-                <input type="text" id="editFN" placeholder="Prénom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
+            <h3 class="font-black mb-8 text-center uppercase text-sm tracking-[0.2em] text-indigo-500">Profil Utilisateur</h3>
+            <div class="space-y-5 mb-8">
+                <input type="text" id="editLN" placeholder="Nom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-3xl p-5 font-black text-lg outline-none focus:border-indigo-500 focus:bg-indigo-500/10">
+                <input type="text" id="editFN" placeholder="Prénom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-3xl p-5 font-black text-lg outline-none focus:border-indigo-500 focus:bg-indigo-500/10">
                 <div>
-                    <input type="text" id="editBD" readonly onclick="openCustomDatePicker('editBD')" placeholder="Date de naissance" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5 cursor-pointer">
-                    <div id="editAgeDisplay" class="text-xs font-bold text-indigo-500 mt-2 text-right pr-3"></div>
+                    <input type="text" id="editBD" readonly onclick="openCustomDatePicker('editBD')" placeholder="Date de naissance" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-3xl p-5 font-black text-lg outline-none focus:border-indigo-500 focus:bg-indigo-500/10 cursor-pointer">
+                    <div id="editAgeDisplay" class="text-sm font-black text-indigo-500 mt-3 text-right pr-4"></div>
                 </div>
-                <div class="h-px w-full bg-slate-500/20 my-4 sm:my-6 rounded-full"></div>
-                <input type="password" id="oldPassCheck" placeholder="Ancien mot de passe" class="w-full bg-slate-500/5 border border-indigo-500/40 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
-                <input type="password" id="newPassSet" placeholder="Nouveau mot de passe" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
-                <div class="h-px w-full bg-slate-500/20 my-4 sm:my-6 rounded-full"></div>
-                <div class="space-y-2">
-                    <label class="text-xs font-black uppercase opacity-60">Lier Telegram</label>
-                    <div class="flex flex-col sm:flex-row gap-2">
-                        <a id="telegramLinkBtn" href="https://t.me/Med_tracker_pro_Bot" target="_blank" class="flex-1 bg-indigo-500/10 text-indigo-500 font-bold rounded-2xl py-3 text-center text-sm action-btn hover:bg-indigo-500/20 transition-all">
-                            <i class="ph ph-telegram-logo"></i> Ouvrir le Bot
+                <div class="h-1 w-full bg-slate-500/10 my-8 rounded-full"></div>
+                <input type="password" id="oldPassCheck" placeholder="Ancien mot de passe" class="w-full bg-slate-500/5 border border-indigo-500/50 rounded-3xl p-5 font-black text-lg outline-none focus:border-indigo-500 focus:bg-indigo-500/10">
+                <input type="password" id="newPassSet" placeholder="Nouveau mot de passe" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-3xl p-5 font-black text-lg outline-none focus:border-indigo-500 focus:bg-indigo-500/10">
+                <div class="h-1 w-full bg-slate-500/10 my-8 rounded-full"></div>
+                <div class="space-y-4">
+                    <label class="text-xs font-black uppercase tracking-widest opacity-60">Lier Telegram</label>
+                    <div class="flex flex-col gap-3">
+                        <a id="telegramLinkBtn" href="https://t.me/Med_tracker_pro_Bot" target="_blank" class="w-full bg-[#2AABEE]/10 text-[#2AABEE] font-black rounded-3xl py-4 text-center text-sm action-btn hover:bg-[#2AABEE]/20 flex items-center justify-center gap-2">
+                            <i class="ph ph-telegram-logo text-xl"></i> Ouvrir le Bot Telegram
                         </a>
-                        <input type="text" id="telegramChatId" placeholder="Votre ID Telegram" class="flex-1 bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 font-bold text-sm outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
+                        <input type="text" id="telegramChatId" placeholder="Votre ID Telegram" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-3xl p-5 font-black text-lg outline-none focus:border-[#2AABEE] focus:bg-[#2AABEE]/10">
                     </div>
-                    <button onclick="saveTelegramId()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-xs uppercase tracking-widest action-btn shadow-lg shadow-indigo-600/30">Enregistrer l'ID</button>
+                    <button onclick="saveTelegramId()" class="w-full py-4 bg-slate-800 dark:bg-white text-white dark:text-slate-900 font-black rounded-3xl text-xs uppercase tracking-[0.2em] action-btn shadow-2xl">Sauvegarder l'ID</button>
                 </div>
-                <div class="h-px w-full bg-slate-500/20 my-4 sm:my-6 rounded-full"></div>
-                <div class="pt-3 space-y-2">
-                    <button onclick="updateAccount()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-xs uppercase tracking-widest action-btn shadow-lg shadow-indigo-600/30">Sauvegarder</button>
-                    <button onclick="handleLogout()" class="w-full py-3.5 bg-slate-500/10 hover:bg-slate-500/20 font-bold rounded-2xl text-xs uppercase tracking-widest action-btn flex items-center justify-center gap-2 text-slate-800 dark:text-white">
-                        <i class="ph ph-sign-out text-lg"></i> Déconnexion
+                <div class="h-1 w-full bg-slate-500/10 my-8 rounded-full"></div>
+                <div class="pt-2 space-y-3">
+                    <button onclick="updateAccount()" class="w-full py-5 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-3xl text-sm uppercase tracking-[0.2em] action-btn shadow-2xl shadow-indigo-600/40">Mettre à jour</button>
+                    <button onclick="handleLogout()" class="w-full py-5 bg-slate-500/10 hover:bg-slate-500/20 font-black rounded-3xl text-sm uppercase tracking-[0.2em] action-btn flex items-center justify-center gap-3 text-slate-800 dark:text-white">
+                        <i class="ph ph-sign-out text-2xl"></i> Déconnexion
                     </button>
-                    <button onclick="deleteAccount()" class="w-full py-3.5 text-red-500 bg-red-500/10 hover:bg-red-500/20 font-bold rounded-2xl text-xs uppercase tracking-widest action-btn mt-1">Supprimer le compte</button>
+                    <button onclick="deleteAccount()" class="w-full py-5 text-red-500 bg-red-500/10 hover:bg-red-500/20 font-black rounded-3xl text-xs uppercase tracking-[0.2em] action-btn mt-2">Supprimer le compte</button>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="addMedModal" class="modal-overlay" onclick="closeModal('addMedModal')">
-        <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
-            <div class="flex justify-center mb-5 sm:mb-6 text-indigo-500">
-                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-indigo-500/10 rounded-full flex items-center justify-center shadow-inner transition-transform duration-500 hover:scale-110 hover:rotate-12">
-                    <i class="ph ph-pill text-3xl sm:text-4xl"></i>
+        <div class="modal-content glass p-8 sm:p-10 rounded-[2.5rem] hide-scroll" onclick="event.stopPropagation()">
+            <div class="flex justify-center mb-8 text-indigo-500">
+                <div class="w-24 h-24 bg-indigo-500/10 rounded-full flex items-center justify-center shadow-inner transition-all duration-700 hover:scale-125 hover:rotate-12">
+                    <i class="ph ph-pill text-6xl"></i>
                 </div>
             </div>
-            <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest text-indigo-500">Nouveau Médicament</h3>
-            <div class="space-y-4 mb-6 flex flex-col">
-                <div class="relative bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 flex items-center justify-between cursor-pointer action-btn" onclick="openModal('colorModal')">
-                    <span class="text-sm font-bold opacity-80">Couleur associée</span>
+            <h3 class="font-black mb-8 text-center uppercase text-sm tracking-[0.2em] text-indigo-500">Nouveau Traitement</h3>
+            <div class="space-y-5 mb-8 flex flex-col">
+                <div class="relative bg-slate-500/5 border border-slate-500/10 rounded-3xl p-5 flex items-center justify-between cursor-pointer action-btn hover:bg-slate-500/10" onclick="openModal('colorModal')">
+                    <span class="text-base font-black opacity-80">Couleur d'identification</span>
                     <input type="hidden" id="newMedColor" value="#6366f1">
-                    <div id="colorPreview" class="w-10 h-10 rounded-xl shadow-lg border-2 border-white/30 transition-transform duration-300" style="background: #6366f1;"></div>
+                    <div id="colorPreview" class="w-12 h-12 rounded-2xl shadow-xl border-4 border-white/40 transition-transform duration-500" style="background: #6366f1;"></div>
                 </div>
                 <div class="relative">
-                    <i class="ph ph-text-aa absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl transition-all" id="iconMedName"></i>
-                    <input type="text" id="newMedName" oninput="validateMedForm()" placeholder="Nom du médicament" class="w-full p-4 pl-12 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
+                    <i class="ph ph-text-aa absolute left-5 top-1/2 -translate-y-1/2 opacity-50 text-2xl" id="iconMedName"></i>
+                    <input type="text" id="newMedName" oninput="validateMedForm()" placeholder="Nom du médicament" class="w-full p-5 pl-14 bg-slate-500/5 border border-slate-500/10 rounded-3xl font-black text-lg outline-none focus:border-indigo-500 focus:bg-indigo-500/10">
                 </div>
-                <div class="grid grid-cols-2 gap-3 sm:gap-4">
-                    <div class="relative">
-                        <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4 transition-all">Doses/Plq</label>
-                        <input type="number" id="newMedPieces" oninput="validateMedForm()" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="relative bg-slate-500/5 border border-slate-500/10 rounded-3xl overflow-hidden focus-within:border-indigo-500 focus-within:bg-indigo-500/10 transition-colors">
+                        <label class="absolute text-[10px] font-black uppercase tracking-widest opacity-50 top-3 left-0 right-0 text-center">Doses / Plaquette</label>
+                        <input type="number" id="newMedPieces" oninput="validateMedForm()" class="w-full p-4 pt-8 bg-transparent font-black outline-none text-center text-2xl">
                     </div>
-                    <div class="relative">
-                        <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4 transition-all">Plaques</label>
-                        <input type="number" id="newMedPlates" oninput="validateMedForm()" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
+                    <div class="relative bg-slate-500/5 border border-slate-500/10 rounded-3xl overflow-hidden focus-within:border-indigo-500 focus-within:bg-indigo-500/10 transition-colors">
+                        <label class="absolute text-[10px] font-black uppercase tracking-widest opacity-50 top-3 left-0 right-0 text-center">Plaquettes / Boîte</label>
+                        <input type="number" id="newMedPlates" value="1" oninput="validateMedForm()" class="w-full p-4 pt-8 bg-transparent font-black outline-none text-center text-2xl">
                     </div>
                 </div>
-                <div class="bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 flex flex-col gap-3">
-                    <span class="text-[10px] font-black uppercase opacity-60">Planification de la prise</span>
-                    <input type="time" id="newMedTime" class="w-full p-3 bg-white dark:bg-slate-800 rounded-xl font-bold outline-none focus:border-indigo-500 text-sm border border-slate-500/10">
-                    <div class="flex justify-between items-center w-full" id="newMedDays">
-                        <button type="button" class="day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="1">L</button>
-                        <button type="button" class="day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="2">M</button>
-                        <button type="button" class="day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="3">M</button>
-                        <button type="button" class="day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="4">J</button>
-                        <button type="button" class="day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="5">V</button>
-                        <button type="button" class="day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="6">S</button>
-                        <button type="button" class="day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="0">D</button>
+                <div class="bg-slate-500/5 border border-slate-500/10 rounded-3xl p-5 flex flex-col gap-5">
+                    <span class="text-xs font-black uppercase tracking-[0.1em] opacity-60 text-center">Horaires de prise (Rappels)</span>
+                    <div id="newMedTimesList" class="flex flex-wrap gap-2 justify-center"></div>
+                    <button type="button" onclick="openTimePickerFor('add')" class="w-full py-4 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-500 font-black rounded-2xl text-xs uppercase tracking-widest action-btn border border-indigo-500/20 border-dashed">
+                        <i class="ph ph-plus font-black"></i> Ajouter une heure
+                    </button>
+                    <div class="flex justify-between items-center w-full mt-2" id="newMedDays">
+                        <button type="button" class="day-btn w-10 h-10 rounded-xl bg-slate-500/10 text-slate-500 text-sm font-black transition-all duration-300 action-btn" data-day="1">L</button>
+                        <button type="button" class="day-btn w-10 h-10 rounded-xl bg-slate-500/10 text-slate-500 text-sm font-black transition-all duration-300 action-btn" data-day="2">M</button>
+                        <button type="button" class="day-btn w-10 h-10 rounded-xl bg-slate-500/10 text-slate-500 text-sm font-black transition-all duration-300 action-btn" data-day="3">M</button>
+                        <button type="button" class="day-btn w-10 h-10 rounded-xl bg-slate-500/10 text-slate-500 text-sm font-black transition-all duration-300 action-btn" data-day="4">J</button>
+                        <button type="button" class="day-btn w-10 h-10 rounded-xl bg-slate-500/10 text-slate-500 text-sm font-black transition-all duration-300 action-btn" data-day="5">V</button>
+                        <button type="button" class="day-btn w-10 h-10 rounded-xl bg-slate-500/10 text-slate-500 text-sm font-black transition-all duration-300 action-btn" data-day="6">S</button>
+                        <button type="button" class="day-btn w-10 h-10 rounded-xl bg-slate-500/10 text-slate-500 text-sm font-black transition-all duration-300 action-btn" data-day="0">D</button>
                     </div>
                 </div>
             </div>
-            <button id="addMedBtn" onclick="confirmAddMed()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl uppercase text-xs tracking-widest action-btn shadow-lg shadow-indigo-600/30 opacity-50 pointer-events-none transition-all">Ajouter</button>
+            <button id="addMedBtn" onclick="confirmAddMed()" class="w-full py-5 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-3xl uppercase text-sm tracking-[0.2em] action-btn shadow-2xl shadow-indigo-600/40 opacity-50 pointer-events-none transition-all">Créer le suivi</button>
+            <button onclick="closeModal('addMedModal')" class="w-full py-4 mt-3 bg-slate-500/10 hover:bg-slate-500/20 font-black rounded-3xl uppercase text-xs tracking-widest action-btn text-slate-800 dark:text-white">Annuler</button>
         </div>
     </div>
 
     <div id="editMedModal" class="modal-overlay" onclick="closeModal('editMedModal')">
-        <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
-            <div class="flex justify-center mb-5 sm:mb-6 text-indigo-500">
-                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-indigo-500/10 rounded-full flex items-center justify-center shadow-inner transition-transform duration-500 hover:scale-110 hover:rotate-12">
-                    <i class="ph ph-pencil-simple text-3xl sm:text-4xl"></i>
+        <div class="modal-content glass p-8 sm:p-10 rounded-[2.5rem] hide-scroll" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-start mb-6">
+                <button onclick="archiveCurrentMed()" id="btnArchiveMed" class="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-500 hover:bg-orange-500/20 flex items-center justify-center action-btn" title="Archiver">
+                    <i class="ph ph-archive text-2xl"></i>
+                </button>
+                <div class="w-20 h-20 bg-indigo-500/10 text-indigo-500 rounded-full flex items-center justify-center shadow-inner transition-all duration-700 hover:scale-125 hover:rotate-12">
+                    <i class="ph ph-pencil-simple text-4xl"></i>
                 </div>
+                <button onclick="deleteCurrentMed()" class="w-12 h-12 rounded-2xl bg-red-500/10 text-red-500 hover:bg-red-500/20 flex items-center justify-center action-btn" title="Supprimer">
+                    <i class="ph ph-trash text-2xl"></i>
+                </button>
             </div>
-            <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest text-indigo-500">Modifier le Médicament</h3>
-            <div class="space-y-4 mb-6 flex flex-col">
-                <div class="relative bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 flex items-center justify-between cursor-pointer action-btn" onclick="openModal('colorModalEdit')">
-                    <span class="text-sm font-bold opacity-80">Couleur associée</span>
+            <h3 class="font-black mb-8 text-center uppercase text-sm tracking-[0.2em] text-indigo-500">Modification</h3>
+            <div class="space-y-5 mb-8 flex flex-col">
+                <div class="relative bg-slate-500/5 border border-slate-500/10 rounded-3xl p-5 flex items-center justify-between cursor-pointer action-btn hover:bg-slate-500/10" onclick="openModal('colorModalEdit')">
+                    <span class="text-base font-black opacity-80">Couleur</span>
                     <input type="hidden" id="editMedColor" value="#6366f1">
-                    <div id="editColorPreview" class="w-10 h-10 rounded-xl shadow-lg border-2 border-white/30 transition-transform duration-300" style="background: #6366f1;"></div>
+                    <div id="editColorPreview" class="w-12 h-12 rounded-2xl shadow-xl border-4 border-white/40 transition-transform duration-500" style="background: #6366f1;"></div>
                 </div>
                 <div class="relative">
-                    <i class="ph ph-text-aa absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl transition-all" id="iconEditMedName"></i>
-                    <input type="text" id="editMedName" placeholder="Nom du médicament" class="w-full p-4 pl-12 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
+                    <i class="ph ph-text-aa absolute left-5 top-1/2 -translate-y-1/2 opacity-50 text-2xl" id="iconEditMedName"></i>
+                    <input type="text" id="editMedName" placeholder="Nom du médicament" class="w-full p-5 pl-14 bg-slate-500/5 border border-slate-500/10 rounded-3xl font-black text-lg outline-none focus:border-indigo-500 focus:bg-indigo-500/10">
                 </div>
-                <div class="grid grid-cols-2 gap-3 sm:gap-4">
-                    <div class="relative">
-                        <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4 transition-all">Doses/Plq</label>
-                        <input type="number" id="editMedPieces" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="relative bg-slate-500/5 border border-slate-500/10 rounded-3xl overflow-hidden focus-within:border-indigo-500 focus-within:bg-indigo-500/10 transition-colors">
+                        <label class="absolute text-[10px] font-black uppercase tracking-widest opacity-50 top-3 left-0 right-0 text-center">Doses / Plq</label>
+                        <input type="number" id="editMedPieces" class="w-full p-4 pt-8 bg-transparent font-black outline-none text-center text-2xl">
                     </div>
-                    <div class="relative">
-                        <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4 transition-all">Plaques</label>
-                        <input type="number" id="editMedPlates" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
+                    <div class="relative bg-slate-500/5 border border-slate-500/10 rounded-3xl overflow-hidden focus-within:border-indigo-500 focus-within:bg-indigo-500/10 transition-colors">
+                        <label class="absolute text-[10px] font-black uppercase tracking-widest opacity-50 top-3 left-0 right-0 text-center">Plaquettes</label>
+                        <input type="number" id="editMedPlates" class="w-full p-4 pt-8 bg-transparent font-black outline-none text-center text-2xl">
                     </div>
                 </div>
-                <div class="bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 flex flex-col gap-3">
-                    <span class="text-[10px] font-black uppercase opacity-60">Planification de la prise</span>
-                    <input type="time" id="editMedTime" class="w-full p-3 bg-white dark:bg-slate-800 rounded-xl font-bold outline-none focus:border-indigo-500 text-sm border border-slate-500/10">
-                    <div class="flex justify-between items-center w-full" id="editMedDays">
-                        <button type="button" class="edit-day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="1">L</button>
-                        <button type="button" class="edit-day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="2">M</button>
-                        <button type="button" class="edit-day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="3">M</button>
-                        <button type="button" class="edit-day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="4">J</button>
-                        <button type="button" class="edit-day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="5">V</button>
-                        <button type="button" class="edit-day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="6">S</button>
-                        <button type="button" class="edit-day-btn w-8 h-8 rounded-lg bg-indigo-500 text-white text-xs font-bold transition-colors" data-day="0">D</button>
+                <div class="bg-slate-500/5 border border-slate-500/10 rounded-3xl p-5 flex flex-col gap-5">
+                    <span class="text-xs font-black uppercase tracking-[0.1em] opacity-60 text-center">Horaires de prise</span>
+                    <div id="editMedTimesList" class="flex flex-wrap gap-2 justify-center"></div>
+                    <button type="button" onclick="openTimePickerFor('edit')" class="w-full py-4 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-500 font-black rounded-2xl text-xs uppercase tracking-widest action-btn border border-indigo-500/20 border-dashed">
+                        <i class="ph ph-plus font-black"></i> Ajouter une heure
+                    </button>
+                    <div class="flex justify-between items-center w-full mt-2" id="editMedDays">
+                        <button type="button" class="edit-day-btn w-10 h-10 rounded-xl bg-slate-500/10 text-slate-500 text-sm font-black transition-all duration-300 action-btn" data-day="1">L</button>
+                        <button type="button" class="edit-day-btn w-10 h-10 rounded-xl bg-slate-500/10 text-slate-500 text-sm font-black transition-all duration-300 action-btn" data-day="2">M</button>
+                        <button type="button" class="edit-day-btn w-10 h-10 rounded-xl bg-slate-500/10 text-slate-500 text-sm font-black transition-all duration-300 action-btn" data-day="3">M</button>
+                        <button type="button" class="edit-day-btn w-10 h-10 rounded-xl bg-slate-500/10 text-slate-500 text-sm font-black transition-all duration-300 action-btn" data-day="4">J</button>
+                        <button type="button" class="edit-day-btn w-10 h-10 rounded-xl bg-slate-500/10 text-slate-500 text-sm font-black transition-all duration-300 action-btn" data-day="5">V</button>
+                        <button type="button" class="edit-day-btn w-10 h-10 rounded-xl bg-slate-500/10 text-slate-500 text-sm font-black transition-all duration-300 action-btn" data-day="6">S</button>
+                        <button type="button" class="edit-day-btn w-10 h-10 rounded-xl bg-slate-500/10 text-slate-500 text-sm font-black transition-all duration-300 action-btn" data-day="0">D</button>
                     </div>
                 </div>
             </div>
             <input type="hidden" id="editMedId" value="">
-            <button onclick="confirmEditMed()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl uppercase text-xs tracking-widest action-btn shadow-lg shadow-indigo-600/30">Enregistrer</button>
+            <button onclick="confirmEditMed()" id="btnSaveEditMed" class="w-full py-5 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-3xl uppercase text-sm tracking-[0.2em] action-btn shadow-2xl shadow-indigo-600/40">Enregistrer</button>
+            <button onclick="unarchiveCurrentMed()" id="btnUnarchiveMed" class="w-full py-5 mt-3 bg-green-500 hover:bg-green-600 text-white font-black rounded-3xl uppercase text-sm tracking-[0.2em] action-btn shadow-2xl shadow-green-500/40 hidden">Restaurer</button>
+            <button onclick="closeModal('editMedModal')" class="w-full py-4 mt-3 bg-slate-500/10 hover:bg-slate-500/20 font-black rounded-3xl uppercase text-xs tracking-widest action-btn text-slate-800 dark:text-white">Annuler</button>
         </div>
     </div>
 
     <div id="colorModal" class="modal-overlay z-top" onclick="closeModal('colorModal')">
-        <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
-            <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest text-indigo-500">Choisir une couleur</h3>
-            <div id="colorGrid" class="grid grid-cols-5 gap-3 sm:gap-4 mb-6"></div>
-            <div class="flex items-center gap-4 mb-6 bg-slate-500/5 p-4 rounded-2xl border border-slate-500/10 transition-all">
-                <span class="text-sm font-bold opacity-80 flex-1">Personnalisée :</span>
-                <input type="color" id="customColorPicker" class="w-10 h-10 rounded-xl shadow-inner cursor-pointer action-btn" onchange="selectColor(this.value)">
+        <div class="modal-content glass p-8 sm:p-10 rounded-[2.5rem]" onclick="event.stopPropagation()">
+            <h3 class="font-black mb-8 text-center uppercase text-sm tracking-[0.2em] text-indigo-500">Palette de couleurs</h3>
+            <div id="colorGrid" class="grid grid-cols-5 gap-4 mb-8"></div>
+            <div class="flex items-center gap-5 mb-8 bg-slate-500/5 p-5 rounded-3xl border border-slate-500/10">
+                <span class="text-sm font-black opacity-80 flex-1">Personnalisée :</span>
+                <input type="color" id="customColorPicker" class="w-12 h-12 rounded-2xl shadow-inner cursor-pointer action-btn border-none p-0 bg-transparent" onchange="selectColor(this.value)">
             </div>
-            <button onclick="closeModal('colorModal')" class="w-full py-4 bg-slate-500/15 hover:bg-slate-500/25 font-bold rounded-2xl uppercase text-xs tracking-widest action-btn text-slate-800 dark:text-white">Retour</button>
+            <button onclick="closeModal('colorModal')" class="w-full py-5 bg-slate-500/15 hover:bg-slate-500/25 font-black rounded-3xl uppercase text-xs tracking-[0.2em] action-btn text-slate-800 dark:text-white">Retour</button>
         </div>
     </div>
 
     <div id="colorModalEdit" class="modal-overlay z-top" onclick="closeModal('colorModalEdit')">
-        <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
-            <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest text-indigo-500">Choisir une couleur</h3>
-            <div id="colorGridEdit" class="grid grid-cols-5 gap-3 sm:gap-4 mb-6"></div>
-            <div class="flex items-center gap-4 mb-6 bg-slate-500/5 p-4 rounded-2xl border border-slate-500/10 transition-all">
-                <span class="text-sm font-bold opacity-80 flex-1">Personnalisée :</span>
-                <input type="color" id="customColorPickerEdit" class="w-10 h-10 rounded-xl shadow-inner cursor-pointer action-btn" onchange="selectEditColor(this.value)">
+        <div class="modal-content glass p-8 sm:p-10 rounded-[2.5rem]" onclick="event.stopPropagation()">
+            <h3 class="font-black mb-8 text-center uppercase text-sm tracking-[0.2em] text-indigo-500">Palette de couleurs</h3>
+            <div id="colorGridEdit" class="grid grid-cols-5 gap-4 mb-8"></div>
+            <div class="flex items-center gap-5 mb-8 bg-slate-500/5 p-5 rounded-3xl border border-slate-500/10">
+                <span class="text-sm font-black opacity-80 flex-1">Personnalisée :</span>
+                <input type="color" id="customColorPickerEdit" class="w-12 h-12 rounded-2xl shadow-inner cursor-pointer action-btn border-none p-0 bg-transparent" onchange="selectEditColor(this.value)">
             </div>
-            <button onclick="closeModal('colorModalEdit')" class="w-full py-4 bg-slate-500/15 hover:bg-slate-500/25 font-bold rounded-2xl uppercase text-xs tracking-widest action-btn text-slate-800 dark:text-white">Retour</button>
+            <button onclick="closeModal('colorModalEdit')" class="w-full py-5 bg-slate-500/15 hover:bg-slate-500/25 font-black rounded-3xl uppercase text-xs tracking-[0.2em] action-btn text-slate-800 dark:text-white">Retour</button>
         </div>
     </div>
 
     <div id="editDayModal" class="modal-overlay" onclick="closeModal('editDayModal')">
-        <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
-            <div class="flex justify-center mb-5 text-indigo-500">
-                <i class="ph ph-calendar-check text-4xl transition-transform duration-500 hover:scale-125"></i>
+        <div class="modal-content glass p-8 sm:p-10 rounded-[2.5rem] hide-scroll" onclick="event.stopPropagation()">
+            <div class="flex justify-center mb-6 text-indigo-500">
+                <div class="w-20 h-20 bg-indigo-500/10 rounded-full flex items-center justify-center shadow-inner transition-all duration-700 hover:scale-125 hover:rotate-12">
+                    <i class="ph ph-calendar-check text-4xl"></i>
+                </div>
             </div>
-            <h3 id="editDayTitle" class="font-black mb-6 text-center uppercase text-xs sm:text-sm tracking-widest text-indigo-500 bg-indigo-500/10 py-2.5 rounded-2xl"></h3>
-            <div id="editDayList" class="space-y-3 sm:space-y-4 max-h-[50vh] overflow-y-auto pr-2 hide-scroll"></div>
-            <button onclick="closeModal('editDayModal')" class="w-full mt-6 py-4 bg-slate-500/10 hover:bg-slate-500/20 font-bold rounded-2xl text-xs uppercase tracking-widest action-btn text-slate-800 dark:text-white">Fermer</button>
+            <h3 id="editDayTitle" class="font-black mb-8 text-center uppercase text-sm sm:text-base tracking-[0.1em] text-indigo-500 bg-indigo-500/5 py-4 rounded-3xl border border-indigo-500/10 shadow-inner"></h3>
+            <div id="editDayList" class="space-y-5 max-h-[50vh] overflow-y-auto pr-2 hide-scroll"></div>
+            <button onclick="closeModal('editDayModal')" class="w-full mt-8 py-5 bg-slate-500/10 hover:bg-slate-500/20 font-black rounded-3xl text-sm uppercase tracking-[0.2em] action-btn text-slate-800 dark:text-white">Fermer</button>
         </div>
-    </div>
-
-    <div id="rightDrawer" class="fixed top-0 right-0 bottom-0 w-full sm:w-[420px] bg-white dark:bg-slate-900 z-[2500] translate-x-full transition-transform duration-500 p-5 sm:p-8 border-l border-slate-500/10 shadow-2xl overflow-hidden flex flex-col" style="transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);">
-        <div class="flex justify-between items-center mb-8 mt-1">
-            <h2 class="text-lg sm:text-xl font-black tracking-tight text-indigo-500 flex items-center gap-2">
-                <i class="ph ph-clock-counter-clockwise"></i> HISTORIQUE
-            </h2>
-            <button onclick="closeDrawers()" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-500/10 flex items-center justify-center action-btn hover:bg-slate-500/20 text-slate-800 dark:text-white">
-                <i class="ph ph-x font-bold text-lg"></i>
-            </button>
-        </div>
-        <div id="globalHistoryList" class="space-y-4 overflow-y-auto flex-1 pr-2 pb-10 hide-scroll"></div>
     </div>
 
     <div id="customDateModal" class="modal-overlay z-top" onclick="closeModal('customDateModal')">
-        <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
-            <div class="flex justify-center mb-4 text-indigo-500">
-                <i class="ph ph-calendar text-4xl transition-transform duration-500 hover:scale-125"></i>
+        <div class="modal-content glass p-8 sm:p-10 rounded-[2.5rem]" onclick="event.stopPropagation()">
+            <div class="flex justify-center mb-6 text-indigo-500">
+                <i class="ph ph-calendar text-5xl transition-transform duration-700 hover:scale-125"></i>
             </div>
-            <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest text-indigo-500" id="datePickerTitle">Sélectionnez l'Année</h3>
-            <div id="datePickerGrid" class="grid grid-cols-4 gap-2 mb-6 max-h-[40vh] overflow-y-auto hide-scroll p-1"></div>
-            <button onclick="closeModal('customDateModal')" class="w-full py-4 bg-slate-500/15 hover:bg-slate-500/25 font-bold rounded-2xl uppercase text-xs tracking-widest action-btn text-slate-800 dark:text-white">Annuler</button>
+            <h3 class="font-black mb-8 text-center uppercase text-sm tracking-[0.2em] text-indigo-500" id="datePickerTitle">Sélectionnez l'Année</h3>
+            <div id="datePickerGrid" class="grid grid-cols-4 gap-3 mb-8 max-h-[40vh] overflow-y-auto hide-scroll p-1"></div>
+            <button onclick="closeModal('customDateModal')" class="w-full py-5 bg-slate-500/15 hover:bg-slate-500/25 font-black rounded-3xl uppercase text-sm tracking-[0.2em] action-btn text-slate-800 dark:text-white">Annuler</button>
         </div>
     </div>
 
     <div id="customTimeModal" class="modal-overlay z-top" onclick="closeModal('customTimeModal')">
-        <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
-            <div class="flex justify-center mb-4 text-indigo-500">
-                <i class="ph ph-clock text-4xl transition-transform duration-500 hover:scale-125"></i>
+        <div class="modal-content glass p-8 sm:p-10 rounded-[2.5rem]" onclick="event.stopPropagation()">
+            <div class="flex justify-center mb-6 text-indigo-500">
+                <i class="ph ph-clock text-5xl transition-transform duration-700 hover:scale-125"></i>
             </div>
-            <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest text-indigo-500" id="timePickerTitle">Heure de la prise</h3>
-            <div id="timePickerGrid" class="grid grid-cols-4 gap-2 mb-4 max-h-[40vh] overflow-y-auto hide-scroll p-1"></div>
-            <button onclick="skipTime()" class="w-full py-4 bg-indigo-500/15 hover:bg-indigo-500/25 font-bold rounded-2xl uppercase text-xs tracking-widest action-btn text-indigo-600 dark:text-indigo-400 mb-2">Ignorer l'heure</button>
-            <button onclick="closeModal('customTimeModal')" class="w-full py-4 bg-slate-500/15 hover:bg-slate-500/25 font-bold rounded-2xl uppercase text-xs tracking-widest action-btn text-slate-800 dark:text-white">Annuler</button>
+            <h3 class="font-black mb-8 text-center uppercase text-sm tracking-[0.2em] text-indigo-500" id="timePickerTitle">Heure</h3>
+            <div id="timePickerGrid" class="grid grid-cols-4 gap-3 mb-6 max-h-[45vh] overflow-y-auto hide-scroll p-1"></div>
+            <button onclick="skipTime()" id="skipTimeBtn" class="w-full py-5 bg-indigo-500/10 hover:bg-indigo-500/20 font-black rounded-3xl uppercase text-sm tracking-[0.2em] action-btn text-indigo-600 dark:text-indigo-400 mb-3">Ignorer l'heure</button>
+            <button onclick="closeModal('customTimeModal')" class="w-full py-5 bg-slate-500/15 hover:bg-slate-500/25 font-black rounded-3xl uppercase text-sm tracking-[0.2em] action-btn text-slate-800 dark:text-white">Annuler</button>
         </div>
     </div>
 
@@ -663,6 +680,8 @@
             window.selectedDateParts = { y: null, m: null, d: null };
             window.pendingDoseAction = null;
             window.selectedTimeParts = { h: null, m: null };
+            window.timePickerContext = null; 
+            window.tempTimesList = [];
             window.currentDayDoses = [];
             let swRegistration = null;
 
@@ -686,18 +705,18 @@
 
                 if (isSyncing) {
                     pendingRequests++;
-                    btn.className = "w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center action-btn";
-                    icon.className = "ph ph-arrows-clockwise text-base sm:text-xl animate-spin";
+                    btn.className = "w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center action-btn";
+                    icon.className = "ph ph-arrows-clockwise text-xl sm:text-2xl animate-spin";
                 } else {
                     setTimeout(() => {
                         pendingRequests = Math.max(0, pendingRequests - 1);
                         if (pendingRequests === 0) {
                             if (!navigator.onLine) {
-                                btn.className = "w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center action-btn";
-                                icon.className = "ph ph-wifi-slash text-base sm:text-xl";
+                                btn.className = "w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center action-btn";
+                                icon.className = "ph ph-wifi-slash text-xl sm:text-2xl";
                             } else {
-                                btn.className = "w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center action-btn";
-                                icon.className = "ph ph-cloud-check text-base sm:text-xl";
+                                btn.className = "w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-green-500/10 text-green-500 flex items-center justify-center action-btn";
+                                icon.className = "ph ph-cloud-check text-xl sm:text-2xl";
                             }
                         }
                     }, 300);
@@ -742,7 +761,7 @@
                 if (btn) {
                     const icon = btn.querySelector('i');
                     icon.classList.add('bell-shake');
-                    setTimeout(() => icon.classList.remove('bell-shake'), 500);
+                    setTimeout(() => icon.classList.remove('bell-shake'), 600);
                 }
                 
                 if (!("Notification" in window)) {
@@ -810,21 +829,19 @@
             }
 
             function initUI() {
-                const cGrid = document.getElementById('colorGrid');
-                cGrid.innerHTML = extendedColors.map((c, idx) =>
-                    `<div onclick="selectColor('${c}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl cursor-pointer action-btn shadow-lg border-2 border-white/20" style="background:${c}; animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${idx * 0.02}s;"></div>`
-                ).join('');
-
-                const cGridEdit = document.getElementById('colorGridEdit');
-                cGridEdit.innerHTML = extendedColors.map((c, idx) =>
-                    `<div onclick="selectEditColor('${c}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl cursor-pointer action-btn shadow-lg border-2 border-white/20" style="background:${c}; animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${idx * 0.02}s;"></div>`
-                ).join('');
+                const buildColors = (containerId, cb) => {
+                    document.getElementById(containerId).innerHTML = extendedColors.map((c, idx) =>
+                        `<div onclick="${cb}('${c}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl cursor-pointer action-btn shadow-lg border-2 border-white/20" style="background:${c}; animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${idx * 0.02}s;"></div>`
+                    ).join('');
+                };
+                buildColors('colorGrid', 'selectColor');
+                buildColors('colorGridEdit', 'selectEditColor');
 
                 document.querySelectorAll('.day-btn').forEach(b => {
                     b.onclick = () => {
                         b.classList.toggle('bg-indigo-500');
                         b.classList.toggle('text-white');
-                        b.classList.toggle('bg-slate-500/20');
+                        b.classList.toggle('bg-slate-500/10');
                         b.classList.toggle('text-slate-500');
                     };
                 });
@@ -833,7 +850,7 @@
                     if (e.target.classList.contains('edit-day-btn')) {
                         e.target.classList.toggle('bg-indigo-500');
                         e.target.classList.toggle('text-white');
-                        e.target.classList.toggle('bg-slate-500/20');
+                        e.target.classList.toggle('bg-slate-500/10');
                         e.target.classList.toggle('text-slate-500');
                     }
                 });
@@ -852,7 +869,7 @@
                 let html = '';
                 const currentY = new Date().getFullYear();
                 for (let y = currentY; y >= 1930; y--) {
-                    html += `<div onclick="selectYear(${y})" class="bg-slate-500/10 hover:bg-indigo-500 hover:text-white text-center py-3 rounded-xl font-bold cursor-pointer custom-grid-btn text-sm">${y}</div>`;
+                    html += `<div onclick="selectYear(${y})" class="bg-slate-500/5 hover:bg-indigo-500 hover:text-white text-center py-4 rounded-2xl font-black cursor-pointer custom-grid-btn text-base transition-colors border border-slate-500/10 shadow-sm">${y}</div>`;
                 }
                 grid.innerHTML = html;
             }
@@ -868,7 +885,7 @@
                 const months = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Aoû", "Sep", "Oct", "Nov", "Déc"];
                 let html = '';
                 months.forEach((m, idx) => {
-                    html += `<div onclick="selectMonth(${idx + 1})" class="bg-slate-500/10 hover:bg-indigo-500 hover:text-white text-center py-3 rounded-xl font-bold cursor-pointer custom-grid-btn text-sm">${m}</div>`;
+                    html += `<div onclick="selectMonth(${idx + 1})" class="bg-slate-500/5 hover:bg-indigo-500 hover:text-white text-center py-4 rounded-2xl font-black cursor-pointer custom-grid-btn text-base transition-colors border border-slate-500/10 shadow-sm">${m}</div>`;
                 });
                 grid.innerHTML = html;
             }
@@ -884,7 +901,7 @@
                 const daysInMonth = new Date(window.selectedDateParts.y, window.selectedDateParts.m, 0).getDate();
                 let html = '';
                 for (let d = 1; d <= daysInMonth; d++) {
-                    html += `<div onclick="selectDay(${d})" class="bg-slate-500/10 hover:bg-indigo-500 hover:text-white text-center py-3 rounded-xl font-bold cursor-pointer custom-grid-btn text-sm">${d}</div>`;
+                    html += `<div onclick="selectDay(${d})" class="bg-slate-500/5 hover:bg-indigo-500 hover:text-white text-center py-4 rounded-2xl font-black cursor-pointer custom-grid-btn text-base transition-colors border border-slate-500/10 shadow-sm">${d}</div>`;
                 }
                 grid.innerHTML = html;
             }
@@ -917,8 +934,8 @@
                         icon.classList.remove('ph-text-aa', 'ph-text-a-underline', 'ph-calendar-blank');
                         icon.classList.add('ph-check-circle', 'text-green-500');
                         icon.classList.remove('opacity-50');
-                        icon.style.transform = 'scale(1.2)';
-                        setTimeout(() => icon.style.transform = 'scale(1)', 200);
+                        icon.style.transform = 'scale(1.3)';
+                        setTimeout(() => icon.style.transform = 'scale(1)', 250);
                     }
                 } else {
                     el.classList.remove('valid-input');
@@ -947,8 +964,8 @@
                 document.getElementById('newMedColor').value = c;
                 const preview = document.getElementById('colorPreview');
                 preview.style.background = c;
-                preview.style.transform = 'scale(1.2)';
-                setTimeout(() => preview.style.transform = 'scale(1)', 300);
+                preview.style.transform = 'scale(1.3) rotate(5deg)';
+                setTimeout(() => preview.style.transform = 'scale(1) rotate(0deg)', 400);
                 closeModal('colorModal');
             };
 
@@ -956,8 +973,8 @@
                 document.getElementById('editMedColor').value = c;
                 const preview = document.getElementById('editColorPreview');
                 preview.style.background = c;
-                preview.style.transform = 'scale(1.2)';
-                setTimeout(() => preview.style.transform = 'scale(1)', 300);
+                preview.style.transform = 'scale(1.3) rotate(5deg)';
+                setTimeout(() => preview.style.transform = 'scale(1) rotate(0deg)', 400);
                 closeModal('colorModalEdit');
             };
 
@@ -976,7 +993,7 @@
 
             window.handleAuth = async () => {
                 const btn = document.getElementById('authBtn');
-                btn.innerHTML = '<i class="ph ph-spinner animate-spin text-2xl"></i>';
+                btn.innerHTML = '<i class="ph ph-spinner animate-spin text-3xl"></i>';
                 btn.disabled = true;
 
                 const ln = document.getElementById('lastName').value.trim().toLowerCase();
@@ -989,14 +1006,14 @@
                     const { data, error } = await sb.from('credentials').select('pw').eq('key', key).maybeSingle();
                     if (error) {
                         showToast("Erreur base de données");
-                        btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>';
+                        btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right text-2xl"></i>';
                         btn.disabled = false;
                         return;
                     }
                     if (data) {
                         if (data.pw !== pw) {
                             showToast("Mot de passe incorrect");
-                            btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>';
+                            btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right text-2xl"></i>';
                             btn.disabled = false;
                             return;
                         }
@@ -1004,7 +1021,7 @@
                         const { error: insertErr } = await sb.from('credentials').insert({ key, pw, info: { ln, fn, bd } });
                         if (insertErr) {
                             showToast("Erreur création compte");
-                            btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>';
+                            btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right text-2xl"></i>';
                             btn.disabled = false;
                             return;
                         }
@@ -1014,7 +1031,7 @@
                     location.reload();
                 } catch(e) {
                     showToast("Erreur de connexion");
-                    btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>';
+                    btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right text-2xl"></i>';
                     btn.disabled = false;
                 }
             };
@@ -1028,7 +1045,7 @@
 
                 const { data: u, error: fetchErr } = await sb.from('credentials').select('pw').eq('key', user).maybeSingle();
                 if (fetchErr || !u) {
-                    showToast("Erreur lors de la récupération du profil");
+                    showToast("Erreur profil");
                     return;
                 }
 
@@ -1038,14 +1055,14 @@
                 const { error: updateErr } = await sb.from('credentials').update({ pw: newP || oldP, info: { ln, fn, bd } }).eq('key', user);
 
                 if (updateErr) {
-                    showToast("Erreur lors de la mise à jour");
+                    showToast("Erreur mise à jour");
                     return;
                 }
 
                 if (newKey !== user) {
                     handleLogout();
                 } else {
-                    showToast("Profil mis à jour avec succès !");
+                    showToast("Profil mis à jour !");
                     closeModal('accountModal');
                 }
             };
@@ -1087,23 +1104,27 @@
             window.openRightDrawer = () => {
                 document.getElementById('rightDrawer').classList.remove('translate-x-full');
                 document.getElementById('drawerOverlay').classList.remove('hidden');
-                setTimeout(() => {
-                    document.getElementById('drawerOverlay').style.opacity = '1';
-                }, 10);
+                setTimeout(() => document.getElementById('drawerOverlay').style.opacity = '1', 10);
                 renderHistory();
+            };
+            
+            window.openLeftDrawer = () => {
+                document.getElementById('leftDrawer').classList.remove('-translate-x-full');
+                document.getElementById('drawerOverlay').classList.remove('hidden');
+                setTimeout(() => document.getElementById('drawerOverlay').style.opacity = '1', 10);
+                renderArchivedMeds();
             };
 
             window.closeDrawers = () => {
                 document.getElementById('rightDrawer').classList.add('translate-x-full');
+                document.getElementById('leftDrawer').classList.add('-translate-x-full');
                 document.getElementById('drawerOverlay').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('drawerOverlay').classList.add('hidden');
-                }, 400);
+                setTimeout(() => document.getElementById('drawerOverlay').classList.add('hidden'), 500);
             };
 
             window.saveTelegramId = async () => {
                 const chatId = document.getElementById('telegramChatId').value.trim();
-                if (!chatId) return showToast("Veuillez entrer un ID Telegram");
+                if (!chatId) return showToast("ID Telegram requis");
                 
                 setSyncing(true);
                 try {
@@ -1111,14 +1132,49 @@
                         { user_key: user, chat_id: chatId },
                         { onConflict: 'user_key' }
                     );
-                    
                     if (error) throw error;
                     showToast("ID Telegram enregistré !");
                 } catch (e) {
-                    showToast("Erreur lors de l'enregistrement");
+                    showToast("Erreur enregistrement");
                 } finally {
                     setSyncing(false);
                 }
+            };
+
+            window.renderTimesList = (containerId) => {
+                const cont = document.getElementById(containerId);
+                cont.innerHTML = window.tempTimesList.map((t, idx) => `
+                    <div class="flex items-center gap-2 bg-indigo-500 text-white px-3 py-1.5 rounded-xl font-black text-xs shadow-md" style="animation: popIn 0.3s forwards; animation-delay: ${idx*0.05}s">
+                        ${t}
+                        <button type="button" onclick="removeTempTime(${idx}, '${containerId}')" class="hover:text-red-300 ml-1 action-btn"><i class="ph ph-x-circle text-lg"></i></button>
+                    </div>
+                `).join('');
+            };
+
+            window.removeTempTime = (idx, containerId) => {
+                window.tempTimesList.splice(idx, 1);
+                renderTimesList(containerId);
+            };
+
+            window.prepareAddMedModal = () => {
+                document.getElementById('newMedName').value = '';
+                document.getElementById('newMedPieces').value = '';
+                document.getElementById('newMedPlates').value = '1';
+                window.tempTimesList = [];
+                renderTimesList('newMedTimesList');
+                document.querySelectorAll('#newMedDays .day-btn').forEach(b => {
+                    b.classList.remove('bg-indigo-500', 'text-white');
+                    b.classList.add('bg-slate-500/10', 'text-slate-500');
+                });
+                validateMedForm();
+                openModal('addMedModal');
+            };
+
+            window.openTimePickerFor = (ctx) => {
+                window.timePickerContext = ctx; 
+                document.getElementById('skipTimeBtn').classList.add('hidden'); 
+                renderHourPicker();
+                openModal('customTimeModal');
             };
 
             window.confirmAddMed = async () => {
@@ -1126,10 +1182,10 @@
                 const pieces = parseInt(document.getElementById('newMedPieces').value) || 0;
                 const plates = parseInt(document.getElementById('newMedPlates').value) || 1;
                 const color = document.getElementById('newMedColor').value;
-                const time = document.getElementById('newMedTime').value;
+                const timesStr = window.tempTimesList.join(',');
                 const days = Array.from(document.querySelectorAll('#newMedDays .day-btn.bg-indigo-500')).map(b => parseInt(b.dataset.day));
 
-                if (!name || !pieces) return showToast("Veuillez remplir les champs obligatoires");
+                if (!name || !pieces) return showToast("Nom et doses/plq obligatoires");
 
                 setSyncing(true);
                 try {
@@ -1138,38 +1194,30 @@
                         name: name,
                         pieces_per_plate: pieces,
                         plates_per_box: plates,
-                        color: color
+                        color: color,
+                        active: true,
+                        archived: false
                     }).select().single();
 
                     if (medError) throw medError;
 
-                    if (time || days.length > 0) {
+                    if (timesStr || days.length > 0) {
                         await sb.from('medication_schedules').insert({
                             medication_id: newMed.id,
-                            time: time || null,
+                            time: timesStr || null,
                             days: days.length > 0 ? days : null
                         });
 
                         let sched = JSON.parse(localStorage.getItem('medSchedules') || '{}');
-                        sched[newMed.id] = { time: time, days: days };
+                        sched[newMed.id] = { time: timesStr, days: days };
                         localStorage.setItem('medSchedules', JSON.stringify(sched));
                     }
 
-                    showToast("Médicament ajouté avec succès !");
-                    
-                    document.getElementById('newMedName').value = '';
-                    document.getElementById('newMedPieces').value = '';
-                    document.getElementById('newMedPlates').value = '';
-                    document.getElementById('newMedTime').value = '';
-                    document.querySelectorAll('#newMedDays .day-btn').forEach(b => {
-                        b.classList.remove('bg-indigo-500', 'text-white');
-                        b.classList.add('bg-slate-500/20', 'text-slate-500');
-                    });
-                    
+                    showToast("Traitement ajouté !");
                     closeModal('addMedModal');
                     await loadMeds();
                 } catch (e) {
-                    showToast("Erreur lors de l'ajout du médicament");
+                    showToast("Erreur ajout");
                 } finally {
                     setSyncing(false);
                 }
@@ -1183,6 +1231,8 @@
                 document.getElementById('accBtn').classList.add('flex');
                 document.getElementById('syncBtn').classList.remove('hidden');
                 document.getElementById('syncBtn').classList.add('flex');
+                document.getElementById('archiveBtn').classList.remove('hidden');
+                document.getElementById('archiveBtn').classList.add('flex');
 
                 try {
                     const { data: u } = await sb.from('credentials').select('info').eq('key', user).maybeSingle();
@@ -1197,9 +1247,7 @@
 
                 try {
                     const { data: tg } = await sb.from('telegram_ids').select('chat_id').eq('user_key', user).maybeSingle();
-                    if (tg) {
-                        document.getElementById('telegramChatId').value = tg.chat_id;
-                    }
+                    if (tg) document.getElementById('telegramChatId').value = tg.chat_id;
                 } catch (e) {}
 
                 if (localStorage.getItem('theme') === 'dark') {
@@ -1207,11 +1255,7 @@
                     document.getElementById('themeIcon').classList.replace('ph-moon', 'ph-sun');
                 }
 
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.ready.then(reg => {
-                        swRegistration = reg;
-                    });
-                }
+                if ('serviceWorker' in navigator) navigator.serviceWorker.ready.then(reg => swRegistration = reg);
 
                 setInterval(() => {
                     if (Notification.permission !== "granted") return;
@@ -1222,22 +1266,16 @@
                     let notified = JSON.parse(localStorage.getItem('medNotified') || '{}');
 
                     for (let id in sched) {
-                        if (sched[id].days && sched[id].days.includes(day) && sched[id].time === timeStr) {
+                        const times = sched[id].time ? sched[id].time.split(',') : [];
+                        if (sched[id].days && sched[id].days.includes(day) && times.includes(timeStr)) {
                             const notifyKey = `${id}_${now.toISOString().split('T')[0]}_${timeStr}`;
                             if (!notified[notifyKey]) {
                                 const medName = medsData[id] ? medsData[id].name : "votre médicament";
-                                const options = {
-                                    body: `Il est temps de prendre : ${medName}`,
-                                    icon: 'icon.png',
-                                    badge: 'icon.png',
-                                    vibrate: [200, 100, 200]
-                                };
+                                const opts = { body: `Il est temps : ${medName}`, icon: 'icon.png', badge: 'icon.png', vibrate: [200, 100, 200] };
                                 if (swRegistration && 'showNotification' in swRegistration) {
-                                    swRegistration.showNotification('MedTracker Pro', options).catch(() => {
-                                        try { new Notification('MedTracker Pro', options); } catch(e) {}
-                                    });
+                                    swRegistration.showNotification('MedTracker Pro', opts).catch(() => { try { new Notification('MedTracker', opts); } catch(e){} });
                                 } else {
-                                    try { new Notification('MedTracker Pro', options); } catch(e) {}
+                                    try { new Notification('MedTracker', opts); } catch(e){}
                                 }
                                 notified[notifyKey] = true;
                                 localStorage.setItem('medNotified', JSON.stringify(notified));
@@ -1261,21 +1299,14 @@
                     const ids = (meds || []).map(m => m.id);
 
                     if (ids.length > 0) {
-                        const { data: dosesData, error: countError } = await sb.from('medication_doses')
-                            .select('medication_id', { count: 'exact' })
-                            .in('medication_id', ids);
-
-                        if (countError) throw countError;
-
+                        const { data: dosesData } = await sb.from('medication_doses').select('medication_id').in('medication_id', ids);
                         const counts = {};
-                        (dosesData || []).forEach(d => {
-                            counts[d.medication_id] = (counts[d.medication_id] || 0) + 1;
-                        });
+                        (dosesData || []).forEach(d => counts[d.medication_id] = (counts[d.medication_id] || 0) + 1);
 
-                        const { data: schedules, error: schedError } = await sb.from('medication_schedules').select('*').in('medication_id', ids);
-                        if (!schedError && schedules) {
+                        const { data: schedules } = await sb.from('medication_schedules').select('*').in('medication_id', ids);
+                        if (schedules) {
                             let schedMap = {};
-                            schedules.forEach(s => { schedMap[s.medication_id] = { time: s.time, days: s.days }; });
+                            schedules.forEach(s => schedMap[s.medication_id] = { time: s.time, days: s.days });
                             localStorage.setItem('medSchedules', JSON.stringify(schedMap));
                         }
 
@@ -1287,14 +1318,13 @@
 
                     const y = currentDate.getFullYear();
                     const m = currentDate.getMonth();
-                    const startDate = `${y}-${String(m+1).padStart(2,'0')}-01`;
-                    const endDate = `${y}-${String(m+1).padStart(2,'0')}-${new Date(y, m+1, 0).getDate()}`;
+                    const startD = `${y}-${String(m+1).padStart(2,'0')}-01`;
+                    const endD = `${y}-${String(m+1).padStart(2,'0')}-${new Date(y, m+1, 0).getDate()}`;
                     
                     if (Object.keys(medsData).length > 0) {
-                        const { data: hist } = await sb.from('medication_history').select('*').in('medication_id', Object.keys(medsData)).gte('date', startDate).lte('date', endDate);
-
+                        const { data: hist } = await sb.from('medication_history').select('*').in('medication_id', Object.keys(medsData)).gte('date', startD).lte('date', endD);
                         window.medsHistoryMap = {};
-                        (hist || []).forEach(h => { window.medsHistoryMap[`${h.date}_${h.medication_id}`] = h; });
+                        (hist || []).forEach(h => window.medsHistoryMap[`${h.date}_${h.medication_id}`] = h);
                     } else {
                         window.medsHistoryMap = {};
                     }
@@ -1302,7 +1332,7 @@
                     renderAllMeds();
                     renderCalendar();
                 } catch (e) {
-                    showToast("Erreur chargement des données");
+                    showToast("Erreur chargement");
                 } finally {
                     setSyncing(false);
                 }
@@ -1316,11 +1346,9 @@
                 const sched = JSON.parse(localStorage.getItem('medSchedules') || '{}');
 
                 for (let id in medsData) {
-                    if (medsData[id].active !== false) {
+                    if (medsData[id].active !== false && medsData[id].archived !== true) {
                         const s = sched[id];
-                        if (s && s.days && s.days.length > 0 && !s.days.includes(todayDay)) {
-                            continue;
-                        }
+                        if (s && s.days && s.days.length > 0 && !s.days.includes(todayDay)) continue;
                         existingIds.add(id);
                         renderMedCard(medsData[id], index);
                         index++;
@@ -1330,9 +1358,7 @@
                 Array.from(grid.children).forEach(child => {
                     if (child.id && child.id.startsWith('med-card-')) {
                         const medId = child.id.replace('med-card-', '');
-                        if (!existingIds.has(medId)) {
-                            child.remove();
-                        }
+                        if (!existingIds.has(medId)) child.remove();
                     }
                 });
             }
@@ -1342,8 +1368,8 @@
                 if (!card) {
                     card = document.createElement('div');
                     card.id = `med-card-${med.id}`;
-                    card.className = "glass p-5 sm:p-7 relative rounded-3xl overflow-hidden group";
-                    card.style.animation = `fadeInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`;
+                    card.className = "glass p-6 sm:p-8 relative rounded-[2.5rem] overflow-hidden group";
+                    card.style.animation = `fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`;
                     card.style.opacity = '0';
                     card.style.animationDelay = `${index * 0.1}s`;
                     document.getElementById('medsGrid').appendChild(card);
@@ -1362,41 +1388,57 @@
                 const plateIdx = Math.floor(count / med.pieces_per_plate) + 1;
                 const remaining = total - count;
 
-                let tag = prog >= 90 ?
-                    `<div class="alert-stock bg-red-500 text-white shadow-lg shadow-red-500/40">URGENT</div>` :
-                    prog >= 80 ?
-                    `<div class="alert-stock bg-orange-500 text-white shadow-lg shadow-orange-500/40">STOCK BAS</div>` :
-                    `<div class="text-[10px] font-black opacity-60 uppercase tracking-widest text-slate-800 dark:text-white">${remaining} restantes</div>`;
+                let tag = prog >= 90 ? `<div class="alert-stock bg-red-500 text-white shadow-lg shadow-red-500/40">URGENT</div>` :
+                          prog >= 80 ? `<div class="alert-stock bg-orange-500 text-white shadow-lg shadow-orange-500/40">STOCK BAS</div>` :
+                          `<div class="text-[11px] font-black opacity-60 uppercase tracking-[0.2em] text-slate-800 dark:text-white">${remaining} restantes</div>`;
 
                 card.innerHTML = `
-                    <div class="absolute top-0 right-0 w-28 h-28 sm:w-36 sm:h-36 opacity-15 rounded-bl-[3rem] pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:opacity-20" style="background:${med.color}"></div>
-                    <button onclick="openEditMedModal('${med.id}')" class="absolute top-4 right-4 w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/90 dark:bg-slate-800/90 flex items-center justify-center text-indigo-500 shadow-lg action-btn z-20 border border-slate-500/10 backdrop-blur-sm">
-                        <i class="ph ph-pencil-simple text-base sm:text-lg"></i>
+                    <div class="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 opacity-15 rounded-bl-[4rem] pointer-events-none transition-transform duration-1000 group-hover:scale-125 group-hover:opacity-25" style="background:${med.color}"></div>
+                    <button onclick="openEditMedModal('${med.id}')" class="absolute top-5 right-5 w-12 h-12 rounded-2xl bg-white/95 dark:bg-slate-800/95 flex items-center justify-center text-indigo-500 shadow-xl action-btn z-20 border border-slate-500/10 backdrop-blur-md">
+                        <i class="ph ph-pencil-simple text-xl sm:text-2xl font-bold"></i>
                     </button>
-                    <div class="flex flex-col items-start mb-4 relative z-10 w-[80%] pr-4">
-                        <div class="font-black text-lg sm:text-xl uppercase tracking-wide truncate w-full" style="color:${med.color}">${med.name}</div>
-                        <div class="mt-1">${tag}</div>
+                    <div class="flex flex-col items-start mb-6 relative z-10 w-[75%] pr-2">
+                        <div class="font-black text-xl sm:text-2xl uppercase tracking-widest truncate w-full" style="color:${med.color}; text-shadow: 0 4px 10px rgba(0,0,0,0.05);">${med.name}</div>
+                        <div class="mt-2">${tag}</div>
                     </div>
-                    <div class="progress-container mb-4">
+                    <div class="progress-container mb-6">
                         <div class="progress-bar" style="width:${prog}%; background:${med.color}"></div>
                     </div>
-                    <div class="flex justify-between items-center mb-6 relative z-10">
-                        <span class="text-xs font-bold opacity-60 bg-slate-500/10 px-3 py-1.5 rounded-lg text-slate-800 dark:text-white">Plaque ${plateIdx}</span>
-                        <span class="text-base sm:text-lg font-black transition-all duration-300" style="color:${med.color}">${Math.round(prog)}%</span>
+                    <div class="flex justify-between items-center mb-8 relative z-10">
+                        <span class="text-xs font-black uppercase tracking-widest opacity-60 bg-slate-500/10 px-4 py-2 rounded-xl text-slate-800 dark:text-white border border-slate-500/10 shadow-sm">Plq ${plateIdx}</span>
+                        <span class="text-xl sm:text-2xl font-black transition-all duration-500" style="color:${med.color}">${Math.round(prog)}%</span>
                     </div>
-                    <div class="flex items-center justify-between bg-slate-500/5 p-2 sm:p-3 rounded-2xl relative z-10 border border-slate-500/10 shadow-inner">
-                        <button onclick="changeDose('${med.id}', -1)" class="w-12 h-12 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white shadow-md flex items-center justify-center font-black action-btn hover:text-red-500 text-xl">
+                    <div class="flex items-center justify-between bg-slate-500/5 p-3 sm:p-4 rounded-3xl relative z-10 border border-slate-500/10 shadow-inner">
+                        <button onclick="changeDose('${med.id}', -1)" class="w-14 h-14 rounded-2xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white shadow-xl flex items-center justify-center font-black action-btn hover:text-red-500 text-2xl transition-colors">
                             <i class="ph ph-minus"></i>
                         </button>
                         <div class="text-center px-2 sm:px-4 text-slate-800 dark:text-white">
-                            <div class="text-3xl sm:text-4xl font-black tracking-tighter dose-anim" id="dose-text-${med.id}">${count % med.pieces_per_plate}</div>
-                            <div class="text-[10px] opacity-50 font-bold uppercase tracking-widest mt-1">/ ${med.pieces_per_plate}</div>
+                            <div class="text-4xl sm:text-5xl font-black tracking-tighter dose-anim" id="dose-text-${med.id}">${count % med.pieces_per_plate}</div>
+                            <div class="text-[11px] opacity-50 font-black uppercase tracking-[0.2em] mt-1">/ ${med.pieces_per_plate}</div>
                         </div>
-                        <button onclick="changeDose('${med.id}', 1)" class="w-12 h-12 rounded-xl bg-white dark:bg-slate-800 shadow-md flex items-center justify-center font-black text-xl action-btn" style="color:${med.color}">
-                            <i class="ph ph-plus"></i>
+                        <button onclick="changeDoseBtnClick(event, '${med.id}')" class="w-14 h-14 rounded-2xl bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center font-black text-2xl action-btn relative overflow-hidden" style="color:${med.color}">
+                            <i class="ph ph-plus relative z-10"></i>
+                            <div class="absolute inset-0 bg-current opacity-10 transition-opacity hover:opacity-20 z-0"></div>
                         </button>
                     </div>`;
             }
+
+            window.changeDoseBtnClick = (e, id) => {
+                const btn = e.currentTarget;
+                const rect = btn.getBoundingClientRect();
+                
+                const animEl = document.createElement('div');
+                animEl.innerText = "+1";
+                animEl.className = "floating-dose";
+                animEl.style.color = medsData[id].color;
+                animEl.style.left = (rect.left + rect.width / 2 - 15) + 'px';
+                animEl.style.top = (rect.top - 10) + 'px';
+                
+                document.body.appendChild(animEl);
+                setTimeout(() => animEl.remove(), 800);
+
+                changeDose(id, 1);
+            };
 
             window.openEditMedModal = (id) => {
                 const med = medsData[id];
@@ -1411,19 +1453,31 @@
 
                 const sched = JSON.parse(localStorage.getItem('medSchedules') || '{}');
                 const currentSched = sched[id] || { time: '', days: [] };
-                document.getElementById('editMedTime').value = currentSched.time || '';
+                
+                window.tempTimesList = currentSched.time ? currentSched.time.split(',') : [];
+                renderTimesList('editMedTimesList');
 
                 const dayButtons = document.querySelectorAll('#editMedDays .edit-day-btn');
                 dayButtons.forEach(btn => {
                     const day = parseInt(btn.dataset.day);
                     if (currentSched.days && currentSched.days.includes(day)) {
                         btn.classList.add('bg-indigo-500', 'text-white');
-                        btn.classList.remove('bg-slate-500/20', 'text-slate-500');
+                        btn.classList.remove('bg-slate-500/10', 'text-slate-500');
                     } else {
                         btn.classList.remove('bg-indigo-500', 'text-white');
-                        btn.classList.add('bg-slate-500/20', 'text-slate-500');
+                        btn.classList.add('bg-slate-500/10', 'text-slate-500');
                     }
                 });
+
+                if(med.archived) {
+                    document.getElementById('btnArchiveMed').classList.add('hidden');
+                    document.getElementById('btnSaveEditMed').classList.add('hidden');
+                    document.getElementById('btnUnarchiveMed').classList.remove('hidden');
+                } else {
+                    document.getElementById('btnArchiveMed').classList.remove('hidden');
+                    document.getElementById('btnSaveEditMed').classList.remove('hidden');
+                    document.getElementById('btnUnarchiveMed').classList.add('hidden');
+                }
 
                 openModal('editMedModal');
             };
@@ -1434,41 +1488,87 @@
                 const pieces = parseInt(document.getElementById('editMedPieces').value) || 0;
                 const plates = parseInt(document.getElementById('editMedPlates').value) || 1;
                 const color = document.getElementById('editMedColor').value;
-                const time = document.getElementById('editMedTime').value;
+                const timesStr = window.tempTimesList.join(',');
                 const days = Array.from(document.querySelectorAll('#editMedDays .edit-day-btn.bg-indigo-500')).map(b => parseInt(b.dataset.day));
 
-                if (!name || !pieces) return showToast("Nom et doses/plq sont obligatoires");
+                if (!name || !pieces) return showToast("Obligatoires manquants");
 
                 setSyncing(true);
                 try {
-                    const { error } = await sb.from('medications').update({
-                        name,
-                        pieces_per_plate: pieces,
-                        plates_per_box: plates,
-                        color
-                    }).eq('id', id);
-
-                    if (error) {
-                        showToast("Erreur lors de la modification");
-                        return;
-                    }
+                    await sb.from('medications').update({ name, pieces_per_plate: pieces, plates_per_box: plates, color }).eq('id', id);
 
                     let sched = JSON.parse(localStorage.getItem('medSchedules') || '{}');
-                    sched[id] = { time, days };
+                    sched[id] = { time: timesStr, days };
                     localStorage.setItem('medSchedules', JSON.stringify(sched));
 
-                    await sb.from('medication_schedules').upsert({
-                        medication_id: id,
-                        time: time || null,
-                        days: days.length ? days : null
-                    }, { onConflict: 'medication_id' });
+                    await sb.from('medication_schedules').upsert({ medication_id: id, time: timesStr || null, days: days.length ? days : null }, { onConflict: 'medication_id' });
 
-                    showToast("Médicament modifié avec succès");
+                    showToast("Modifié !");
                     closeModal('editMedModal');
                     loadMeds();
                 } finally {
                     setSyncing(false);
                 }
+            };
+
+            window.archiveCurrentMed = async () => {
+                const id = document.getElementById('editMedId').value;
+                setSyncing(true);
+                try {
+                    await sb.from('medications').update({ active: false, archived: true }).eq('id', id);
+                    showToast("Archivé !");
+                    closeModal('editMedModal');
+                    loadMeds();
+                } finally { setSyncing(false); }
+            };
+
+            window.unarchiveCurrentMed = async () => {
+                const id = document.getElementById('editMedId').value;
+                setSyncing(true);
+                try {
+                    await sb.from('medications').update({ active: true, archived: false }).eq('id', id);
+                    showToast("Restauré !");
+                    closeModal('editMedModal');
+                    closeDrawers();
+                    loadMeds();
+                } finally { setSyncing(false); }
+            };
+
+            window.deleteCurrentMed = async () => {
+                if(!confirm("Supprimer définitivement ce médicament et tout son historique ?")) return;
+                const id = document.getElementById('editMedId').value;
+                setSyncing(true);
+                try {
+                    await sb.from('medications').delete().eq('id', id);
+                    showToast("Supprimé");
+                    closeModal('editMedModal');
+                    closeDrawers();
+                    loadMeds();
+                } finally { setSyncing(false); }
+            };
+
+            window.renderArchivedMeds = () => {
+                const list = document.getElementById('archivedMedsList');
+                list.innerHTML = "";
+                let count = 0;
+                for(let id in medsData) {
+                    if(medsData[id].archived === true) {
+                        count++;
+                        const med = medsData[id];
+                        list.innerHTML += `
+                            <div onclick="openEditMedModal('${id}')" class="bg-slate-500/5 p-5 rounded-3xl mb-4 flex justify-between items-center border border-slate-500/10 cursor-pointer action-btn hover:bg-slate-500/10 shadow-sm">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-2xl shadow-inner border border-white/20 flex items-center justify-center" style="background:${med.color}20">
+                                        <i class="ph ph-archive font-bold text-2xl" style="color:${med.color}"></i>
+                                    </div>
+                                    <span class="font-black text-lg uppercase tracking-widest" style="color:${med.color}">${med.name}</span>
+                                </div>
+                                <i class="ph ph-caret-right text-slate-400 font-bold text-xl"></i>
+                            </div>
+                        `;
+                    }
+                }
+                if(count === 0) list.innerHTML = `<div class="text-center opacity-40 font-black text-sm uppercase tracking-widest py-10">Aucune archive.</div>`;
             };
 
             window.changeMonth = (delta) => {
@@ -1481,6 +1581,8 @@
                 if (val > 0) {
                     if (date && date !== todayStr) {
                         window.pendingDoseAction = { id, val, date };
+                        window.timePickerContext = 'dose';
+                        document.getElementById('skipTimeBtn').classList.remove('hidden');
                         renderHourPicker();
                         openModal('customTimeModal');
                     } else {
@@ -1493,11 +1595,11 @@
             };
 
             function renderHourPicker() {
-                document.getElementById('timePickerTitle').innerText = "Heure de la prise";
+                document.getElementById('timePickerTitle').innerText = "Heure";
                 const grid = document.getElementById('timePickerGrid');
                 let html = '';
                 for (let h = 0; h < 24; h++) {
-                    html += `<div onclick="selectHour(${h})" class="bg-slate-500/10 hover:bg-indigo-500 hover:text-white text-center py-3 rounded-xl font-bold cursor-pointer custom-grid-btn text-sm">${String(h).padStart(2, '0')}h</div>`;
+                    html += `<div onclick="selectHour(${h})" class="bg-slate-500/5 hover:bg-indigo-500 hover:text-white text-center py-4 rounded-2xl font-black cursor-pointer custom-grid-btn text-base border border-slate-500/10 shadow-sm transition-colors">${String(h).padStart(2, '0')}h</div>`;
                 }
                 grid.innerHTML = html;
             }
@@ -1508,11 +1610,11 @@
             };
 
             function renderMinutePicker() {
-                document.getElementById('timePickerTitle').innerText = "Minute de la prise";
+                document.getElementById('timePickerTitle').innerText = "Minute";
                 const grid = document.getElementById('timePickerGrid');
                 let html = '';
                 for (let m = 0; m < 60; m += 5) {
-                    html += `<div onclick="selectMinute(${m})" class="bg-slate-500/10 hover:bg-indigo-500 hover:text-white text-center py-3 rounded-xl font-bold cursor-pointer custom-grid-btn text-sm">${String(m).padStart(2, '0')}</div>`;
+                    html += `<div onclick="selectMinute(${m})" class="bg-slate-500/5 hover:bg-indigo-500 hover:text-white text-center py-4 rounded-2xl font-black cursor-pointer custom-grid-btn text-base border border-slate-500/10 shadow-sm transition-colors">${String(m).padStart(2, '0')}</div>`;
                 }
                 grid.innerHTML = html;
             }
@@ -1523,7 +1625,19 @@
                 const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
                 closeModal('customTimeModal');
 
-                if (window.pendingDoseAction) {
+                if (window.timePickerContext === 'add') {
+                    if (!window.tempTimesList.includes(timeStr)) {
+                        window.tempTimesList.push(timeStr);
+                        window.tempTimesList.sort();
+                        renderTimesList('newMedTimesList');
+                    }
+                } else if (window.timePickerContext === 'edit') {
+                    if (!window.tempTimesList.includes(timeStr)) {
+                        window.tempTimesList.push(timeStr);
+                        window.tempTimesList.sort();
+                        renderTimesList('editMedTimesList');
+                    }
+                } else if (window.timePickerContext === 'dose' && window.pendingDoseAction) {
                     executeChangeDose(window.pendingDoseAction.id, window.pendingDoseAction.val, window.pendingDoseAction.date, timeStr);
                     window.pendingDoseAction = null;
                 }
@@ -1546,7 +1660,7 @@
                 const maxTotal = med.pieces_per_plate * med.plates_per_box;
 
                 if (val > 0 && med._count >= maxTotal) {
-                    if (confirm("Boîte terminée. Entamer une nouvelle ?")) {
+                    if (confirm("Boîte terminée. Nouvelle boîte ?")) {
                         med.box_count = (med.box_count || 1) + 1;
                         med._count = 0;
                         setSyncing(true);
@@ -1555,28 +1669,16 @@
                             await sb.from('medications').update({ box_count: med.box_count }).eq('id', id);
                             showToast("Nouvelle boîte entamée");
                             await loadMeds();
-                        } catch(e) {
-                            showToast("Action reportée, erreur réseau");
-                        } finally {
-                            setSyncing(false);
-                        }
+                        } catch(e) {} finally { setSyncing(false); }
                     }
                     return;
                 }
 
                 med._count = Math.max(0, med._count + val);
-
                 const hKey = `${d}_${id}`;
                 if (!window.medsHistoryMap) window.medsHistoryMap = {};
                 if (!window.medsHistoryMap[hKey]) window.medsHistoryMap[hKey] = { count: 0, color: med.color, date: d, medication_id: id };
                 window.medsHistoryMap[hKey].count = Math.max(0, window.medsHistoryMap[hKey].count + val);
-
-                if (val > 0 && time) {
-                    window.currentDayDoses.push({ medication_id: id, created_at: `${d}T${time}:00` });
-                } else if (val < 0) {
-                    const idx = window.currentDayDoses.map(d => d.medication_id).lastIndexOf(id);
-                    if (idx > -1) window.currentDayDoses.splice(idx, 1);
-                }
 
                 updateMedCardDOM(id);
                 renderCalendar();
@@ -1606,17 +1708,15 @@
                     if (val > 0) {
                         let insertData = { medication_id: id };
                         if (time) {
-                            const fullDateTime = new Date(`${d}T${time}:00`).toISOString();
-                            insertData.created_at = fullDateTime;
+                            insertData.created_at = new Date(`${d}T${time}:00`).toISOString();
                         } else if (d !== new Date().toISOString().split('T')[0]) {
                             insertData.created_at = new Date(`${d}T12:00:00`).toISOString();
                         }
                         await sb.from('medication_doses').insert(insertData);
                     } else {
-                        const { data: last } = await sb.from('medication_doses').select('id').eq('medication_id', id).order('id', { ascending: false }).limit(1).maybeSingle();
+                        const { data: last } = await sb.from('medication_doses').select('id').eq('medication_id', id).like('created_at', `${d}%`).order('id', { ascending: false }).limit(1).maybeSingle();
                         if (last) await sb.from('medication_doses').delete().eq('id', last.id);
                     }
-
                     const { count: newCount } = await sb.from('medication_doses').select('*', { count: 'exact', head: true }).eq('medication_id', id);
                     const { data: exist } = await sb.from('medication_history').select('count').eq('medication_id', id).eq('date', d).maybeSingle();
 
@@ -1644,9 +1744,7 @@
                 let firstDay = (new Date(y, m, 1).getDay() + 6) % 7;
                 let daysInMonth = new Date(y, m + 1, 0).getDate();
 
-                for (let i = 0; i < firstDay; i++) {
-                    cal.innerHTML += `<div></div>`;
-                }
+                for (let i = 0; i < firstDay; i++) cal.innerHTML += `<div></div>`;
 
                 const todayStr = new Date().toISOString().split('T')[0];
 
@@ -1657,55 +1755,76 @@
                     for (let id in medsData) {
                         let hKey = `${dStr}_${id}`;
                         if (window.medsHistoryMap && window.medsHistoryMap[hKey] && window.medsHistoryMap[hKey].count > 0) {
-                            indicators += `<div class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full shadow-sm" style="background:${medsData[id].color}"></div>`;
+                            indicators += `<div class="w-2 h-2 rounded-full shadow-sm" style="background:${medsData[id].color}"></div>`;
                         }
                     }
 
-                    let isTodayClass = dStr === todayStr ? 'border-indigo-500 bg-indigo-500/10' : 'border-slate-500/10';
+                    let isTodayClass = dStr === todayStr ? 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/20' : 'border-slate-500/10';
                     let textClass = dStr === todayStr ? 'text-indigo-500' : 'opacity-80';
 
                     cal.innerHTML += `
-                        <div onclick="renderDayEditList('${dStr}')" class="cal-cell ${isTodayClass} flex flex-col items-center justify-start gap-1 p-1">
-                            <span class="text-[10px] sm:text-xs font-bold ${textClass}">${d}</span>
-                            <div class="flex flex-wrap gap-0.5 justify-center mt-auto w-full px-1 mb-1">${indicators}</div>
+                        <div onclick="renderDayEditList('${dStr}')" class="cal-cell ${isTodayClass} flex flex-col items-center justify-start gap-1 p-2">
+                            <span class="text-xs font-black ${textClass}">${d}</span>
+                            <div class="flex flex-wrap gap-1 justify-center mt-auto w-full px-1 mb-1">${indicators}</div>
                         </div>`;
                 }
             }
 
-            window.renderDayEditList = (dateStr) => {
+            window.renderDayEditList = async (dateStr) => {
                 document.getElementById('editDayTitle').innerText = new Intl.DateTimeFormat('fr', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(dateStr));
                 const list = document.getElementById('editDayList');
-                list.innerHTML = "";
+                list.innerHTML = `<div class="flex justify-center p-5"><i class="ph ph-spinner animate-spin text-3xl text-indigo-500"></i></div>`;
+                openModal('editDayModal');
 
+                let dayDoses = [];
+                try {
+                    const { data } = await sb.from('medication_doses').select('created_at, medication_id').like('created_at', `${dateStr}%`).order('created_at', { ascending: true });
+                    if(data) dayDoses = data;
+                } catch(e) {}
+
+                list.innerHTML = "";
                 let hasRecords = false;
+
                 for (let id in medsData) {
                     const med = medsData[id];
                     const hKey = `${dateStr}_${id}`;
                     const record = window.medsHistoryMap[hKey];
                     const count = record ? record.count : 0;
+                    
+                    const dosesForMed = dayDoses.filter(d => d.medication_id === id).map(d => {
+                        const dateObj = new Date(d.created_at);
+                        return `${String(dateObj.getHours()).padStart(2,'0')}:${String(dateObj.getMinutes()).padStart(2,'0')}`;
+                    });
+
+                    let timesHtml = '';
+                    if(dosesForMed.length > 0) {
+                        timesHtml = `<div class="w-full flex gap-2 flex-wrap mt-3 pt-3 border-t border-slate-500/10">` + 
+                            dosesForMed.map(t => `<span class="text-[10px] font-black bg-slate-500/10 px-2 py-1 rounded-md text-slate-500"><i class="ph ph-clock"></i> ${t}</span>`).join('') +
+                        `</div>`;
+                    }
 
                     if (med.active !== false || count > 0) {
                         hasRecords = true;
                         list.innerHTML += `
-                            <div class="flex items-center justify-between bg-slate-500/5 p-3 rounded-2xl border border-slate-500/10">
-                                <div class="flex items-center gap-3 w-1/2">
-                                    <div class="w-3 h-3 rounded-full shadow-sm" style="background:${med.color}"></div>
-                                    <span class="font-bold text-sm truncate" style="color:${med.color}">${med.name}</span>
+                            <div class="flex flex-col bg-slate-500/5 p-5 rounded-[2rem] border border-slate-500/10 shadow-sm">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-4 w-1/2">
+                                        <div class="w-4 h-4 rounded-full shadow-md" style="background:${med.color}"></div>
+                                        <span class="font-black text-base truncate uppercase tracking-widest" style="color:${med.color}">${med.name}</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <button onclick="changeDose('${id}', -1, '${dateStr}')" class="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 shadow-md flex items-center justify-center action-btn hover:text-red-500 text-lg font-black transition-colors"><i class="ph ph-minus"></i></button>
+                                        <span class="font-black text-2xl w-8 text-center">${count}</span>
+                                        <button onclick="changeDose('${id}', 1, '${dateStr}')" class="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 shadow-md flex items-center justify-center action-btn text-lg font-black transition-colors" style="color:${med.color}"><i class="ph ph-plus"></i></button>
+                                    </div>
                                 </div>
-                                <div class="flex items-center gap-3">
-                                    <button onclick="changeDose('${id}', -1, '${dateStr}')" class="w-8 h-8 rounded-lg bg-white dark:bg-slate-800 shadow flex items-center justify-center action-btn hover:text-red-500 text-sm font-black text-slate-800 dark:text-white"><i class="ph ph-minus"></i></button>
-                                    <span class="font-black text-lg w-6 text-center text-slate-800 dark:text-white">${count}</span>
-                                    <button onclick="changeDose('${id}', 1, '${dateStr}')" class="w-8 h-8 rounded-lg bg-white dark:bg-slate-800 shadow flex items-center justify-center action-btn text-sm font-black" style="color:${med.color}"><i class="ph ph-plus"></i></button>
-                                </div>
+                                ${timesHtml}
                             </div>
                         `;
                     }
                 }
 
-                if (!hasRecords) {
-                    list.innerHTML = `<div class="text-center opacity-50 font-bold text-sm py-4 text-slate-800 dark:text-white">Aucun médicament disponible.</div>`;
-                }
-                openModal('editDayModal');
+                if (!hasRecords) list.innerHTML = `<div class="text-center opacity-40 font-black text-sm uppercase tracking-widest py-10">Rien à afficher.</div>`;
             };
 
             window.renderHistory = () => {
@@ -1715,25 +1834,25 @@
                 let sortedHistory = Object.values(window.medsHistoryMap).filter(h => h.count > 0).sort((a, b) => new Date(b.date) - new Date(a.date));
                 
                 if (sortedHistory.length === 0) {
-                    list.innerHTML = `<div class="text-center opacity-50 font-bold text-sm py-10 text-slate-800 dark:text-white">Aucun historique récent.</div>`;
+                    list.innerHTML = `<div class="text-center opacity-40 font-black text-sm uppercase tracking-widest py-10">Aucun historique.</div>`;
                     return;
                 }
 
                 let lastDate = "";
                 sortedHistory.forEach(h => {
                     if (h.date !== lastDate) {
-                        list.innerHTML += `<div class="font-black text-[10px] uppercase tracking-widest opacity-40 mt-6 mb-2 ml-1 text-slate-800 dark:text-white">${new Intl.DateTimeFormat('fr', { weekday: 'long', day: 'numeric', month: 'short' }).format(new Date(h.date))}</div>`;
+                        list.innerHTML += `<div class="font-black text-xs uppercase tracking-[0.2em] opacity-40 mt-8 mb-3 ml-2 text-indigo-500">${new Intl.DateTimeFormat('fr', { weekday: 'long', day: 'numeric', month: 'short' }).format(new Date(h.date))}</div>`;
                         lastDate = h.date;
                     }
                     const med = medsData[h.medication_id];
                     if (med) {
                         list.innerHTML += `
-                            <div class="bg-slate-500/5 p-4 rounded-2xl mb-2 flex justify-between items-center border border-slate-500/10">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-2.5 h-2.5 rounded-full shadow-sm" style="background:${med.color}"></div>
-                                    <span class="font-bold text-sm" style="color:${med.color}">${med.name}</span>
+                            <div class="bg-slate-500/5 p-5 rounded-3xl mb-3 flex justify-between items-center border border-slate-500/10 shadow-sm">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-4 h-4 rounded-full shadow-md" style="background:${med.color}"></div>
+                                    <span class="font-black text-base uppercase tracking-widest" style="color:${med.color}">${med.name}</span>
                                 </div>
-                                <span class="font-black text-sm bg-white dark:bg-slate-800 px-3 py-1 rounded-lg shadow-sm border border-slate-500/10 text-slate-800 dark:text-white">${h.count} prise(s)</span>
+                                <span class="font-black text-sm bg-white dark:bg-slate-800 px-4 py-2 rounded-xl shadow-md border border-slate-500/10">${h.count}</span>
                             </div>
                         `;
                     }
