@@ -39,6 +39,8 @@
             --text: #0f172a;
             --border: rgba(255, 255, 255, 0.8);
             --shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.05);
+            --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --ease-smooth: cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         .dark {
@@ -123,8 +125,13 @@
             100% { background-position: 200% 0; }
         }
 
+        @keyframes fadeOutScale {
+            from { opacity: 1; transform: scale(1); max-height: 500px; margin-bottom: 1.5rem; }
+            to { opacity: 0; transform: scale(0.85); max-height: 0; margin-bottom: 0; padding: 0; }
+        }
+
         .dose-pop {
-            animation: scaleBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+            animation: scaleBounce 0.4s var(--ease-spring) !important;
         }
 
         .bell-shake {
@@ -138,7 +145,7 @@
             border: 1px solid var(--border);
             border-radius: 24px;
             box-shadow: var(--shadow);
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: transform 0.2s var(--ease-spring), box-shadow 0.2s var(--ease-spring);
             will-change: transform, box-shadow;
         }
 
@@ -164,7 +171,7 @@
         .progress-bar {
             height: 100%;
             border-radius: 99px;
-            transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: width 0.6s var(--ease-spring);
             will-change: width;
             position: relative;
             overflow: hidden;
@@ -187,7 +194,7 @@
             padding: 6px;
             border: 1px solid var(--border);
             cursor: pointer;
-            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease, box-shadow 0.15s ease;
+            transition: transform 0.15s var(--ease-spring), background 0.15s ease, box-shadow 0.15s ease;
             will-change: transform;
         }
 
@@ -199,6 +206,10 @@
             background: rgba(148, 163, 184, 0.15);
             transform: translateY(-2px) scale(1.02);
             box-shadow: 0 8px 16px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .cal-indicator {
+            transition: transform 0.3s var(--ease-spring), opacity 0.3s ease;
         }
 
         .modal-overlay {
@@ -234,7 +245,7 @@
         .modal-content {
             opacity: 0;
             transform: translateY(20px) scale(0.95);
-            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+            transition: transform 0.25s var(--ease-spring), opacity 0.2s ease;
             width: 100%;
             max-width: 420px;
             will-change: transform, opacity;
@@ -269,7 +280,7 @@
             font-weight: 700;
             font-size: 13px;
             z-index: 9999;
-            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+            transition: transform 0.35s var(--ease-spring), opacity 0.25s ease;
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
@@ -295,7 +306,7 @@
             appearance: none;
             -webkit-appearance: none;
             font-size: 15px !important;
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+            transition: transform 0.2s var(--ease-spring), box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
             will-change: transform, box-shadow;
         }
 
@@ -323,7 +334,7 @@
         }
 
         .action-btn {
-            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease;
+            transition: transform 0.15s var(--ease-spring), box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease;
             will-change: transform;
             position: relative;
             overflow: hidden;
@@ -348,7 +359,7 @@
         }
 
         .dose-anim {
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: transform 0.3s var(--ease-spring);
             display: inline-block;
         }
 
@@ -367,11 +378,11 @@
         }
 
         #drawerOverlay {
-            transition: opacity 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: opacity 0.25s var(--ease-spring);
         }
 
         .custom-grid-btn {
-            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease, color 0.15s ease;
+            transition: transform 0.15s var(--ease-spring), background 0.15s ease, color 0.15s ease;
         }
 
         .custom-grid-btn:active {
@@ -384,10 +395,10 @@
             gap: 1.5px;
         }
 
-        .slide-left-out { animation: slideOutLeft 0.2s forwards; }
-        .slide-left-in { animation: slideInFromLeft 0.25s forwards; }
-        .slide-right-out { animation: slideOutRight 0.2s forwards; }
-        .slide-right-in { animation: slideInFromRight 0.25s forwards; }
+        .slide-left-out { animation: slideOutLeft 0.2s var(--ease-smooth) forwards; }
+        .slide-left-in { animation: slideInFromLeft 0.25s var(--ease-smooth) forwards; }
+        .slide-right-out { animation: slideOutRight 0.2s var(--ease-smooth) forwards; }
+        .slide-right-in { animation: slideInFromRight 0.25s var(--ease-smooth) forwards; }
 
         .day-btn.active, .edit-day-btn.active {
             background: #6366f1;
@@ -409,7 +420,7 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             letter-spacing: -2px;
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: transform 0.2s var(--ease-spring);
         }
 
         .time-column {
@@ -429,7 +440,7 @@
             font-weight: 700;
             font-size: 14px;
             cursor: pointer;
-            transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
+            transition: transform 0.12s var(--ease-spring), background 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
             background: rgba(148, 163, 184, 0.08);
             will-change: transform;
         }
@@ -454,7 +465,7 @@
             background: rgba(99, 102, 241, 0.1);
             color: #6366f1;
             cursor: pointer;
-            transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.12s ease;
+            transition: transform 0.12s var(--ease-spring), background 0.12s ease;
             will-change: transform;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -470,7 +481,7 @@
         }
 
         .nav-btn {
-            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease, color 0.15s ease;
+            transition: transform 0.15s var(--ease-spring), background 0.15s ease, color 0.15s ease;
             will-change: transform;
         }
 
@@ -483,7 +494,7 @@
         }
 
         .dose-btn {
-            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease, color 0.15s ease;
+            transition: transform 0.15s var(--ease-spring), box-shadow 0.15s ease, color 0.15s ease;
             will-change: transform;
         }
 
@@ -495,6 +506,11 @@
             transform: scale(1.08);
             box-shadow: 0 8px 20px -5px rgba(0,0,0,0.15);
         }
+
+        .remove-card-anim {
+            animation: fadeOutScale 0.3s var(--ease-smooth) forwards;
+            overflow: hidden;
+        }
     </style>
 </head>
 <body class="p-3 sm:p-5 lg:p-6">
@@ -502,7 +518,7 @@
 
     <div id="drawerOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[2000] hidden opacity-0" onclick="closeDrawers()"></div>
 
-    <nav class="max-w-5xl mx-auto flex justify-between items-center p-3 sm:p-4 glass mb-6 sm:mb-8 relative z-[1000] rounded-3xl" style="animation: fadeInUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
+    <nav class="max-w-5xl mx-auto flex justify-between items-center p-3 sm:p-4 glass mb-6 sm:mb-8 relative z-[1000] rounded-3xl" style="animation: fadeInUp 0.4s var(--ease-spring) forwards;">
         <button onclick="openModal('accountModal')" id="accBtn" class="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-slate-500/10 items-center justify-center hidden action-btn hover:bg-indigo-500/15 hover:text-indigo-500">
             <i class="ph ph-user text-base sm:text-xl"></i>
         </button>
@@ -523,7 +539,7 @@
     </nav>
 
     <main class="max-w-5xl mx-auto space-y-6 pb-12">
-        <div id="loginBox" class="glass p-6 sm:p-10 text-center space-y-6 max-w-md mx-auto mt-8 sm:mt-12 rounded-[2rem]" style="animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
+        <div id="loginBox" class="glass p-6 sm:p-10 text-center space-y-6 max-w-md mx-auto mt-8 sm:mt-12 rounded-[2rem]" style="animation: popIn 0.4s var(--ease-spring) forwards;">
             <div class="w-20 h-20 sm:w-24 sm:h-24 bg-indigo-500/10 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-2 transition-transform duration-500 hover:scale-110 hover:rotate-12">
                 <i class="ph ph-lock-key text-4xl sm:text-5xl"></i>
             </div>
@@ -558,7 +574,7 @@
         </div>
 
         <div id="appBody" class="hidden space-y-6">
-            <div style="animation: fadeInUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
+            <div style="animation: fadeInUp 0.4s var(--ease-spring) forwards;">
                 <div class="flex justify-between items-center px-1 mb-4 sm:mb-6">
                     <h2 class="font-black text-xs sm:text-sm uppercase tracking-widest opacity-60 flex items-center gap-2">
                         <i class="ph ph-pill text-lg"></i> Mes Médicaments
@@ -570,7 +586,7 @@
                 <div id="medsGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6"></div>
             </div>
 
-            <div class="glass p-4 sm:p-8 rounded-[2rem]" style="animation: fadeInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: 0.1s;">
+            <div class="glass p-4 sm:p-8 rounded-[2rem]" style="animation: fadeInUp 0.5s var(--ease-spring) forwards; opacity: 0; animation-delay: 0.1s;">
                 <div class="flex justify-between items-center mb-6 bg-slate-500/5 p-2 rounded-2xl">
                     <button onclick="changeMonth(-1)" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-500/15 nav-btn text-lg bg-white dark:bg-slate-800 shadow-sm">
                         <i class="ph ph-caret-left font-bold"></i>
@@ -751,7 +767,7 @@
         </div>
     </div>
 
-    <div id="rightDrawer" class="fixed top-0 right-0 bottom-0 w-full sm:w-[420px] bg-white dark:bg-slate-900 z-[2500] translate-x-full transition-transform duration-300 p-5 sm:p-8 border-l border-slate-500/10 shadow-2xl overflow-hidden flex flex-col" style="transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);">
+    <div id="rightDrawer" class="fixed top-0 right-0 bottom-0 w-full sm:w-[420px] bg-white dark:bg-slate-900 z-[2500] translate-x-full transition-transform duration-300 p-5 sm:p-8 border-l border-slate-500/10 shadow-2xl overflow-hidden flex flex-col" style="transition-timing-function: var(--ease-spring);">
         <div class="flex justify-between items-center mb-6 mt-1">
             <h2 class="text-lg sm:text-xl font-black tracking-tight text-indigo-500 flex items-center gap-2">
                 <i class="ph ph-clock-counter-clockwise"></i> <span id="drawerTitle">HISTORIQUE</span>
@@ -839,6 +855,7 @@
             window.currentEditingSchedules = [];
             let swRegistration = null;
             let monthChangeDirection = 0;
+            let loadedMonths = new Set(); // Cache for calendar months
 
             const extendedColors = [
                 '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e',
@@ -896,7 +913,8 @@
                     for (let i of q) {
                         if (i.type === 'dose') await syncDoseToDB(i.id, i.val, i.date, i.med, i.time);
                     }
-                    loadMeds();
+                    // Light reload to ensure everything is perfectly in sync after queue processing
+                    loadMeds(); 
                 } catch(e) {
                     localStorage.setItem('medQueue', JSON.stringify(q));
                 }
@@ -988,12 +1006,12 @@
             function initUI() {
                 const cGrid = document.getElementById('colorGrid');
                 cGrid.innerHTML = extendedColors.map((c, idx) =>
-                    `<div onclick="selectColor('${c}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl cursor-pointer action-btn shadow-lg border-2 border-white/20" style="background:${c}; animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${idx * 0.015}s;"></div>`
+                    `<div onclick="selectColor('${c}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl cursor-pointer action-btn shadow-lg border-2 border-white/20" style="background:${c}; animation: popIn 0.3s var(--ease-spring) forwards; opacity: 0; animation-delay: ${idx * 0.015}s;"></div>`
                 ).join('');
 
                 const cGridEdit = document.getElementById('colorGridEdit');
                 cGridEdit.innerHTML = extendedColors.map((c, idx) =>
-                    `<div onclick="selectEditColor('${c}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl cursor-pointer action-btn shadow-lg border-2 border-white/20" style="background:${c}; animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; animation-delay: ${idx * 0.015}s;"></div>`
+                    `<div onclick="selectEditColor('${c}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl cursor-pointer action-btn shadow-lg border-2 border-white/20" style="background:${c}; animation: popIn 0.3s var(--ease-spring) forwards; opacity: 0; animation-delay: ${idx * 0.015}s;"></div>`
                 ).join('');
 
                 document.body.addEventListener('click', (e) => {
@@ -1387,6 +1405,7 @@
                 openModal('customTimeModal');
             };
 
+            // Optimistic UI for Adding Med
             window.confirmAddMed = async () => {
                 const name = document.getElementById('newMedName').value.trim();
                 const pieces = parseInt(document.getElementById('newMedPieces').value) || 0;
@@ -1407,6 +1426,11 @@
 
                     if (medError) throw medError;
 
+                    // Optimistic local update
+                    newMed._count = 0;
+                    medsData[newMed.id] = newMed;
+                    renderAllMeds();
+
                     if (window.currentEditingSchedules.length > 0) {
                         const schedInserts = window.currentEditingSchedules.map(s => ({
                             medication_id: newMed.id,
@@ -1414,6 +1438,10 @@
                             days: s.days
                         }));
                         await sb.from('medication_schedules').insert(schedInserts);
+                        
+                        let sched = JSON.parse(localStorage.getItem('medSchedules') || '{}');
+                        sched[newMed.id] = window.currentEditingSchedules;
+                        localStorage.setItem('medSchedules', JSON.stringify(sched));
                     }
 
                     showToast("Médicament ajouté avec succès !");
@@ -1421,11 +1449,13 @@
                     document.getElementById('newMedName').value = '';
                     document.getElementById('newMedPieces').value = '';
                     document.getElementById('newMedPlates').value = '';
+                    document.getElementById('newMedColor').value = '#6366f1';
+                    document.getElementById('colorPreview').style.background = '#6366f1';
                     window.currentEditingSchedules = [];
                     renderScheduleList(false);
+                    validateMedForm();
                     
                     closeModal('addMedModal');
-                    await loadMeds();
                 } catch (e) {
                     showToast("Erreur lors de l'ajout du médicament");
                 } finally {
@@ -1575,6 +1605,10 @@
 
                     renderAllMeds();
                     renderCalendar();
+                    if (document.getElementById('rightDrawer').classList.contains('translate-x-full') === false) {
+                        renderHistory();
+                        renderManageView();
+                    }
                 } catch (e) {
                     showToast("Erreur chargement des données");
                 } finally {
@@ -1611,7 +1645,10 @@
                     if (child.id && child.id.startsWith('med-card-')) {
                         const medId = child.id.replace('med-card-', '');
                         if (!existingIds.has(medId)) {
-                            child.remove();
+                            if (!child.classList.contains('remove-card-anim')) {
+                                child.classList.add('remove-card-anim');
+                                setTimeout(() => child.remove(), 300);
+                            }
                         }
                     }
                 });
@@ -1623,7 +1660,7 @@
                     card = document.createElement('div');
                     card.id = `med-card-${med.id}`;
                     card.className = "glass p-5 sm:p-7 relative rounded-3xl overflow-hidden group";
-                    card.style.animation = `fadeInUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`;
+                    card.style.animation = `fadeInUp 0.4s var(--ease-spring) forwards`;
                     card.style.opacity = '0';
                     card.style.animationDelay = `${index * 0.08}s`;
                     document.getElementById('medsGrid').appendChild(card);
@@ -1699,6 +1736,7 @@
                 openModal('editMedModal');
             };
 
+            // Optimistic UI for Editing Med
             window.confirmEditMed = async () => {
                 const id = document.getElementById('editMedId').value;
                 const name = document.getElementById('editMedName').value.trim();
@@ -1710,6 +1748,21 @@
 
                 setSyncing(true);
                 try {
+                    // Optimistic local update
+                    medsData[id].name = name;
+                    medsData[id].pieces_per_plate = pieces;
+                    medsData[id].plates_per_box = plates;
+                    medsData[id].color = color;
+                    updateMedCardDOM(id);
+
+                    let sched = JSON.parse(localStorage.getItem('medSchedules') || '{}');
+                    sched[id] = window.currentEditingSchedules;
+                    localStorage.setItem('medSchedules', JSON.stringify(sched));
+                    
+                    renderAllMeds();
+                    closeModal('editMedModal');
+
+                    // Background sync
                     const { error } = await sb.from('medications').update({
                         name,
                         pieces_per_plate: pieces,
@@ -1717,10 +1770,7 @@
                         color
                     }).eq('id', id);
 
-                    if (error) {
-                        showToast("Erreur lors de la modification");
-                        return;
-                    }
+                    if (error) throw error;
 
                     await sb.from('medication_schedules').delete().eq('medication_id', id);
                     if (window.currentEditingSchedules.length > 0) {
@@ -1732,13 +1782,10 @@
                         await sb.from('medication_schedules').insert(schedInserts);
                     }
 
-                    let sched = JSON.parse(localStorage.getItem('medSchedules') || '{}');
-                    sched[id] = window.currentEditingSchedules;
-                    localStorage.setItem('medSchedules', JSON.stringify(sched));
-
                     showToast("Médicament modifié avec succès");
-                    closeModal('editMedModal');
-                    loadMeds();
+                } catch(e) {
+                    showToast("Erreur lors de la modification");
+                    await loadMeds(); // Revert on error
                 } finally {
                     setSyncing(false);
                 }
@@ -1751,9 +1798,42 @@
                 
                 setTimeout(() => {
                     currentDate.setMonth(currentDate.getMonth() + delta);
-                    loadMeds();
+                    const y = currentDate.getFullYear();
+                    const m = currentDate.getMonth();
+                    const startDate = `${y}-${String(m+1).padStart(2,'0')}-01`;
+                    const endDate = `${y}-${String(m+1).padStart(2,'0')}-${new Date(y, m+1, 0).getDate()}`;
+                    
+                    // Instantly render the new empty calendar structure for smooth slide-in
+                    renderCalendar(true); 
+                    
+                    // Fetch data in background and update dots smoothly
+                    fetchMonthData(startDate, endDate);
                 }, 200);
             };
+
+            async function fetchMonthData(startDate, endDate) {
+                try {
+                    window.medsHistoryMap = {};
+                    window.dayDosesMap = {};
+                    if (Object.keys(medsData).length > 0) {
+                        const { data: hist } = await sb.from('medication_history').select('*').in('medication_id', Object.keys(medsData)).gte('date', startDate).lte('date', endDate);
+                        (hist || []).forEach(h => { window.medsHistoryMap[`${h.date}_${h.medication_id}`] = h; });
+
+                        const { data: monthDoses } = await sb.from('medication_doses').select('id, medication_id, created_at').in('medication_id', Object.keys(medsData)).gte('created_at', `${startDate}T00:00:00`).lte('created_at', `${endDate}T23:59:59`);
+                        (monthDoses || []).forEach(d => {
+                            const dStr = d.created_at.split('T')[0];
+                            if (!window.dayDosesMap[dStr]) window.dayDosesMap[dStr] = [];
+                            window.dayDosesMap[dStr].push(d);
+                        });
+                    }
+                    // Update all days with new data
+                    document.querySelectorAll('.cal-cell').forEach(cell => {
+                        updateCalendarDay(cell.dataset.date);
+                    });
+                } catch (e) {
+                    console.error("Error fetching month data", e);
+                }
+            }
 
             window.changeDose = (id, val, date = null) => {
                 const todayStr = new Date().toISOString().split('T')[0];
@@ -1860,6 +1940,7 @@
                 }
             };
 
+            // Optimistic UI for Dose Change
             window.executeChangeDose = async (id, val, date, time) => {
                 const med = medsData[id];
                 if (!med) return;
@@ -1877,7 +1958,12 @@
                             await sb.from('medication_doses').delete().eq('medication_id', id);
                             await sb.from('medications').update({ box_count: med.box_count }).eq('id', id);
                             showToast("Nouvelle boîte entamée");
-                            await loadMeds();
+                            // Reset history for this med as it's a new box
+                            for (let k in window.medsHistoryMap) {
+                                if (k.endsWith(`_${id}`)) delete window.medsHistoryMap[k];
+                            }
+                            updateMedCardDOM(id);
+                            document.querySelectorAll('.cal-cell').forEach(cell => updateCalendarDay(cell.dataset.date));
                         } catch(e) {
                             showToast("Action reportée, erreur réseau");
                         } finally {
@@ -1887,10 +1973,10 @@
                     return;
                 }
 
+                // 1. Instant Optimistic Local Update
                 med._count = Math.max(0, med._count + val);
 
                 const hKey = `${d}_${id}`;
-                if (!window.medsHistoryMap) window.medsHistoryMap = {};
                 if (!window.medsHistoryMap[hKey]) window.medsHistoryMap[hKey] = { count: 0, color: med.color, date: d, medication_id: id };
                 window.medsHistoryMap[hKey].count = Math.max(0, window.medsHistoryMap[hKey].count + val);
 
@@ -1904,12 +1990,17 @@
                     }
                 }
 
+                // 2. Instant DOM Update
                 updateMedCardDOM(id);
-                renderCalendar();
+                updateCalendarDay(d);
                 if (document.getElementById('editDayModal').classList.contains('open')) {
-                    renderDayEditList(d);
+                    renderDayEditList(d, true);
+                }
+                if (document.getElementById('rightDrawer').classList.contains('translate-x-full') === false) {
+                    renderHistory();
                 }
 
+                // 3. Pop animation for dose text
                 setTimeout(() => {
                     const dt = document.getElementById(`dose-text-${id}`);
                     if(dt) {
@@ -1919,6 +2010,7 @@
                     }
                 }, 10);
 
+                // 4. Background Sync to Cloud
                 try {
                     await syncDoseToDB(id, val, d, med, time);
                 } catch(e) {
@@ -1976,6 +2068,7 @@
                         await sb.from('medication_history').delete().eq('id', exist.id);
                     }
 
+                    // Silently update local state with real DB count to fix any discrepancies
                     if (medsData[id]) medsData[id]._count = totalCount;
                     updateMedCardDOM(id);
 
@@ -1986,14 +2079,16 @@
                 }
             };
 
-            function renderCalendar() {
+            function renderCalendar(isMonthChange = false) {
                 const cal = document.getElementById('calendar');
                 const y = currentDate.getFullYear();
                 const m = currentDate.getMonth();
                 
                 cal.classList.remove('slide-left-out', 'slide-right-out', 'slide-left-in', 'slide-right-in');
                 void cal.offsetWidth;
-                cal.classList.add(monthChangeDirection > 0 ? 'slide-right-in' : 'slide-left-in');
+                if (isMonthChange) {
+                    cal.classList.add(monthChangeDirection > 0 ? 'slide-right-in' : 'slide-left-in');
+                }
 
                 cal.innerHTML = "";
 
@@ -2011,45 +2106,60 @@
 
                 for (let d = 1; d <= daysInMonth; d++) {
                     let dStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                    let indicators = '';
                     
-                    for (let id in medsData) {
-                        let hKey = `${dStr}_${id}`;
-                        if (window.medsHistoryMap && window.medsHistoryMap[hKey] && window.medsHistoryMap[hKey].count > 0) {
-                            indicators += `<div class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full shadow-sm" style="background:${medsData[id].color}"></div>`;
-                        }
-                    }
-
                     let isTodayClass = dStr === todayStr ? 'border-indigo-500 bg-indigo-500/10' : 'border-slate-500/10';
                     let textClass = dStr === todayStr ? 'text-indigo-500' : 'opacity-80';
 
                     cal.innerHTML += `
-                        <div onclick="renderDayEditList('${dStr}')" class="cal-cell ${isTodayClass} flex flex-col items-center justify-start gap-1 p-1">
+                        <div data-date="${dStr}" onclick="renderDayEditList('${dStr}')" class="cal-cell ${isTodayClass} flex flex-col items-center justify-start gap-1 p-1">
                             <span class="text-[10px] sm:text-xs font-bold ${textClass}">${d}</span>
-                            <div class="flex flex-wrap gap-0.5 justify-center mt-auto w-full px-1 mb-1">${indicators}</div>
+                            <div class="flex flex-wrap gap-0.5 justify-center mt-auto w-full px-1 mb-1 indicators-container"></div>
                         </div>`;
                 }
+                
+                // Instantly populate dots if we already have the data
+                document.querySelectorAll('.cal-cell').forEach(cell => {
+                    updateCalendarDay(cell.dataset.date);
+                });
             }
 
-            window.renderDayEditList = async (dateStr) => {
+            // Update a single calendar day without reloading the whole calendar
+            window.updateCalendarDay = (dateStr) => {
+                if (!dateStr) return;
+                const cell = document.querySelector(`.cal-cell[data-date="${dateStr}"]`);
+                if (!cell) return;
+                
+                const container = cell.querySelector('.indicators-container');
+                if (!container) return;
+                
+                let indicators = '';
+                for (let id in medsData) {
+                    let hKey = `${dateStr}_${id}`;
+                    if (window.medsHistoryMap && window.medsHistoryMap[hKey] && window.medsHistoryMap[hKey].count > 0) {
+                        indicators += `<div class="cal-indicator w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full shadow-sm" style="background:${medsData[id].color}"></div>`;
+                    }
+                }
+                
+                if (container.innerHTML !== indicators) {
+                    container.innerHTML = indicators;
+                }
+            };
+
+            // Optimistic UI for Day Edit List (Instant open)
+            window.renderDayEditList = async (dateStr, isUpdate = false) => {
                 document.getElementById('editDayTitle').innerText = new Intl.DateTimeFormat('fr', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(dateStr));
                 const list = document.getElementById('editDayList');
-                list.innerHTML = '<div class="text-center opacity-50 font-bold text-sm py-4">Chargement...</div>';
-                openModal('editDayModal');
+                
+                if (!isUpdate) openModal('editDayModal');
 
-                const { data: dayDoses } = await sb.from('medication_doses')
-                    .select('id, medication_id, created_at')
-                    .in('medication_id', Object.keys(medsData))
-                    .gte('created_at', `${dateStr}T00:00:00`)
-                    .lte('created_at', `${dateStr}T23:59:59`)
-                    .order('created_at', { ascending: true });
-
-                list.innerHTML = "";
                 let hasRecords = false;
+                let html = '';
+
+                const localDoses = window.dayDosesMap[dateStr] || [];
 
                 for (let id in medsData) {
                     const med = medsData[id];
-                    const dosesForMed = (dayDoses || []).filter(d => d.medication_id === id);
+                    const dosesForMed = localDoses.filter(d => d.medication_id === id);
                     
                     if (med.active !== false || dosesForMed.length > 0) {
                         hasRecords = true;
@@ -2057,11 +2167,11 @@
                             const time = new Date(d.created_at).toLocaleTimeString('fr', { hour: '2-digit', minute: '2-digit' });
                             return `<div class="flex justify-between items-center bg-slate-500/5 px-3 py-2 rounded-lg text-sm font-bold mb-1">
                                         <span class="flex items-center gap-2"><i class="ph ph-clock text-xs opacity-50"></i> ${time}</span>
-                                        <button onclick="deleteSpecificDose('${d.id}', '${id}', '${dateStr}')" class="text-red-500 text-xs action-btn hover:scale-110 transition-transform"><i class="ph ph-trash text-sm"></i></button>
+                                        <button onclick="deleteSpecificDose('${d.id || d.tempId}', '${id}', '${dateStr}')" class="text-red-500 text-xs action-btn hover:scale-110 transition-transform"><i class="ph ph-trash text-sm"></i></button>
                                     </div>`;
                         }).join('') : '<div class="text-xs opacity-40 px-3 py-1">Aucune prise enregistrée</div>';
 
-                        list.innerHTML += `
+                        html += `
                             <div class="bg-slate-500/5 p-4 rounded-2xl border border-slate-500/10">
                                 <div class="flex items-center justify-between mb-3">
                                     <div class="flex items-center gap-2">
@@ -2077,11 +2187,59 @@
                 }
 
                 if (!hasRecords) {
-                    list.innerHTML = `<div class="text-center opacity-50 font-bold text-sm py-4 text-slate-800 dark:text-white">Aucun médicament disponible.</div>`;
+                    html = `<div class="text-center opacity-50 font-bold text-sm py-4 text-slate-800 dark:text-white">Aucun médicament disponible.</div>`;
+                }
+
+                list.innerHTML = html;
+                
+                // If it wasn't an update, it was an open. We ensure the modal is visible.
+                if (!isUpdate) {
+                    // Already opened above
+                }
+                
+                // Fetch fresh data in background to ensure sync
+                try {
+                    const { data: dayDoses } = await sb.from('medication_doses')
+                        .select('id, medication_id, created_at')
+                        .in('medication_id', Object.keys(medsData))
+                        .gte('created_at', `${dateStr}T00:00:00`)
+                        .lte('created_at', `${dateStr}T23:59:59`)
+                        .order('created_at', { ascending: true });
+
+                    window.dayDosesMap[dateStr] = dayDoses || [];
+                    // Re-render quietly with fresh data
+                    if (document.getElementById('editDayModal').classList.contains('open')) {
+                        renderDayEditList(dateStr, true);
+                    }
+                } catch(e) {
+                    console.error("Failed to sync day data", e);
                 }
             };
 
+            // Optimistic UI for Deleting Dose
             window.deleteSpecificDose = async (doseId, medId, dateStr) => {
+                // 1. Local instant removal
+                if (window.dayDosesMap[dateStr]) {
+                    const idx = window.dayDosesMap[dateStr].findIndex(d => (d.id || d.tempId) === doseId);
+                    if (idx > -1) window.dayDosesMap[dateStr].splice(idx, 1);
+                }
+                
+                if (medsData[medId]) medsData[medId]._count = Math.max(0, (medsData[medId]._count || 0) - 1);
+                
+                const hKey = `${dateStr}_${medId}`;
+                if (window.medsHistoryMap[hKey]) {
+                    window.medsHistoryMap[hKey].count = Math.max(0, window.medsHistoryMap[hKey].count - 1);
+                }
+
+                // 2. DOM Updates
+                renderDayEditList(dateStr, true);
+                updateMedCardDOM(medId);
+                updateCalendarDay(dateStr);
+                if (document.getElementById('rightDrawer').classList.contains('translate-x-full') === false) {
+                    renderHistory();
+                }
+
+                // 3. Background Sync
                 setSyncing(true);
                 try {
                     await sb.from('medication_doses').delete().eq('id', doseId);
@@ -2103,12 +2261,7 @@
                         await sb.from('medication_history').delete().eq('id', exist.id);
                     }
 
-                    if (medsData[medId]) medsData[medId]._count = totalCount;
-                    updateMedCardDOM(medId);
-
                     showToast("Prise supprimée");
-                    await loadMeds();
-                    renderDayEditList(dateStr);
                 } catch (e) {
                     showToast("Erreur lors de la suppression");
                 } finally {
@@ -2179,38 +2332,62 @@
                 });
             };
 
+            // Optimistic UI for Archive
             window.toggleArchive = async (id) => {
+                const newStatus = medsData[id].active === false ? true : false;
+                medsData[id].active = newStatus;
+                
+                renderManageView();
+                renderAllMeds();
+                
                 setSyncing(true);
                 try {
-                    const newStatus = medsData[id].active === false ? true : false;
                     await sb.from('medications').update({ active: newStatus }).eq('id', id);
-                    medsData[id].active = newStatus;
                     showToast(newStatus ? "Médicament restauré" : "Médicament archivé");
+                } catch (e) {
+                    medsData[id].active = !newStatus; // Revert
                     renderManageView();
                     renderAllMeds();
-                } catch (e) {
                     showToast("Erreur lors de l'archivage");
                 } finally {
                     setSyncing(false);
                 }
             };
 
+            // Optimistic UI for Delete Med
             window.deleteMed = async (id) => {
                 if (!confirm("Supprimer définitivement ce médicament et tout son historique ?")) return;
+                
+                // Animate card out locally
+                const manageCards = document.querySelectorAll('#manageView > div');
+                manageCards.forEach(card => {
+                    if (card.querySelector(`span[style*="${medsData[id].color}"]`)) {
+                        card.classList.add('remove-card-anim');
+                    }
+                });
+
+                const medCard = document.getElementById(`med-card-${id}`);
+                if (medCard) {
+                    medCard.classList.add('remove-card-anim');
+                }
+
+                setTimeout(() => {
+                    delete medsData[id];
+                    renderManageView();
+                    renderAllMeds();
+                    document.querySelectorAll('.cal-cell').forEach(cell => updateCalendarDay(cell.dataset.date));
+                }, 300);
+
                 setSyncing(true);
                 try {
                     await sb.from('medication_doses').delete().eq('medication_id', id);
                     await sb.from('medication_history').delete().eq('medication_id', id);
                     await sb.from('medication_schedules').delete().eq('medication_id', id);
                     await sb.from('medications').delete().eq('id', id);
-                    
-                    delete medsData[id];
                     showToast("Médicament supprimé");
-                    renderManageView();
-                    renderAllMeds();
-                    renderCalendar();
                 } catch (e) {
                     showToast("Erreur lors de la suppression");
+                    await loadMeds(); // Revert
                 } finally {
                     setSyncing(false);
                 }
