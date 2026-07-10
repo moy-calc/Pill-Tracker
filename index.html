@@ -657,7 +657,9 @@
                     <div class="text-center text-[10px] font-bold text-orange-500/70 uppercase tracking-wider">Ven</div>
                     <div class="text-center text-[10px] font-bold text-orange-500/70 uppercase tracking-wider">Sam</div>
                 </div>
-                <div id="calendar" class="cal-wrapper gap-1.5 sm:gap-3"></div>
+                <div class="overflow-hidden">
+                    <div id="calendar" class="cal-wrapper gap-1.5 sm:gap-3"></div>
+                </div>
             </div>
         </div>
     </main>
@@ -1745,18 +1747,24 @@
                 const count = med._count || 0;
                 const total = med.pieces_per_plate * med.plates_per_box;
                 const prog = total ? (count / total) * 100 : 0;
-                const plateIdx = Math.floor(count / med.pieces_per_plate) + 1;
+                
+                // Calculation for remaining plates and pills
+                const isBoxEmpty = count >= total && total > 0;
+                const dosesTakenInPlate = isBoxEmpty ? 0 : count % med.pieces_per_plate;
+                const currentPlateNumber = isBoxEmpty ? med.plates_per_box : Math.floor(count / med.pieces_per_plate) + 1;
+                const remainingFullPlates = isBoxEmpty ? 0 : med.plates_per_box - currentPlateNumber;
+                const remainingDosesInCurrentPlate = isBoxEmpty ? 0 : med.pieces_per_plate - dosesTakenInPlate;
                 const remaining = total - count;
 
                 let tag = prog >= 90 ?
                     `<div class="alert-stock bg-red-500 text-white shadow-lg shadow-red-500/40">URGENT</div>` :
                     prog >= 80 ?
                     `<div class="alert-stock bg-orange-500 text-white shadow-lg shadow-orange-500/40">STOCK BAS</div>` :
-                    `<div class="text-[10px] font-black opacity-60 uppercase tracking-widest text-slate-800 dark:text-white">${remaining} restantes</div>`;
+                    `<div class="text-[10px] font-black opacity-60 uppercase tracking-widest text-slate-800 dark:text-white">${remaining} prises au total</div>`;
 
                 const doseText = card.querySelector(`#dose-text-${id}`);
                 if (doseText) {
-                    doseText.innerText = count % med.pieces_per_plate;
+                    doseText.innerText = isBoxEmpty ? 0 : count % med.pieces_per_plate;
                     
                     const progressBar = card.querySelector('.progress-bar');
                     if (progressBar) progressBar.style.width = `${prog}%`;
@@ -1765,10 +1773,17 @@
                     if (progressText) progressText.innerText = `${Math.round(prog)}%`;
                     
                     const plateText = card.querySelector('.plate-text');
-                    if (plateText) plateText.innerText = `Plaque ${plateIdx}`;
+                    if (plateText) plateText.innerText = `Plaque ${currentPlateNumber} / ${med.plates_per_box}`;
                     
                     const stockAlert = card.querySelector('.stock-alert');
                     if (stockAlert) stockAlert.innerHTML = tag;
+
+                    const remainingPlatesEl = card.querySelector('.remaining-plates');
+                    if (remainingPlatesEl) remainingPlatesEl.innerText = remainingFullPlates;
+
+                    const remainingDosesEl = card.querySelector('.remaining-doses');
+                    if (remainingDosesEl) remainingDosesEl.innerText = remainingDosesInCurrentPlate;
+                    
                     return;
                 }
 
@@ -1784,8 +1799,18 @@
                     <div class="progress-container mb-4">
                         <div class="progress-bar" style="width:${prog}%; background:${med.color}"></div>
                     </div>
-                    <div class="flex justify-between items-center mb-6 relative z-10">
-                        <span class="plate-text text-xs font-bold opacity-60 bg-slate-500/10 px-3 py-1.5 rounded-lg text-slate-800 dark:text-white">Plaque ${plateIdx}</span>
+                    <div class="grid grid-cols-2 gap-2 mb-4 relative z-10">
+                        <div class="bg-slate-500/5 rounded-xl p-2 text-center border border-slate-500/10">
+                            <div class="text-[9px] font-black uppercase opacity-60 tracking-wider text-slate-800 dark:text-white">Plaques restantes</div>
+                            <div class="text-lg font-black text-indigo-500 remaining-plates">${remainingFullPlates}</div>
+                        </div>
+                        <div class="bg-slate-500/5 rounded-xl p-2 text-center border border-slate-500/10">
+                            <div class="text-[9px] font-black uppercase opacity-60 tracking-wider text-slate-800 dark:text-white">Prises restantes (plaque)</div>
+                            <div class="text-lg font-black text-indigo-500 remaining-doses">${remainingDosesInCurrentPlate}</div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center mb-4 relative z-10">
+                        <span class="plate-text text-xs font-bold opacity-60 bg-slate-500/10 px-3 py-1.5 rounded-lg text-slate-800 dark:text-white">Plaque ${currentPlateNumber} / ${med.plates_per_box}</span>
                         <span class="progress-text text-base sm:text-lg font-black transition-all duration-300" style="color:${med.color}">${Math.round(prog)}%</span>
                     </div>
                     <div class="flex items-center justify-between bg-slate-500/5 p-2 sm:p-3 rounded-2xl relative z-10 border border-slate-500/10 shadow-inner">
@@ -1793,7 +1818,7 @@
                             <i class="ph ph-minus"></i>
                         </button>
                         <div class="text-center px-2 sm:px-4 text-slate-800 dark:text-white">
-                            <div class="text-3xl sm:text-4xl font-black tracking-tighter dose-anim" id="dose-text-${med.id}">${count % med.pieces_per_plate}</div>
+                            <div class="text-3xl sm:text-4xl font-black tracking-tighter dose-anim" id="dose-text-${med.id}">${isBoxEmpty ? 0 : count % med.pieces_per_plate}</div>
                             <div class="text-[10px] opacity-50 font-bold uppercase tracking-widest mt-1">/ ${med.pieces_per_plate}</div>
                         </div>
                         <button onclick="changeDose('${med.id}', 1)" class="dose-btn w-12 h-12 rounded-xl bg-white dark:bg-slate-800 shadow-md flex items-center justify-center font-black text-xl" style="color:${med.color}">
@@ -1877,9 +1902,16 @@
 
             window.changeMonth = (delta) => {
                 const cal = document.getElementById('calendar');
+                const monthEl = document.getElementById('calMonth');
                 
+                // Slide out animation
+                cal.style.transition = 'opacity 0.2s ease-out, transform 0.2s ease-out';
                 cal.style.opacity = '0';
-                cal.style.transform = `translateX(${delta * 20}px)`;
+                cal.style.transform = `translateX(${delta * -40}px)`;
+                
+                monthEl.style.transition = 'opacity 0.2s ease-out, transform 0.2s ease-out';
+                monthEl.style.opacity = '0';
+                monthEl.style.transform = `translateX(${delta * -10}px)`;
                 
                 setTimeout(() => {
                     currentDate.setMonth(currentDate.getMonth() + delta);
@@ -1888,15 +1920,29 @@
                     const startDate = `${y}-${String(m+1).padStart(2,'0')}-01`;
                     const endDate = `${y}-${String(m+1).padStart(2,'0')}-${new Date(y, m+1, 0).getDate()}`;
                     
-                    renderCalendar();
+                    renderCalendar(); // Updates text content while invisible
                     
+                    // Prepare to slide in from the opposite direction
                     cal.style.transition = 'none';
-                    cal.style.transform = `translateX(${delta * -20}px)`;
+                    cal.style.transform = `translateX(${delta * 40}px)`;
+                    cal.style.opacity = '0';
                     
+                    monthEl.style.transition = 'none';
+                    monthEl.style.transform = `translateX(${delta * 10}px)`;
+                    monthEl.style.opacity = '0';
+                    
+                    // Force reflow
+                    void cal.offsetWidth;
+                    
+                    // Slide in animation
                     requestAnimationFrame(() => {
-                        cal.style.transition = 'opacity 0.3s ease, transform 0.3s var(--ease-spring)';
+                        cal.style.transition = 'opacity 0.3s var(--ease-spring), transform 0.3s var(--ease-spring)';
                         cal.style.opacity = '1';
                         cal.style.transform = 'translateX(0)';
+                        
+                        monthEl.style.transition = 'opacity 0.3s var(--ease-spring), transform 0.3s var(--ease-spring)';
+                        monthEl.style.opacity = '1';
+                        monthEl.style.transform = 'translateX(0)';
                     });
                     
                     fetchMonthData(startDate, endDate);
@@ -2548,4 +2594,4 @@
         });
     </script>
 </body>
-</html>
+    </html>
