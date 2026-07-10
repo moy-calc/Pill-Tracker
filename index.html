@@ -91,26 +91,6 @@
             80% { transform: rotate(-5deg); }
         }
 
-        @keyframes slideOutLeft {
-            from { opacity: 1; transform: translateX(0); }
-            to { opacity: 0; transform: translateX(-40px); }
-        }
-
-        @keyframes slideInFromRight {
-            from { opacity: 0; transform: translateX(40px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        @keyframes slideOutRight {
-            from { opacity: 1; transform: translateX(0); }
-            to { opacity: 0; transform: translateX(40px); }
-        }
-
-        @keyframes slideInFromLeft {
-            from { opacity: 0; transform: translateX(-40px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
         @keyframes pulse-soft {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.85; transform: scale(1.08); }
@@ -393,12 +373,8 @@
             display: grid;
             grid-template-columns: repeat(7, minmax(0, 1fr));
             gap: 1.5px;
+            transition: opacity 0.2s ease, transform 0.25s var(--ease-spring);
         }
-
-        .slide-left-out { animation: slideOutLeft 0.2s var(--ease-smooth) forwards; }
-        .slide-left-in { animation: slideInFromLeft 0.25s var(--ease-smooth) forwards; }
-        .slide-right-out { animation: slideOutRight 0.2s var(--ease-smooth) forwards; }
-        .slide-right-in { animation: slideInFromRight 0.25s var(--ease-smooth) forwards; }
 
         .day-btn.active, .edit-day-btn.active {
             background: #6366f1;
@@ -409,6 +385,10 @@
         .day-btn:not(.active), .edit-day-btn:not(.active) {
             background: rgba(148, 163, 184, 0.2);
             color: rgba(148, 163, 184, 1);
+        }
+        
+        .day-btn.weekend:not(.active), .edit-day-btn.weekend:not(.active) {
+            color: rgba(249, 115, 22, 0.7);
         }
 
         .time-display {
@@ -597,13 +577,13 @@
                     </button>
                 </div>
                 <div class="grid grid-cols-7 gap-1 sm:gap-2 mb-2 px-1">
+                    <div class="text-center text-[10px] font-bold opacity-40 uppercase tracking-wider">Dim</div>
                     <div class="text-center text-[10px] font-bold opacity-40 uppercase tracking-wider">Lun</div>
                     <div class="text-center text-[10px] font-bold opacity-40 uppercase tracking-wider">Mar</div>
                     <div class="text-center text-[10px] font-bold opacity-40 uppercase tracking-wider">Mer</div>
                     <div class="text-center text-[10px] font-bold opacity-40 uppercase tracking-wider">Jeu</div>
-                    <div class="text-center text-[10px] font-bold opacity-40 uppercase tracking-wider">Ven</div>
-                    <div class="text-center text-[10px] font-bold opacity-40 uppercase tracking-wider">Sam</div>
-                    <div class="text-center text-[10px] font-bold opacity-40 uppercase tracking-wider">Dim</div>
+                    <div class="text-center text-[10px] font-bold text-orange-500/70 uppercase tracking-wider">Ven</div>
+                    <div class="text-center text-[10px] font-bold text-orange-500/70 uppercase tracking-wider">Sam</div>
                 </div>
                 <div id="calendar" class="cal-wrapper gap-1.5 sm:gap-3"></div>
             </div>
@@ -854,8 +834,6 @@
             window.selectedTimeParts = { h: 8, m: 0 };
             window.currentEditingSchedules = [];
             let swRegistration = null;
-            let monthChangeDirection = 0;
-            let loadedMonths = new Set(); // Cache for calendar months
 
             const extendedColors = [
                 '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e',
@@ -913,7 +891,6 @@
                     for (let i of q) {
                         if (i.type === 'dose') await syncDoseToDB(i.id, i.val, i.date, i.med, i.time);
                     }
-                    // Light reload to ensure everything is perfectly in sync after queue processing
                     loadMeds(); 
                 } catch(e) {
                     localStorage.setItem('medQueue', JSON.stringify(q));
@@ -1344,13 +1321,8 @@
             };
 
             window.addScheduleRow = (isEdit = false) => {
-                if (isEdit) {
-                    window.currentEditingSchedules.push({ time: "08:00", days: [1,2,3,4,5] });
-                    renderScheduleList(true);
-                } else {
-                    window.currentEditingSchedules.push({ time: "08:00", days: [1,2,3,4,5] });
-                    renderScheduleList(false);
-                }
+                window.currentEditingSchedules.push({ time: "08:00", days: [1,2,3,4,5] });
+                renderScheduleList(isEdit);
             };
 
             window.renderScheduleList = (isEdit) => {
@@ -1358,12 +1330,15 @@
                 const container = document.getElementById(containerId);
                 container.innerHTML = '';
                 
+                // Week starts on Sunday (0) and ends on Saturday (6). Weekend is Friday(5) and Saturday(6)
+                const days = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
+                const dayValues = [0, 1, 2, 3, 4, 5, 6];
+                
                 window.currentEditingSchedules.forEach((sched, idx) => {
-                    const days = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
-                    const dayValues = [1, 2, 3, 4, 5, 6, 0];
-                    const daysHtml = days.map((d, i) => 
-                        `<button onclick="toggleScheduleDay(${idx}, ${dayValues[i]}, ${isEdit})" class="day-btn ${isEdit ? 'edit-day-btn' : ''} w-7 h-7 rounded-md text-[10px] font-bold transition-all ${sched.days.includes(dayValues[i]) ? 'active' : ''}">${d}</button>`
-                    ).join('');
+                    const daysHtml = days.map((d, i) => {
+                        const isWeekend = dayValues[i] === 5 || dayValues[i] === 6;
+                        return `<button data-sched-idx="${idx}" data-sched-day="${dayValues[i]}" onclick="toggleScheduleDay(${idx}, ${dayValues[i]}, ${isEdit})" class="day-btn ${isEdit ? 'edit-day-btn' : ''} w-7 h-7 rounded-md text-[10px] font-bold transition-all ${isWeekend ? 'weekend' : ''} ${sched.days.includes(dayValues[i]) ? 'active' : ''}">${d}</button>`;
+                    }).join('');
                     
                     container.innerHTML += `
                         <div class="bg-slate-500/10 p-3 rounded-xl space-y-2" style="animation: popIn 0.25s forwards;">
@@ -1384,7 +1359,17 @@
                 const i = sched.days.indexOf(day);
                 if (i > -1) sched.days.splice(i, 1);
                 else sched.days.push(day);
-                renderScheduleList(isEdit);
+                
+                // Update only the specific button clicked without re-rendering everything
+                const containerId = isEdit ? 'editScheduleList' : 'scheduleList';
+                const btn = document.querySelector(`#${containerId} button[data-sched-idx="${idx}"][data-sched-day="${day}"]`);
+                if (btn) {
+                    if (sched.days.includes(day)) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                }
             };
 
             window.removeScheduleRow = (idx, isEdit) => {
@@ -1405,7 +1390,6 @@
                 openModal('customTimeModal');
             };
 
-            // Optimistic UI for Adding Med
             window.confirmAddMed = async () => {
                 const name = document.getElementById('newMedName').value.trim();
                 const pieces = parseInt(document.getElementById('newMedPieces').value) || 0;
@@ -1426,7 +1410,6 @@
 
                     if (medError) throw medError;
 
-                    // Optimistic local update
                     newMed._count = 0;
                     medsData[newMed.id] = newMed;
                     renderAllMeds();
@@ -1685,6 +1668,26 @@
                     `<div class="alert-stock bg-orange-500 text-white shadow-lg shadow-orange-500/40">STOCK BAS</div>` :
                     `<div class="text-[10px] font-black opacity-60 uppercase tracking-widest text-slate-800 dark:text-white">${remaining} restantes</div>`;
 
+                const doseText = card.querySelector(`#dose-text-${id}`);
+                if (doseText) {
+                    // Partially update DOM for smooth animation without flickering
+                    doseText.innerText = count % med.pieces_per_plate;
+                    
+                    const progressBar = card.querySelector('.progress-bar');
+                    if (progressBar) progressBar.style.width = `${prog}%`;
+                    
+                    const progressText = card.querySelector('.progress-text');
+                    if (progressText) progressText.innerText = `${Math.round(prog)}%`;
+                    
+                    const plateText = card.querySelector('.plate-text');
+                    if (plateText) plateText.innerText = `Plaque ${plateIdx}`;
+                    
+                    const stockAlert = card.querySelector('.stock-alert');
+                    if (stockAlert) stockAlert.innerHTML = tag;
+                    return;
+                }
+
+                // Full render
                 card.innerHTML = `
                     <div class="absolute top-0 right-0 w-28 h-28 sm:w-36 sm:h-36 opacity-15 rounded-bl-[3rem] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:opacity-20" style="background:${med.color}"></div>
                     <button onclick="openEditMedModal('${med.id}')" class="absolute top-4 right-4 w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/90 dark:bg-slate-800/90 flex items-center justify-center text-indigo-500 shadow-lg action-btn z-20 border border-slate-500/10 backdrop-blur-sm">
@@ -1692,14 +1695,14 @@
                     </button>
                     <div class="flex flex-col items-start mb-4 relative z-10 w-[80%] pr-4">
                         <div class="font-black text-lg sm:text-xl uppercase tracking-wide truncate w-full" style="color:${med.color}">${med.name}</div>
-                        <div class="mt-1">${tag}</div>
+                        <div class="mt-1 stock-alert">${tag}</div>
                     </div>
                     <div class="progress-container mb-4">
                         <div class="progress-bar" style="width:${prog}%; background:${med.color}"></div>
                     </div>
                     <div class="flex justify-between items-center mb-6 relative z-10">
-                        <span class="text-xs font-bold opacity-60 bg-slate-500/10 px-3 py-1.5 rounded-lg text-slate-800 dark:text-white">Plaque ${plateIdx}</span>
-                        <span class="text-base sm:text-lg font-black transition-all duration-300" style="color:${med.color}">${Math.round(prog)}%</span>
+                        <span class="plate-text text-xs font-bold opacity-60 bg-slate-500/10 px-3 py-1.5 rounded-lg text-slate-800 dark:text-white">Plaque ${plateIdx}</span>
+                        <span class="progress-text text-base sm:text-lg font-black transition-all duration-300" style="color:${med.color}">${Math.round(prog)}%</span>
                     </div>
                     <div class="flex items-center justify-between bg-slate-500/5 p-2 sm:p-3 rounded-2xl relative z-10 border border-slate-500/10 shadow-inner">
                         <button onclick="changeDose('${med.id}', -1)" class="dose-btn w-12 h-12 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white shadow-md flex items-center justify-center font-black hover:text-red-500 text-xl">
@@ -1736,7 +1739,6 @@
                 openModal('editMedModal');
             };
 
-            // Optimistic UI for Editing Med
             window.confirmEditMed = async () => {
                 const id = document.getElementById('editMedId').value;
                 const name = document.getElementById('editMedName').value.trim();
@@ -1748,7 +1750,6 @@
 
                 setSyncing(true);
                 try {
-                    // Optimistic local update
                     medsData[id].name = name;
                     medsData[id].pieces_per_plate = pieces;
                     medsData[id].plates_per_box = plates;
@@ -1762,7 +1763,6 @@
                     renderAllMeds();
                     closeModal('editMedModal');
 
-                    // Background sync
                     const { error } = await sb.from('medications').update({
                         name,
                         pieces_per_plate: pieces,
@@ -1785,16 +1785,18 @@
                     showToast("Médicament modifié avec succès");
                 } catch(e) {
                     showToast("Erreur lors de la modification");
-                    await loadMeds(); // Revert on error
+                    await loadMeds(); 
                 } finally {
                     setSyncing(false);
                 }
             };
 
             window.changeMonth = (delta) => {
-                monthChangeDirection = delta;
                 const cal = document.getElementById('calendar');
-                cal.classList.add(delta > 0 ? 'slide-left-out' : 'slide-right-out');
+                
+                // Smooth slide out
+                cal.style.opacity = '0';
+                cal.style.transform = `translateX(${delta * 20}px)`;
                 
                 setTimeout(() => {
                     currentDate.setMonth(currentDate.getMonth() + delta);
@@ -1803,10 +1805,18 @@
                     const startDate = `${y}-${String(m+1).padStart(2,'0')}-01`;
                     const endDate = `${y}-${String(m+1).padStart(2,'0')}-${new Date(y, m+1, 0).getDate()}`;
                     
-                    // Instantly render the new empty calendar structure for smooth slide-in
-                    renderCalendar(true); 
+                    renderCalendar();
                     
-                    // Fetch data in background and update dots smoothly
+                    // Reset position instantly for slide in
+                    cal.style.transition = 'none';
+                    cal.style.transform = `translateX(${delta * -20}px)`;
+                    
+                    requestAnimationFrame(() => {
+                        cal.style.transition = 'opacity 0.3s ease, transform 0.3s var(--ease-spring)';
+                        cal.style.opacity = '1';
+                        cal.style.transform = 'translateX(0)';
+                    });
+                    
                     fetchMonthData(startDate, endDate);
                 }, 200);
             };
@@ -1826,7 +1836,6 @@
                             window.dayDosesMap[dStr].push(d);
                         });
                     }
-                    // Update all days with new data
                     document.querySelectorAll('.cal-cell').forEach(cell => {
                         updateCalendarDay(cell.dataset.date);
                     });
@@ -1864,7 +1873,7 @@
                 let html = '';
                 for (let h = 0; h < 24; h++) {
                     const active = window.selectedTimeParts.h === h ? 'active' : '';
-                    html += `<div class="time-option ${active}" onclick="selectHour(${h})">${String(h).padStart(2, '0')}h</div>`;
+                    html += `<div class="time-option ${active}" data-hour="${h}" onclick="selectHour(${h})">${String(h).padStart(2, '0')}h</div>`;
                 }
                 col.innerHTML = html;
                 updateTimeDisplay();
@@ -1877,7 +1886,15 @@
 
             window.selectHour = (h) => {
                 window.selectedTimeParts.h = h;
-                renderHourPicker();
+                
+                // Update classes directly without re-rendering to avoid scroll jumps
+                const oldActive = document.querySelector('#hourColumn .time-option.active');
+                if (oldActive) oldActive.classList.remove('active');
+                
+                const newActive = document.querySelector(`#hourColumn .time-option[data-hour="${h}"]`);
+                if (newActive) newActive.classList.add('active');
+                
+                updateTimeDisplay();
             };
 
             function renderMinutePicker() {
@@ -1885,7 +1902,7 @@
                 let html = '';
                 for (let m = 0; m < 60; m += 5) {
                     const active = window.selectedTimeParts.m === m ? 'active' : '';
-                    html += `<div class="time-option ${active}" onclick="selectMinute(${m})">${String(m).padStart(2, '0')}</div>`;
+                    html += `<div class="time-option ${active}" data-minute="${m}" onclick="selectMinute(${m})">${String(m).padStart(2, '0')}</div>`;
                 }
                 col.innerHTML = html;
                 updateTimeDisplay();
@@ -1898,14 +1915,29 @@
 
             window.selectMinute = (m) => {
                 window.selectedTimeParts.m = m;
-                renderMinutePicker();
+                
+                const oldActive = document.querySelector('#minuteColumn .time-option.active');
+                if (oldActive) oldActive.classList.remove('active');
+                
+                const newActive = document.querySelector(`#minuteColumn .time-option[data-minute="${m}"]`);
+                if (newActive) newActive.classList.add('active');
+                
+                updateTimeDisplay();
             };
 
             window.setQuickTime = (h, m) => {
                 window.selectedTimeParts.h = h;
                 window.selectedTimeParts.m = m;
-                renderHourPicker();
-                renderMinutePicker();
+                
+                // Smoothly update selectors
+                document.querySelectorAll('#hourColumn .time-option').forEach(el => {
+                    el.classList.toggle('active', parseInt(el.dataset.hour) === h);
+                });
+                document.querySelectorAll('#minuteColumn .time-option').forEach(el => {
+                    el.classList.toggle('active', parseInt(el.dataset.minute) === m);
+                });
+                
+                updateTimeDisplay();
             };
 
             function updateTimeDisplay() {
@@ -1940,7 +1972,6 @@
                 }
             };
 
-            // Optimistic UI for Dose Change
             window.executeChangeDose = async (id, val, date, time) => {
                 const med = medsData[id];
                 if (!med) return;
@@ -1958,7 +1989,6 @@
                             await sb.from('medication_doses').delete().eq('medication_id', id);
                             await sb.from('medications').update({ box_count: med.box_count }).eq('id', id);
                             showToast("Nouvelle boîte entamée");
-                            // Reset history for this med as it's a new box
                             for (let k in window.medsHistoryMap) {
                                 if (k.endsWith(`_${id}`)) delete window.medsHistoryMap[k];
                             }
@@ -1973,7 +2003,6 @@
                     return;
                 }
 
-                // 1. Instant Optimistic Local Update
                 med._count = Math.max(0, med._count + val);
 
                 const hKey = `${d}_${id}`;
@@ -1990,7 +2019,6 @@
                     }
                 }
 
-                // 2. Instant DOM Update
                 updateMedCardDOM(id);
                 updateCalendarDay(d);
                 if (document.getElementById('editDayModal').classList.contains('open')) {
@@ -2000,7 +2028,6 @@
                     renderHistory();
                 }
 
-                // 3. Pop animation for dose text
                 setTimeout(() => {
                     const dt = document.getElementById(`dose-text-${id}`);
                     if(dt) {
@@ -2010,7 +2037,6 @@
                     }
                 }, 10);
 
-                // 4. Background Sync to Cloud
                 try {
                     await syncDoseToDB(id, val, d, med, time);
                 } catch(e) {
@@ -2068,7 +2094,6 @@
                         await sb.from('medication_history').delete().eq('id', exist.id);
                     }
 
-                    // Silently update local state with real DB count to fix any discrepancies
                     if (medsData[id]) medsData[id]._count = totalCount;
                     updateMedCardDOM(id);
 
@@ -2079,23 +2104,19 @@
                 }
             };
 
-            function renderCalendar(isMonthChange = false) {
+            function renderCalendar() {
                 const cal = document.getElementById('calendar');
                 const y = currentDate.getFullYear();
                 const m = currentDate.getMonth();
                 
-                cal.classList.remove('slide-left-out', 'slide-right-out', 'slide-left-in', 'slide-right-in');
-                void cal.offsetWidth;
-                if (isMonthChange) {
-                    cal.classList.add(monthChangeDirection > 0 ? 'slide-right-in' : 'slide-left-in');
-                }
-
                 cal.innerHTML = "";
 
                 const monthName = new Intl.DateTimeFormat('fr', { month: 'long', year: 'numeric' }).format(currentDate);
                 document.getElementById('calMonth').innerText = monthName;
 
-                let firstDay = (new Date(y, m, 1).getDay() + 6) % 7;
+                // Sunday is 0, Monday is 1, etc.
+                // Since we want Sunday as the first day, firstDay is simply getDay()
+                let firstDay = new Date(y, m, 1).getDay(); 
                 let daysInMonth = new Date(y, m + 1, 0).getDate();
 
                 for (let i = 0; i < firstDay; i++) {
@@ -2117,13 +2138,11 @@
                         </div>`;
                 }
                 
-                // Instantly populate dots if we already have the data
                 document.querySelectorAll('.cal-cell').forEach(cell => {
                     updateCalendarDay(cell.dataset.date);
                 });
             }
 
-            // Update a single calendar day without reloading the whole calendar
             window.updateCalendarDay = (dateStr) => {
                 if (!dateStr) return;
                 const cell = document.querySelector(`.cal-cell[data-date="${dateStr}"]`);
@@ -2145,7 +2164,6 @@
                 }
             };
 
-            // Optimistic UI for Day Edit List (Instant open)
             window.renderDayEditList = async (dateStr, isUpdate = false) => {
                 document.getElementById('editDayTitle').innerText = new Intl.DateTimeFormat('fr', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(dateStr));
                 const list = document.getElementById('editDayList');
@@ -2192,12 +2210,6 @@
 
                 list.innerHTML = html;
                 
-                // If it wasn't an update, it was an open. We ensure the modal is visible.
-                if (!isUpdate) {
-                    // Already opened above
-                }
-                
-                // Fetch fresh data in background to ensure sync
                 try {
                     const { data: dayDoses } = await sb.from('medication_doses')
                         .select('id, medication_id, created_at')
@@ -2206,19 +2218,21 @@
                         .lte('created_at', `${dateStr}T23:59:59`)
                         .order('created_at', { ascending: true });
 
-                    window.dayDosesMap[dateStr] = dayDoses || [];
-                    // Re-render quietly with fresh data
-                    if (document.getElementById('editDayModal').classList.contains('open')) {
-                        renderDayEditList(dateStr, true);
+                    const oldDosesString = JSON.stringify(localDoses.map(d => ({id: d.id || d.tempId, med: d.medication_id, time: d.created_at})));
+                    const newDosesString = JSON.stringify((dayDoses || []).map(d => ({id: d.id, med: d.medication_id, time: d.created_at})));
+
+                    if (oldDosesString !== newDosesString) {
+                        window.dayDosesMap[dateStr] = dayDoses || [];
+                        if (document.getElementById('editDayModal').classList.contains('open')) {
+                            renderDayEditList(dateStr, true);
+                        }
                     }
                 } catch(e) {
                     console.error("Failed to sync day data", e);
                 }
             };
 
-            // Optimistic UI for Deleting Dose
             window.deleteSpecificDose = async (doseId, medId, dateStr) => {
-                // 1. Local instant removal
                 if (window.dayDosesMap[dateStr]) {
                     const idx = window.dayDosesMap[dateStr].findIndex(d => (d.id || d.tempId) === doseId);
                     if (idx > -1) window.dayDosesMap[dateStr].splice(idx, 1);
@@ -2231,7 +2245,6 @@
                     window.medsHistoryMap[hKey].count = Math.max(0, window.medsHistoryMap[hKey].count - 1);
                 }
 
-                // 2. DOM Updates
                 renderDayEditList(dateStr, true);
                 updateMedCardDOM(medId);
                 updateCalendarDay(dateStr);
@@ -2239,7 +2252,6 @@
                     renderHistory();
                 }
 
-                // 3. Background Sync
                 setSyncing(true);
                 try {
                     await sb.from('medication_doses').delete().eq('id', doseId);
@@ -2332,7 +2344,6 @@
                 });
             };
 
-            // Optimistic UI for Archive
             window.toggleArchive = async (id) => {
                 const newStatus = medsData[id].active === false ? true : false;
                 medsData[id].active = newStatus;
@@ -2345,7 +2356,7 @@
                     await sb.from('medications').update({ active: newStatus }).eq('id', id);
                     showToast(newStatus ? "Médicament restauré" : "Médicament archivé");
                 } catch (e) {
-                    medsData[id].active = !newStatus; // Revert
+                    medsData[id].active = !newStatus;
                     renderManageView();
                     renderAllMeds();
                     showToast("Erreur lors de l'archivage");
@@ -2354,11 +2365,9 @@
                 }
             };
 
-            // Optimistic UI for Delete Med
             window.deleteMed = async (id) => {
                 if (!confirm("Supprimer définitivement ce médicament et tout son historique ?")) return;
                 
-                // Animate card out locally
                 const manageCards = document.querySelectorAll('#manageView > div');
                 manageCards.forEach(card => {
                     if (card.querySelector(`span[style*="${medsData[id].color}"]`)) {
@@ -2387,7 +2396,7 @@
                     showToast("Médicament supprimé");
                 } catch (e) {
                     showToast("Erreur lors de la suppression");
-                    await loadMeds(); // Revert
+                    await loadMeds();
                 } finally {
                     setSyncing(false);
                 }
