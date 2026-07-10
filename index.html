@@ -977,6 +977,7 @@
             window.handleAuth = async () => {
                 const btn = document.getElementById('authBtn');
                 btn.innerHTML = '<i class="ph ph-spinner animate-spin text-2xl"></i>';
+                btn.disabled = true;
 
                 const ln = document.getElementById('lastName').value.trim().toLowerCase();
                 const fn = document.getElementById('firstName').value.trim().toLowerCase();
@@ -985,16 +986,18 @@
                 const key = `${ln}_${fn}_${bd.replace(/-/g, '')}`;
 
                 try {
-                    const { data, error } = await sb.from('credentials').select('pw').eq('key', key).single();
-                    if (error && error.code !== 'PGRST116') {
+                    const { data, error } = await sb.from('credentials').select('pw').eq('key', key).maybeSingle();
+                    if (error) {
                         showToast("Erreur base de données");
                         btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>';
+                        btn.disabled = false;
                         return;
                     }
                     if (data) {
                         if (data.pw !== pw) {
                             showToast("Mot de passe incorrect");
                             btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>';
+                            btn.disabled = false;
                             return;
                         }
                     } else {
@@ -1002,6 +1005,7 @@
                         if (insertErr) {
                             showToast("Erreur création compte");
                             btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>';
+                            btn.disabled = false;
                             return;
                         }
                     }
@@ -1011,6 +1015,7 @@
                 } catch(e) {
                     showToast("Erreur de connexion");
                     btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>';
+                    btn.disabled = false;
                 }
             };
 
@@ -1020,12 +1025,22 @@
                 const ln = document.getElementById('editLN').value;
                 const fn = document.getElementById('editFN').value;
                 const bd = document.getElementById('editBD').value;
-                const { data: u } = await sb.from('credentials').select('pw').eq('key', user).single();
+
+                const { data: u, error: fetchErr } = await sb.from('credentials').select('pw').eq('key', user).maybeSingle();
+                if (fetchErr || !u) {
+                    showToast("Erreur lors de la récupération du profil");
+                    return;
+                }
 
                 if (u.pw !== oldP) return showToast("Ancien mot de passe requis.");
 
                 const newKey = `${ln.toLowerCase()}_${fn.toLowerCase()}_${bd.replace(/-/g, '')}`;
-                await sb.from('credentials').update({ pw: newP || oldP, info: { ln, fn, bd } }).eq('key', user);
+                const { error: updateErr } = await sb.from('credentials').update({ pw: newP || oldP, info: { ln, fn, bd } }).eq('key', user);
+
+                if (updateErr) {
+                    showToast("Erreur lors de la mise à jour");
+                    return;
+                }
 
                 if (newKey !== user) {
                     handleLogout();
@@ -1108,7 +1123,7 @@
 
             window.confirmAddMed = async () => {
                 const name = document.getElementById('newMedName').value.trim();
-                const pieces = parseInt(document.getElementById('newMedPieces').value);
+                const pieces = parseInt(document.getElementById('newMedPieces').value) || 0;
                 const plates = parseInt(document.getElementById('newMedPlates').value) || 1;
                 const color = document.getElementById('newMedColor').value;
                 const time = document.getElementById('newMedTime').value;
@@ -1170,18 +1185,18 @@
                 document.getElementById('syncBtn').classList.add('flex');
 
                 try {
-                    const { data: u } = await sb.from('credentials').select('info').eq('key', user).single();
+                    const { data: u } = await sb.from('credentials').select('info').eq('key', user).maybeSingle();
                     if (u) {
                         const i = u.info;
-                        document.getElementById('editLN').value = i.ln;
-                        document.getElementById('editFN').value = i.fn;
-                        document.getElementById('editBD').value = i.bd;
-                        document.getElementById('editAgeDisplay').innerText = calculateAge(i.bd);
+                        document.getElementById('editLN').value = i.ln || '';
+                        document.getElementById('editFN').value = i.fn || '';
+                        document.getElementById('editBD').value = i.bd || '';
+                        document.getElementById('editAgeDisplay').innerText = calculateAge(i.bd || '');
                     }
                 } catch (e) {}
 
                 try {
-                    const { data: tg } = await sb.from('telegram_ids').select('chat_id').eq('user_key', user).single();
+                    const { data: tg } = await sb.from('telegram_ids').select('chat_id').eq('user_key', user).maybeSingle();
                     if (tg) {
                         document.getElementById('telegramChatId').value = tg.chat_id;
                     }
@@ -1246,21 +1261,19 @@
                     const ids = (meds || []).map(m => m.id);
 
                     if (ids.length > 0) {
-                        const { data: counts, error: countError } = await sb.from('medication_doses')
+                        const { data: dosesData, error: countError } = await sb.from('medication_doses')
                             .select('medication_id', { count: 'exact' })
-                            .in('medication_id', ids)
-                            .then(result => {
-                                const grouped = {};
-                                (result.data || []).forEach(d => {
-                                    grouped[d.medication_id] = (grouped[d.medication_id] || 0) + 1;
-                                });
-                                return { data: grouped, error: result.error };
-                            });
+                            .in('medication_id', ids);
 
                         if (countError) throw countError;
 
+                        const counts = {};
+                        (dosesData || []).forEach(d => {
+                            counts[d.medication_id] = (counts[d.medication_id] || 0) + 1;
+                        });
+
                         const { data: schedules, error: schedError } = await sb.from('medication_schedules').select('*').in('medication_id', ids);
-                        if (!schedError) {
+                        if (!schedError && schedules) {
                             let schedMap = {};
                             schedules.forEach(s => { schedMap[s.medication_id] = { time: s.time, days: s.days }; });
                             localStorage.setItem('medSchedules', JSON.stringify(schedMap));
@@ -1276,10 +1289,15 @@
                     const m = currentDate.getMonth();
                     const startDate = `${y}-${String(m+1).padStart(2,'0')}-01`;
                     const endDate = `${y}-${String(m+1).padStart(2,'0')}-${new Date(y, m+1, 0).getDate()}`;
-                    const { data: hist } = await sb.from('medication_history').select('*').in('medication_id', Object.keys(medsData)).gte('date', startDate).lte('date', endDate);
+                    
+                    if (Object.keys(medsData).length > 0) {
+                        const { data: hist } = await sb.from('medication_history').select('*').in('medication_id', Object.keys(medsData)).gte('date', startDate).lte('date', endDate);
 
-                    window.medsHistoryMap = {};
-                    (hist || []).forEach(h => { window.medsHistoryMap[`${h.date}_${h.medication_id}`] = h; });
+                        window.medsHistoryMap = {};
+                        (hist || []).forEach(h => { window.medsHistoryMap[`${h.date}_${h.medication_id}`] = h; });
+                    } else {
+                        window.medsHistoryMap = {};
+                    }
 
                     renderAllMeds();
                     renderCalendar();
@@ -1292,6 +1310,7 @@
 
             function renderAllMeds() {
                 const grid = document.getElementById('medsGrid');
+                const existingIds = new Set();
                 let index = 0;
                 const todayDay = new Date().getDay();
                 const sched = JSON.parse(localStorage.getItem('medSchedules') || '{}');
@@ -1300,17 +1319,22 @@
                     if (medsData[id].active !== false) {
                         const s = sched[id];
                         if (s && s.days && s.days.length > 0 && !s.days.includes(todayDay)) {
-                            const existingCard = document.getElementById(`med-card-${id}`);
-                            if (existingCard) existingCard.remove();
                             continue;
                         }
+                        existingIds.add(id);
                         renderMedCard(medsData[id], index);
                         index++;
-                    } else {
-                        const existingCard = document.getElementById(`med-card-${id}`);
-                        if (existingCard) existingCard.remove();
                     }
                 }
+
+                Array.from(grid.children).forEach(child => {
+                    if (child.id && child.id.startsWith('med-card-')) {
+                        const medId = child.id.replace('med-card-', '');
+                        if (!existingIds.has(medId)) {
+                            child.remove();
+                        }
+                    }
+                });
             }
 
             function renderMedCard(med, index) {
@@ -1407,7 +1431,7 @@
             window.confirmEditMed = async () => {
                 const id = document.getElementById('editMedId').value;
                 const name = document.getElementById('editMedName').value.trim();
-                const pieces = parseInt(document.getElementById('editMedPieces').value);
+                const pieces = parseInt(document.getElementById('editMedPieces').value) || 0;
                 const plates = parseInt(document.getElementById('editMedPlates').value) || 1;
                 const color = document.getElementById('editMedColor').value;
                 const time = document.getElementById('editMedTime').value;
@@ -1544,7 +1568,7 @@
 
                 const hKey = `${d}_${id}`;
                 if (!window.medsHistoryMap) window.medsHistoryMap = {};
-                if (!window.medsHistoryMap[hKey]) window.medsHistoryMap[hKey] = { count: 0, color: med.color };
+                if (!window.medsHistoryMap[hKey]) window.medsHistoryMap[hKey] = { count: 0, color: med.color, date: d, medication_id: id };
                 window.medsHistoryMap[hKey].count = Math.max(0, window.medsHistoryMap[hKey].count + val);
 
                 if (val > 0 && time) {
@@ -1589,12 +1613,12 @@
                         }
                         await sb.from('medication_doses').insert(insertData);
                     } else {
-                        const { data: last } = await sb.from('medication_doses').select('id').eq('medication_id', id).order('id', { ascending: false }).limit(1).single();
+                        const { data: last } = await sb.from('medication_doses').select('id').eq('medication_id', id).order('id', { ascending: false }).limit(1).maybeSingle();
                         if (last) await sb.from('medication_doses').delete().eq('id', last.id);
                     }
 
                     const { count: newCount } = await sb.from('medication_doses').select('*', { count: 'exact', head: true }).eq('medication_id', id);
-                    const { data: exist } = await sb.from('medication_history').select('count').eq('medication_id', id).eq('date', d).single();
+                    const { data: exist } = await sb.from('medication_history').select('count').eq('medication_id', id).eq('date', d).maybeSingle();
 
                     if (exist) {
                         await sb.from('medication_history').update({ count: Math.max(0, exist.count + val), cumulative: newCount, color: med.color }).eq('medication_id', id).eq('date', d);
