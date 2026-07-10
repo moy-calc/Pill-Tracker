@@ -1666,7 +1666,8 @@
                     loadMeds();
                     showToast("Médicament ajouté");
                 } catch(e) {
-                    showToast("Erreur lors de l'ajout");
+                    console.error("Erreur lors de l'ajout du médicament:", e);
+                    showToast("Erreur lors de l'ajout: " + (e.message || "Vérifiez la console"));
                     btn.classList.remove('opacity-50', 'pointer-events-none');
                 } finally {
                     setSyncing(false);
