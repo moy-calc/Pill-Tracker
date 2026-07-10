@@ -110,6 +110,76 @@
             to { opacity: 0; transform: scale(0.85); max-height: 0; margin-bottom: 0; padding: 0; }
         }
 
+        /* === BEAUTIFUL DAY BUTTON ANIMATIONS === */
+        @keyframes dayActivate {
+            0% { 
+                transform: scale(1) rotate(0deg);
+                filter: brightness(1);
+            }
+            25% { 
+                transform: scale(1.4) rotate(-12deg);
+                filter: brightness(1.4);
+            }
+            50% { 
+                transform: scale(0.85) rotate(6deg);
+                filter: brightness(1.15);
+            }
+            75% { 
+                transform: scale(1.1) rotate(-3deg);
+                filter: brightness(1.08);
+            }
+            100% { 
+                transform: scale(1) rotate(0deg);
+                filter: brightness(1);
+            }
+        }
+
+        @keyframes dayDeactivate {
+            0% { transform: scale(1); filter: brightness(1); }
+            35% { transform: scale(0.75); filter: brightness(0.85); }
+            100% { transform: scale(1); filter: brightness(1); }
+        }
+
+        @keyframes dayGlow {
+            0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+            40% { box-shadow: 0 0 0 8px rgba(99, 102, 241, 0.25), 0 6px 18px rgba(99, 102, 241, 0.35); }
+            100% { box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3); }
+        }
+
+        @keyframes dayRipple {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(2.8); opacity: 0; }
+        }
+
+        .day-btn, .edit-day-btn {
+            position: relative;
+            overflow: visible;
+        }
+
+        .day-btn.animate-on, .edit-day-btn.animate-on {
+            animation: dayActivate 0.5s var(--ease-spring), dayGlow 0.5s ease;
+        }
+
+        .day-btn.animate-off, .edit-day-btn.animate-off {
+            animation: dayDeactivate 0.35s var(--ease-spring);
+        }
+
+        .day-ripple {
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: rgba(99, 102, 241, 0.4);
+            animation: dayRipple 0.5s ease-out;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .day-btn > span, .edit-day-btn > span {
+            position: relative;
+            z-index: 1;
+        }
+        /* === END DAY BUTTON ANIMATIONS === */
+
         .dose-pop {
             animation: scaleBounce 0.4s var(--ease-spring) !important;
         }
@@ -410,6 +480,7 @@
             max-height: 240px;
             overflow-y: auto;
             scroll-behavior: smooth;
+            scroll-snap-type: y mandatory;
         }
 
         .time-option {
@@ -423,6 +494,7 @@
             transition: transform 0.12s var(--ease-spring), background 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
             background: rgba(148, 163, 184, 0.08);
             will-change: transform;
+            scroll-snap-align: center;
         }
 
         .time-option:hover {
@@ -1330,14 +1402,13 @@
                 const container = document.getElementById(containerId);
                 container.innerHTML = '';
                 
-                // Week starts on Sunday (0) and ends on Saturday (6). Weekend is Friday(5) and Saturday(6)
                 const days = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
                 const dayValues = [0, 1, 2, 3, 4, 5, 6];
                 
                 window.currentEditingSchedules.forEach((sched, idx) => {
                     const daysHtml = days.map((d, i) => {
                         const isWeekend = dayValues[i] === 5 || dayValues[i] === 6;
-                        return `<button data-sched-idx="${idx}" data-sched-day="${dayValues[i]}" onclick="toggleScheduleDay(${idx}, ${dayValues[i]}, ${isEdit})" class="day-btn ${isEdit ? 'edit-day-btn' : ''} w-7 h-7 rounded-md text-[10px] font-bold transition-all ${isWeekend ? 'weekend' : ''} ${sched.days.includes(dayValues[i]) ? 'active' : ''}">${d}</button>`;
+                        return `<button data-sched-idx="${idx}" data-sched-day="${dayValues[i]}" onclick="toggleScheduleDay(${idx}, ${dayValues[i]}, ${isEdit})" class="day-btn ${isEdit ? 'edit-day-btn' : ''} w-7 h-7 rounded-md text-[10px] font-bold transition-all ${isWeekend ? 'weekend' : ''} ${sched.days.includes(dayValues[i]) ? 'active' : ''}"><span>${d}</span></button>`;
                     }).join('');
                     
                     container.innerHTML += `
@@ -1357,10 +1428,10 @@
             window.toggleScheduleDay = (idx, day, isEdit) => {
                 let sched = window.currentEditingSchedules[idx];
                 const i = sched.days.indexOf(day);
+                const isActivating = i === -1;
                 if (i > -1) sched.days.splice(i, 1);
                 else sched.days.push(day);
                 
-                // Update only the specific button clicked without re-rendering everything
                 const containerId = isEdit ? 'editScheduleList' : 'scheduleList';
                 const btn = document.querySelector(`#${containerId} button[data-sched-idx="${idx}"][data-sched-day="${day}"]`);
                 if (btn) {
@@ -1368,6 +1439,21 @@
                         btn.classList.add('active');
                     } else {
                         btn.classList.remove('active');
+                    }
+                    
+                    // === BEAUTIFUL CLICK ANIMATION ===
+                    const animClass = isActivating ? 'animate-on' : 'animate-off';
+                    btn.classList.remove('animate-on', 'animate-off');
+                    void btn.offsetWidth;
+                    btn.classList.add(animClass);
+                    setTimeout(() => btn.classList.remove(animClass), 500);
+                    
+                    // Ripple effect when activating
+                    if (isActivating) {
+                        const ripple = document.createElement('span');
+                        ripple.className = 'day-ripple';
+                        btn.appendChild(ripple);
+                        setTimeout(() => ripple.remove(), 500);
                     }
                 }
             };
@@ -1670,7 +1756,6 @@
 
                 const doseText = card.querySelector(`#dose-text-${id}`);
                 if (doseText) {
-                    // Partially update DOM for smooth animation without flickering
                     doseText.innerText = count % med.pieces_per_plate;
                     
                     const progressBar = card.querySelector('.progress-bar');
@@ -1687,7 +1772,6 @@
                     return;
                 }
 
-                // Full render
                 card.innerHTML = `
                     <div class="absolute top-0 right-0 w-28 h-28 sm:w-36 sm:h-36 opacity-15 rounded-bl-[3rem] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:opacity-20" style="background:${med.color}"></div>
                     <button onclick="openEditMedModal('${med.id}')" class="absolute top-4 right-4 w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/90 dark:bg-slate-800/90 flex items-center justify-center text-indigo-500 shadow-lg action-btn z-20 border border-slate-500/10 backdrop-blur-sm">
@@ -1794,7 +1878,6 @@
             window.changeMonth = (delta) => {
                 const cal = document.getElementById('calendar');
                 
-                // Smooth slide out
                 cal.style.opacity = '0';
                 cal.style.transform = `translateX(${delta * 20}px)`;
                 
@@ -1807,7 +1890,6 @@
                     
                     renderCalendar();
                     
-                    // Reset position instantly for slide in
                     cal.style.transition = 'none';
                     cal.style.transform = `translateX(${delta * -20}px)`;
                     
@@ -1848,7 +1930,7 @@
                 const todayStr = new Date().toISOString().split('T')[0];
                 if (val > 0) {
                     if (date && date !== todayStr) {
-                        window.pendingDoseAction = { id, val, date };
+                        window.pendingDoseAction = { type: 'add', id, val, date };
                         document.getElementById('skipTimeBtn').classList.remove('hidden');
                         window.activeTimePickerTarget = { type: 'dose' };
                         
@@ -1864,6 +1946,59 @@
                     }
                 } else {
                     executeChangeDose(id, val, date || todayStr, null);
+                }
+            };
+
+            // === EDIT DOSE TIME FUNCTION ===
+            window.editDoseTime = (doseId, medId, dateStr) => {
+                window.pendingDoseAction = { type: 'edit', doseId, medId, dateStr };
+                document.getElementById('skipTimeBtn').classList.add('hidden');
+                window.activeTimePickerTarget = { type: 'editDose' };
+                
+                const doses = window.dayDosesMap[dateStr] || [];
+                const dose = doses.find(d => (d.id || d.tempId) === doseId);
+                if (dose) {
+                    const date = new Date(dose.created_at);
+                    window.selectedTimeParts = { h: date.getHours(), m: date.getMinutes() };
+                } else {
+                    const now = new Date();
+                    window.selectedTimeParts = { h: now.getHours(), m: 0 };
+                }
+                
+                renderHourPicker();
+                renderMinutePicker();
+                document.getElementById('timePickerTitle').innerText = "Modifier l'heure de la prise";
+                openModal('customTimeModal');
+            };
+
+            // === EXECUTE DOSE TIME EDIT ===
+            window.executeDoseTimeEdit = async (doseId, medId, dateStr, timeStr) => {
+                setSyncing(true);
+                try {
+                    const newCreatedAt = new Date(`${dateStr}T${timeStr}:00`).toISOString();
+                    const { error } = await sb.from('medication_doses').update({ created_at: newCreatedAt }).eq('id', doseId);
+                    if (error) throw error;
+                    
+                    // Update local state
+                    if (window.dayDosesMap[dateStr]) {
+                        const idx = window.dayDosesMap[dateStr].findIndex(d => (d.id || d.tempId) === doseId);
+                        if (idx > -1) {
+                            window.dayDosesMap[dateStr][idx].created_at = `${dateStr}T${timeStr}:00`;
+                        }
+                        window.dayDosesMap[dateStr].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                    }
+                    
+                    renderDayEditList(dateStr, true);
+                    if (document.getElementById('rightDrawer').classList.contains('translate-x-full') === false) {
+                        renderHistory();
+                    }
+                    
+                    showToast("Heure modifiée avec succès");
+                } catch (e) {
+                    showToast("Erreur lors de la modification de l'heure");
+                    renderDayEditList(dateStr, true);
+                } finally {
+                    setSyncing(false);
                 }
             };
 
@@ -1887,7 +2022,6 @@
             window.selectHour = (h) => {
                 window.selectedTimeParts.h = h;
                 
-                // Update classes directly without re-rendering to avoid scroll jumps
                 const oldActive = document.querySelector('#hourColumn .time-option.active');
                 if (oldActive) oldActive.classList.remove('active');
                 
@@ -1900,7 +2034,8 @@
             function renderMinutePicker() {
                 const col = document.getElementById('minuteColumn');
                 let html = '';
-                for (let m = 0; m < 60; m += 5) {
+                // === CHANGED: Now shows ALL 60 minutes (0-59) instead of every 5 ===
+                for (let m = 0; m < 60; m++) {
                     const active = window.selectedTimeParts.m === m ? 'active' : '';
                     html += `<div class="time-option ${active}" data-minute="${m}" onclick="selectMinute(${m})">${String(m).padStart(2, '0')}</div>`;
                 }
@@ -1929,7 +2064,6 @@
                 window.selectedTimeParts.h = h;
                 window.selectedTimeParts.m = m;
                 
-                // Smoothly update selectors
                 document.querySelectorAll('#hourColumn .time-option').forEach(el => {
                     el.classList.toggle('active', parseInt(el.dataset.hour) === h);
                 });
@@ -1957,6 +2091,11 @@
                     const { index, isEdit } = window.activeTimePickerTarget;
                     window.currentEditingSchedules[index].time = timeStr;
                     renderScheduleList(isEdit);
+                } else if (window.activeTimePickerTarget && window.activeTimePickerTarget.type === 'editDose') {
+                    // === EDIT DOSE TIME ===
+                    const { doseId, medId, dateStr } = window.pendingDoseAction;
+                    executeDoseTimeEdit(doseId, medId, dateStr, timeStr);
+                    window.pendingDoseAction = null;
                 } else if (window.pendingDoseAction) {
                     executeChangeDose(window.pendingDoseAction.id, window.pendingDoseAction.val, window.pendingDoseAction.date, timeStr);
                     window.pendingDoseAction = null;
@@ -1966,10 +2105,11 @@
 
             window.skipTime = () => {
                 closeModal('customTimeModal');
-                if (window.pendingDoseAction) {
+                if (window.activeTimePickerTarget && window.activeTimePickerTarget.type === 'dose' && window.pendingDoseAction) {
                     executeChangeDose(window.pendingDoseAction.id, window.pendingDoseAction.val, window.pendingDoseAction.date, null);
-                    window.pendingDoseAction = null;
                 }
+                window.pendingDoseAction = null;
+                window.activeTimePickerTarget = null;
             };
 
             window.executeChangeDose = async (id, val, date, time) => {
@@ -2114,8 +2254,6 @@
                 const monthName = new Intl.DateTimeFormat('fr', { month: 'long', year: 'numeric' }).format(currentDate);
                 document.getElementById('calMonth').innerText = monthName;
 
-                // Sunday is 0, Monday is 1, etc.
-                // Since we want Sunday as the first day, firstDay is simply getDay()
                 let firstDay = new Date(y, m, 1).getDay(); 
                 let daysInMonth = new Date(y, m + 1, 0).getDate();
 
@@ -2181,11 +2319,15 @@
                     
                     if (med.active !== false || dosesForMed.length > 0) {
                         hasRecords = true;
+                        // === ADDED: Edit button (pencil) next to each dose time ===
                         let dosesHtml = dosesForMed.length > 0 ? dosesForMed.map(d => {
                             const time = new Date(d.created_at).toLocaleTimeString('fr', { hour: '2-digit', minute: '2-digit' });
                             return `<div class="flex justify-between items-center bg-slate-500/5 px-3 py-2 rounded-lg text-sm font-bold mb-1">
                                         <span class="flex items-center gap-2"><i class="ph ph-clock text-xs opacity-50"></i> ${time}</span>
-                                        <button onclick="deleteSpecificDose('${d.id || d.tempId}', '${id}', '${dateStr}')" class="text-red-500 text-xs action-btn hover:scale-110 transition-transform"><i class="ph ph-trash text-sm"></i></button>
+                                        <div class="flex gap-1">
+                                            <button onclick="editDoseTime('${d.id || d.tempId}', '${id}', '${dateStr}')" class="text-indigo-500 text-xs action-btn hover:scale-110 transition-transform px-2 py-1 rounded-lg hover:bg-indigo-500/10" title="Modifier l'heure"><i class="ph ph-pencil-simple text-sm"></i></button>
+                                            <button onclick="deleteSpecificDose('${d.id || d.tempId}', '${id}', '${dateStr}')" class="text-red-500 text-xs action-btn hover:scale-110 transition-transform px-2 py-1 rounded-lg hover:bg-red-500/10" title="Supprimer"><i class="ph ph-trash text-sm"></i></button>
+                                        </div>
                                     </div>`;
                         }).join('') : '<div class="text-xs opacity-40 px-3 py-1">Aucune prise enregistrée</div>';
 
