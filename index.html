@@ -310,10 +310,10 @@
 
         .alert-stock {
             animation: pulse-soft 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 800;
-            padding: 4px 10px;
-            border-radius: 8px;
+            padding: 3px 8px;
+            border-radius: 6px;
             letter-spacing: 0.5px;
             display: inline-block;
         }
@@ -563,6 +563,18 @@
             animation: fadeOutScale 0.3s var(--ease-smooth) forwards;
             overflow: hidden;
         }
+
+        /* === COMPACT MED CARD === */
+        .med-card-compact {
+            position: relative;
+            overflow: hidden;
+        }
+        .med-card-compact::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 3px;
+        }
     </style>
 </head>
 <body class="p-3 sm:p-5 lg:p-6">
@@ -626,19 +638,8 @@
         </div>
 
         <div id="appBody" class="hidden space-y-6">
-            <div style="animation: fadeInUp 0.4s var(--ease-spring) forwards;">
-                <div class="flex justify-between items-center px-1 mb-4 sm:mb-6">
-                    <h2 class="font-black text-xs sm:text-sm uppercase tracking-widest opacity-60 flex items-center gap-2">
-                        <i class="ph ph-pill text-lg"></i> Mes Médicaments
-                    </h2>
-                    <button onclick="openModal('addMedModal')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-bold text-xs uppercase tracking-wider action-btn flex items-center gap-2 shadow-lg shadow-indigo-500/30">
-                        <i class="ph ph-plus-circle text-lg"></i> AJOUTER
-                    </button>
-                </div>
-                <div id="medsGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6"></div>
-            </div>
-
-            <div class="glass p-4 sm:p-8 rounded-[2rem]" style="animation: fadeInUp 0.5s var(--ease-spring) forwards; opacity: 0; animation-delay: 0.1s;">
+            <!-- === CALENDAR FIRST (on top) === -->
+            <div class="glass p-4 sm:p-8 rounded-[2rem]" style="animation: fadeInUp 0.4s var(--ease-spring) forwards;">
                 <div class="flex justify-between items-center mb-6 bg-slate-500/5 p-2 rounded-2xl">
                     <button onclick="changeMonth(-1)" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-500/15 nav-btn text-lg bg-white dark:bg-slate-800 shadow-sm">
                         <i class="ph ph-caret-left font-bold"></i>
@@ -660,6 +661,19 @@
                 <div class="overflow-hidden">
                     <div id="calendar" class="cal-wrapper gap-1.5 sm:gap-3"></div>
                 </div>
+            </div>
+
+            <!-- === MEDICATIONS BELOW (compact) === -->
+            <div style="animation: fadeInUp 0.5s var(--ease-spring) forwards; opacity: 0; animation-delay: 0.1s;">
+                <div class="flex justify-between items-center px-1 mb-3 sm:mb-4">
+                    <h2 class="font-black text-xs sm:text-sm uppercase tracking-widest opacity-60 flex items-center gap-2">
+                        <i class="ph ph-pill text-lg"></i> Médicaments du jour
+                    </h2>
+                    <button onclick="openModal('addMedModal')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-bold text-xs uppercase tracking-wider action-btn flex items-center gap-2 shadow-lg shadow-indigo-500/30">
+                        <i class="ph ph-plus-circle text-lg"></i> AJOUTER
+                    </button>
+                </div>
+                <div id="medsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"></div>
             </div>
         </div>
     </main>
@@ -908,6 +922,7 @@
             window.selectedTimeParts = { h: 8, m: 0 };
             window.currentEditingSchedules = [];
             let swRegistration = null;
+            let lastCheckedDay = new Date().getDay();
 
             const extendedColors = [
                 '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e',
@@ -1443,14 +1458,12 @@
                         btn.classList.remove('active');
                     }
                     
-                    // === BEAUTIFUL CLICK ANIMATION ===
                     const animClass = isActivating ? 'animate-on' : 'animate-off';
                     btn.classList.remove('animate-on', 'animate-off');
                     void btn.offsetWidth;
                     btn.classList.add(animClass);
                     setTimeout(() => btn.classList.remove(animClass), 500);
                     
-                    // Ripple effect when activating
                     if (isActivating) {
                         const ripple = document.createElement('span');
                         ripple.className = 'day-ripple';
@@ -1527,6 +1540,7 @@
                     validateMedForm();
                     
                     closeModal('addMedModal');
+                    renderAllMeds();
                 } catch (e) {
                     showToast("Erreur lors de l'ajout du médicament");
                 } finally {
@@ -1612,6 +1626,15 @@
                     }
                 }, 15000);
 
+                // === DAY CHANGE DETECTION: auto-refresh med list when day changes ===
+                setInterval(() => {
+                    const currentDay = new Date().getDay();
+                    if (currentDay !== lastCheckedDay) {
+                        lastCheckedDay = currentDay;
+                        renderAllMeds();
+                    }
+                }, 30000);
+
                 processQueue();
                 await loadMeds();
                 initUI();
@@ -1687,6 +1710,7 @@
                 }
             }
 
+            // === RENDER ALL MEDS: only show meds scheduled for today ===
             function renderAllMeds() {
                 const grid = document.getElementById('medsGrid');
                 const existingIds = new Set();
@@ -1698,6 +1722,7 @@
                     if (medsData[id].active !== false) {
                         const s = sched[id];
                         let showToday = true;
+                        // If schedule exists and has entries, only show if today is in the schedule
                         if (s && s.length > 0) {
                             showToday = false;
                             s.forEach(sc => {
@@ -1712,6 +1737,7 @@
                     }
                 }
 
+                // Remove cards that are no longer scheduled for today
                 Array.from(grid.children).forEach(child => {
                     if (child.id && child.id.startsWith('med-card-')) {
                         const medId = child.id.replace('med-card-', '');
@@ -1723,14 +1749,30 @@
                         }
                     }
                 });
+
+                // Show empty state message when no meds are scheduled for today
+                let emptyMsg = document.getElementById('emptyMedsMsg');
+                if (existingIds.size === 0) {
+                    if (!emptyMsg) {
+                        emptyMsg = document.createElement('div');
+                        emptyMsg.id = 'emptyMedsMsg';
+                        emptyMsg.className = 'text-center opacity-50 font-bold text-sm py-8 col-span-full text-slate-800 dark:text-white';
+                        emptyMsg.style.animation = 'fadeInUp 0.3s var(--ease-spring) forwards';
+                        emptyMsg.innerHTML = '<i class="ph ph-pill text-3xl block mb-2 opacity-40"></i>Aucun médicament à prendre aujourd\'hui';
+                        grid.appendChild(emptyMsg);
+                    }
+                } else {
+                    if (emptyMsg) emptyMsg.remove();
+                }
             }
 
+            // === COMPACT MED CARD: horizontal layout, all info preserved ===
             function renderMedCard(med, index) {
                 let card = document.getElementById(`med-card-${med.id}`);
                 if (!card) {
                     card = document.createElement('div');
                     card.id = `med-card-${med.id}`;
-                    card.className = "glass p-5 sm:p-7 relative rounded-3xl overflow-hidden group";
+                    card.className = "glass med-card-compact p-3 sm:p-4 relative rounded-2xl overflow-hidden group";
                     card.style.animation = `fadeInUp 0.4s var(--ease-spring) forwards`;
                     card.style.opacity = '0';
                     card.style.animationDelay = `${index * 0.08}s`;
@@ -1748,7 +1790,6 @@
                 const total = med.pieces_per_plate * med.plates_per_box;
                 const prog = total ? (count / total) * 100 : 0;
                 
-                // Calculation for remaining plates and pills
                 const isBoxEmpty = count >= total && total > 0;
                 const dosesTakenInPlate = isBoxEmpty ? 0 : count % med.pieces_per_plate;
                 const currentPlateNumber = isBoxEmpty ? med.plates_per_box : Math.floor(count / med.pieces_per_plate) + 1;
@@ -1757,11 +1798,12 @@
                 const remaining = total - count;
 
                 let tag = prog >= 90 ?
-                    `<div class="alert-stock bg-red-500 text-white shadow-lg shadow-red-500/40">URGENT</div>` :
+                    `<span class="alert-stock bg-red-500 text-white">URGENT</span>` :
                     prog >= 80 ?
-                    `<div class="alert-stock bg-orange-500 text-white shadow-lg shadow-orange-500/40">STOCK BAS</div>` :
-                    `<div class="text-[10px] font-black opacity-60 uppercase tracking-widest text-slate-800 dark:text-white">${remaining} prises au total</div>`;
+                    `<span class="alert-stock bg-orange-500 text-white">STOCK BAS</span>` :
+                    `<span class="text-[9px] font-black opacity-50 uppercase tracking-wider text-slate-800 dark:text-white">${remaining} prises au total</span>`;
 
+                // === UPDATE PATH: card already exists, just update values ===
                 const doseText = card.querySelector(`#dose-text-${id}`);
                 if (doseText) {
                     doseText.innerText = isBoxEmpty ? 0 : count % med.pieces_per_plate;
@@ -1773,7 +1815,7 @@
                     if (progressText) progressText.innerText = `${Math.round(prog)}%`;
                     
                     const plateText = card.querySelector('.plate-text');
-                    if (plateText) plateText.innerText = `Plaque ${currentPlateNumber} / ${med.plates_per_box}`;
+                    if (plateText) plateText.innerText = `Plq ${currentPlateNumber}/${med.plates_per_box}`;
                     
                     const stockAlert = card.querySelector('.stock-alert');
                     if (stockAlert) stockAlert.innerHTML = tag;
@@ -1787,44 +1829,42 @@
                     return;
                 }
 
+                // === CREATE PATH: build compact card HTML ===
                 card.innerHTML = `
-                    <div class="absolute top-0 right-0 w-28 h-28 sm:w-36 sm:h-36 opacity-15 rounded-bl-[3rem] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:opacity-20" style="background:${med.color}"></div>
-                    <button onclick="openEditMedModal('${med.id}')" class="absolute top-4 right-4 w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/90 dark:bg-slate-800/90 flex items-center justify-center text-indigo-500 shadow-lg action-btn z-20 border border-slate-500/10 backdrop-blur-sm">
-                        <i class="ph ph-pencil-simple text-base sm:text-lg"></i>
+                    <div class="absolute left-0 top-0 bottom-0 w-1.5" style="background:${med.color}"></div>
+                    <button onclick="openEditMedModal('${med.id}')" class="absolute top-2.5 right-2.5 w-7 h-7 rounded-lg bg-slate-500/10 hover:bg-indigo-500/15 hover:text-indigo-500 flex items-center justify-center action-btn z-20">
+                        <i class="ph ph-pencil-simple text-xs"></i>
                     </button>
-                    <div class="flex flex-col items-start mb-4 relative z-10 w-[80%] pr-4">
-                        <div class="font-black text-lg sm:text-xl uppercase tracking-wide truncate w-full" style="color:${med.color}">${med.name}</div>
-                        <div class="mt-1 stock-alert">${tag}</div>
-                    </div>
-                    <div class="progress-container mb-4">
-                        <div class="progress-bar" style="width:${prog}%; background:${med.color}"></div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 mb-4 relative z-10">
-                        <div class="bg-slate-500/5 rounded-xl p-2 text-center border border-slate-500/10">
-                            <div class="text-[9px] font-black uppercase opacity-60 tracking-wider text-slate-800 dark:text-white">Plaques restantes</div>
-                            <div class="text-lg font-black text-indigo-500 remaining-plates">${remainingFullPlates}</div>
+                    <div class="pl-3 pr-9">
+                        <div class="flex items-center gap-2 mb-1.5">
+                            <div class="font-black text-sm sm:text-base uppercase tracking-wide truncate flex-1" style="color:${med.color}">${med.name}</div>
                         </div>
-                        <div class="bg-slate-500/5 rounded-xl p-2 text-center border border-slate-500/10">
-                            <div class="text-[9px] font-black uppercase opacity-60 tracking-wider text-slate-800 dark:text-white">Prises restantes (plaque)</div>
-                            <div class="text-lg font-black text-indigo-500 remaining-doses">${remainingDosesInCurrentPlate}</div>
+                        <div class="stock-alert mb-2">${tag}</div>
+                        <div class="progress-container mb-2.5" style="height: 5px;">
+                            <div class="progress-bar" style="width:${prog}%; background:${med.color}"></div>
+                        </div>
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex flex-wrap gap-1 text-[9px] font-bold">
+                                <span class="plate-text bg-slate-500/10 px-2 py-1 rounded text-slate-800 dark:text-white">Plq ${currentPlateNumber}/${med.plates_per_box}</span>
+                                <span class="hidden sm:inline-block bg-slate-500/10 px-2 py-1 rounded text-slate-800 dark:text-white"><span class="remaining-plates">${remainingFullPlates}</span> plq rest.</span>
+                                <span class="hidden sm:inline-block bg-slate-500/10 px-2 py-1 rounded text-slate-800 dark:text-white"><span class="remaining-doses">${remainingDosesInCurrentPlate}</span> /plq</span>
+                                <span class="progress-text bg-slate-500/10 px-2 py-1 rounded font-black" style="color:${med.color}">${Math.round(prog)}%</span>
+                            </div>
+                            <div class="flex items-center gap-1 bg-slate-500/5 p-1 rounded-xl flex-shrink-0">
+                                <button onclick="changeDose('${med.id}', -1)" class="dose-btn w-8 h-8 rounded-lg bg-white dark:bg-slate-800 shadow-sm text-red-500 font-black flex items-center justify-center">
+                                    <i class="ph ph-minus text-sm"></i>
+                                </button>
+                                <div class="text-center min-w-[36px]">
+                                    <div class="text-lg font-black dose-anim" id="dose-text-${med.id}" style="color:${med.color}">${isBoxEmpty ? 0 : count % med.pieces_per_plate}</div>
+                                    <div class="text-[8px] opacity-50 font-bold">/ ${med.pieces_per_plate}</div>
+                                </div>
+                                <button onclick="changeDose('${med.id}', 1)" class="dose-btn w-8 h-8 rounded-lg bg-white dark:bg-slate-800 shadow-sm font-black flex items-center justify-center" style="color:${med.color}">
+                                    <i class="ph ph-plus text-sm"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    <div class="flex justify-between items-center mb-4 relative z-10">
-                        <span class="plate-text text-xs font-bold opacity-60 bg-slate-500/10 px-3 py-1.5 rounded-lg text-slate-800 dark:text-white">Plaque ${currentPlateNumber} / ${med.plates_per_box}</span>
-                        <span class="progress-text text-base sm:text-lg font-black transition-all duration-300" style="color:${med.color}">${Math.round(prog)}%</span>
-                    </div>
-                    <div class="flex items-center justify-between bg-slate-500/5 p-2 sm:p-3 rounded-2xl relative z-10 border border-slate-500/10 shadow-inner">
-                        <button onclick="changeDose('${med.id}', -1)" class="dose-btn w-12 h-12 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white shadow-md flex items-center justify-center font-black hover:text-red-500 text-xl">
-                            <i class="ph ph-minus"></i>
-                        </button>
-                        <div class="text-center px-2 sm:px-4 text-slate-800 dark:text-white">
-                            <div class="text-3xl sm:text-4xl font-black tracking-tighter dose-anim" id="dose-text-${med.id}">${isBoxEmpty ? 0 : count % med.pieces_per_plate}</div>
-                            <div class="text-[10px] opacity-50 font-bold uppercase tracking-widest mt-1">/ ${med.pieces_per_plate}</div>
-                        </div>
-                        <button onclick="changeDose('${med.id}', 1)" class="dose-btn w-12 h-12 rounded-xl bg-white dark:bg-slate-800 shadow-md flex items-center justify-center font-black text-xl" style="color:${med.color}">
-                            <i class="ph ph-plus"></i>
-                        </button>
-                    </div>`;
+                `;
             }
 
             window.openEditMedModal = (id) => {
@@ -1904,7 +1944,6 @@
                 const cal = document.getElementById('calendar');
                 const monthEl = document.getElementById('calMonth');
                 
-                // Slide out animation
                 cal.style.transition = 'opacity 0.2s ease-out, transform 0.2s ease-out';
                 cal.style.opacity = '0';
                 cal.style.transform = `translateX(${delta * -40}px)`;
@@ -1920,9 +1959,8 @@
                     const startDate = `${y}-${String(m+1).padStart(2,'0')}-01`;
                     const endDate = `${y}-${String(m+1).padStart(2,'0')}-${new Date(y, m+1, 0).getDate()}`;
                     
-                    renderCalendar(); // Updates text content while invisible
+                    renderCalendar();
                     
-                    // Prepare to slide in from the opposite direction
                     cal.style.transition = 'none';
                     cal.style.transform = `translateX(${delta * 40}px)`;
                     cal.style.opacity = '0';
@@ -1931,10 +1969,8 @@
                     monthEl.style.transform = `translateX(${delta * 10}px)`;
                     monthEl.style.opacity = '0';
                     
-                    // Force reflow
                     void cal.offsetWidth;
                     
-                    // Slide in animation
                     requestAnimationFrame(() => {
                         cal.style.transition = 'opacity 0.3s var(--ease-spring), transform 0.3s var(--ease-spring)';
                         cal.style.opacity = '1';
@@ -1995,7 +2031,6 @@
                 }
             };
 
-            // === EDIT DOSE TIME FUNCTION ===
             window.editDoseTime = (doseId, medId, dateStr) => {
                 window.pendingDoseAction = { type: 'edit', doseId, medId, dateStr };
                 document.getElementById('skipTimeBtn').classList.add('hidden');
@@ -2017,7 +2052,6 @@
                 openModal('customTimeModal');
             };
 
-            // === EXECUTE DOSE TIME EDIT ===
             window.executeDoseTimeEdit = async (doseId, medId, dateStr, timeStr) => {
                 setSyncing(true);
                 try {
@@ -2025,7 +2059,6 @@
                     const { error } = await sb.from('medication_doses').update({ created_at: newCreatedAt }).eq('id', doseId);
                     if (error) throw error;
                     
-                    // Update local state
                     if (window.dayDosesMap[dateStr]) {
                         const idx = window.dayDosesMap[dateStr].findIndex(d => (d.id || d.tempId) === doseId);
                         if (idx > -1) {
@@ -2080,7 +2113,6 @@
             function renderMinutePicker() {
                 const col = document.getElementById('minuteColumn');
                 let html = '';
-                // === CHANGED: Now shows ALL 60 minutes (0-59) instead of every 5 ===
                 for (let m = 0; m < 60; m++) {
                     const active = window.selectedTimeParts.m === m ? 'active' : '';
                     html += `<div class="time-option ${active}" data-minute="${m}" onclick="selectMinute(${m})">${String(m).padStart(2, '0')}</div>`;
@@ -2138,7 +2170,6 @@
                     window.currentEditingSchedules[index].time = timeStr;
                     renderScheduleList(isEdit);
                 } else if (window.activeTimePickerTarget && window.activeTimePickerTarget.type === 'editDose') {
-                    // === EDIT DOSE TIME ===
                     const { doseId, medId, dateStr } = window.pendingDoseAction;
                     executeDoseTimeEdit(doseId, medId, dateStr, timeStr);
                     window.pendingDoseAction = null;
@@ -2365,7 +2396,6 @@
                     
                     if (med.active !== false || dosesForMed.length > 0) {
                         hasRecords = true;
-                        // === ADDED: Edit button (pencil) next to each dose time ===
                         let dosesHtml = dosesForMed.length > 0 ? dosesForMed.map(d => {
                             const time = new Date(d.created_at).toLocaleTimeString('fr', { hour: '2-digit', minute: '2-digit' });
                             return `<div class="flex justify-between items-center bg-slate-500/5 px-3 py-2 rounded-lg text-sm font-bold mb-1">
@@ -2594,4 +2624,4 @@
         });
     </script>
 </body>
-    </html>
+</html>
