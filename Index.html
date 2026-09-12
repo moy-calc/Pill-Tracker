@@ -719,6 +719,14 @@
                     <i class="ph ph-password absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
                     <input type="password" id="loginPw" oninput="validateLoginForm()" placeholder="Mot de passe" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
                 </div>
+                <div class="text-right -mt-1">
+                    <button type="button" onclick="toggleForgotPw()" class="text-[11px] font-bold text-indigo-500 hover:underline">Mot de passe oublié ?</button>
+                </div>
+                <div id="forgotPwBox" class="hidden space-y-3 bg-indigo-500/5 border border-indigo-500/20 rounded-2xl p-4" style="animation: fadeInUp 0.3s var(--ease-spring) forwards;">
+                    <p class="text-[11px] font-semibold opacity-70 text-left leading-relaxed">Entrez l'email de votre compte : vous recevrez un lien pour choisir un nouveau mot de passe. (Comptes avec email uniquement — pas les anciens comptes non migrés.)</p>
+                    <input type="email" id="forgotEmail" placeholder="Email du compte" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-xl p-3 font-bold text-sm outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
+                    <button onclick="sendResetEmail()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs uppercase tracking-widest action-btn shadow-lg shadow-indigo-600/30">📧 Envoyer le lien</button>
+                </div>
                 <button id="loginBtn" onclick="handleLogin()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl opacity-50 pointer-events-none action-btn flex items-center justify-center gap-2 text-sm tracking-widest uppercase shadow-lg shadow-indigo-600/30">
                     SE CONNECTER <i class="ph ph-arrow-right font-bold text-xl"></i>
                 </button>
@@ -856,15 +864,24 @@
                 <input type="password" id="newPassSet" placeholder="Nouveau mot de passe (6 car. min)" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
                 <button onclick="changePassword()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-xs uppercase tracking-widest action-btn shadow-lg shadow-indigo-600/30">Changer le mot de passe</button>
                 <div class="h-px w-full bg-slate-500/20 my-4 sm:my-6 rounded-full"></div>
-                <div class="space-y-2">
-                    <label class="text-xs font-black uppercase opacity-60">Lier Telegram</label>
-                    <div class="flex flex-col sm:flex-row gap-2">
-                        <a id="telegramLinkBtn" href="https://t.me/Med_tracker_pro_Bot" target="_blank" class="flex-1 bg-indigo-500/10 text-indigo-500 font-bold rounded-2xl py-3 text-center text-sm action-btn hover:bg-indigo-500/20 transition-all">
-                            <i class="ph ph-telegram-logo"></i> Ouvrir le Bot
-                        </a>
-                        <input type="text" id="telegramChatId" placeholder="Votre ID Telegram" class="flex-1 bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 font-bold text-sm outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
+                <div class="space-y-3">
+                    <label class="text-xs font-black uppercase opacity-60 flex items-center gap-2"><i class="ph ph-telegram-logo text-indigo-500"></i> Rappels Telegram</label>
+                    <div id="tgStatus" class="text-[11px] font-bold px-3 py-2.5 rounded-xl bg-slate-500/5 border border-slate-500/10 text-left text-slate-800 dark:text-white"></div>
+                    <a href="https://t.me/Med_tracker_pro_Bot" target="_blank" class="w-full block bg-indigo-500/10 text-indigo-500 font-bold rounded-2xl py-3 text-center text-sm action-btn hover:bg-indigo-500/20 transition-all">
+                        <i class="ph ph-telegram-logo"></i> Ouvrir le Bot
+                    </a>
+                    <p class="text-[10px] opacity-50 font-semibold text-left leading-relaxed">1️⃣ Envoyez <span class="font-black">/start</span> au bot sur Telegram<br>2️⃣ Il vous répond par un code à 6 chiffres (valable 15 min)<br>3️⃣ Entrez ce code ici et appuyez sur « Lier » :</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="tgLinkCode" inputmode="numeric" maxlength="6" placeholder="••••••" class="flex-1 bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 font-bold text-lg text-center tracking-[0.3em] outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
+                        <button onclick="linkTelegram()" class="px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-xs uppercase tracking-widest action-btn shadow-lg shadow-indigo-600/30">Lier</button>
                     </div>
-                    <button onclick="saveTelegramId()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-xs uppercase tracking-widest action-btn shadow-lg shadow-indigo-600/30">Enregistrer l'ID</button>
+                    <details class="text-[10px] font-semibold">
+                        <summary class="cursor-pointer select-none uppercase tracking-wider font-black opacity-50 py-1">Option avancée : ID manuel</summary>
+                        <div class="flex gap-2 pt-2">
+                            <input type="text" id="telegramChatId" placeholder="Votre ID Telegram" class="flex-1 bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 font-bold text-sm outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
+                            <button onclick="saveTelegramId()" class="px-4 bg-slate-500/15 hover:bg-slate-500/25 font-bold rounded-2xl text-[10px] uppercase tracking-widest action-btn text-slate-800 dark:text-white">OK</button>
+                        </div>
+                    </details>
                 </div>
                 <div class="h-px w-full bg-slate-500/20 my-4 sm:my-6 rounded-full"></div>
                 <div class="pt-3 space-y-2">
@@ -1169,6 +1186,29 @@
         </div>
     </div>
 
+    <div id="resetPwModal" class="modal-overlay z-uber">
+        <div class="modal-content glass p-6 sm:p-8" onclick="event.stopPropagation()">
+            <div class="flex justify-center mb-4 text-indigo-500">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-indigo-500/10 rounded-full flex items-center justify-center shadow-inner">
+                    <i class="ph ph-key text-4xl warning-shake"></i>
+                </div>
+            </div>
+            <h3 class="font-black mb-2 text-center uppercase text-sm tracking-widest text-indigo-500">Nouveau mot de passe</h3>
+            <p class="text-xs opacity-60 text-center mb-5">Choisissez un nouveau mot de passe pour votre compte.</p>
+            <div class="space-y-4">
+                <div class="relative">
+                    <i class="ph ph-password absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
+                    <input type="password" id="newPwInput" placeholder="Nouveau mot de passe (6 car. min)" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
+                </div>
+                <div class="relative">
+                    <i class="ph ph-password absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
+                    <input type="password" id="newPwConfirm" placeholder="Confirmer le mot de passe" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
+                </div>
+                <button onclick="updateNewPassword()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl uppercase text-xs tracking-widest action-btn shadow-lg shadow-indigo-600/30">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         window.addEventListener('load', () => {
             if (typeof supabase === 'undefined') {
@@ -1179,10 +1219,9 @@
             const sb = supabase.createClient(
                 'https://jyjjlaqmmfmoqrxcbizy.supabase.co',
                 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5ampsYXFtbWZtb3FyeGNiaXp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MDIzMTksImV4cCI6MjA5OTE3ODMxOX0.XPVACZLMNcdYcZBhNbuHdql6NBMRdgZDuhHKZfxNM6I',
-                { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } }
+                { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
             );
 
-            // === AUTH : utilisateur connecté (Supabase Auth) ===
             let uid = null;
             let userEmail = "";
 
@@ -1199,10 +1238,10 @@
             window.activeTimePickerTarget = null;
             window.selectedTimeParts = { h: 8, m: 0 };
             window.currentEditingSchedules = [];
+            window.__recoveryUser = null;
             let swRegistration = null;
             let lastCheckedDate = '';
 
-            // === ETAT DES FORMULAIRES (ajout / édition) ===
             let addPackaging = 'plate';
             let addTrackingMode = 'stock';
             let addDurationUnit = 'day';
@@ -1224,7 +1263,6 @@
                 '#34d399', '#22d3ee', '#38bdf8', '#60a5fa', '#818cf8'
             ];
 
-            // === LOCAL DATE HELPERS ===
             function getLocalDateStr(date = new Date()) {
                 const y = date.getFullYear();
                 const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -1274,7 +1312,6 @@
 
             lastCheckedDate = getLocalDateStr();
 
-            // === CUSTOM CONFIRM DIALOG ===
             window.customConfirm = (title, message, onConfirm, confirmText = "Confirmer", isDanger = true) => {
                 document.getElementById('confirmTitle').innerText = title;
                 document.getElementById('confirmMessage').innerText = message;
@@ -1479,7 +1516,7 @@
             }
 
             // ============================================================
-            // === SYSTEME DE LOGIN : SUPABASE AUTH (RLS compatible) ===
+            // === AUTH : LOGIN / SIGNUP / MIGRATION / MOT DE PASSE OUBLIÉ ===
             // ============================================================
 
             function validEmail(v) {
@@ -1615,7 +1652,7 @@
                 const runClaim = async () => {
                     const { data: res, error: rpcErr } = await sb.rpc('claim_legacy_account', { old_key: oldKey, old_pw: oldPw });
                     if (rpcErr || !res || !res.success) {
-                        const msg = (res && res.message) ? res.message : "La migration a échoué. Vérifiez vos anciennes informations.";
+                        const msg = (res && res.message) ? res.message : "La migration a échouée. Vérifiez vos anciennes informations.";
                         customConfirm("Migration échouée", msg, async () => {
                             await sb.auth.signOut();
                             location.reload();
@@ -1657,11 +1694,50 @@
                 }
             };
 
+            // === MOT DE PASSE OUBLIÉ ===
+            window.toggleForgotPw = () => {
+                document.getElementById('forgotPwBox').classList.toggle('hidden');
+            };
+
+            window.sendResetEmail = async () => {
+                const email = document.getElementById('forgotEmail').value.trim();
+                if (!validEmail(email)) return showToast("Entrez un email valide.");
+                const redirectTo = window.location.origin + window.location.pathname;
+                setSyncing(true);
+                try {
+                    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo });
+                    if (error) { showToast(authErrMsg(error.message)); return; }
+                    showToast("Lien envoyé ! Vérifiez votre boîte mail (et les spams).");
+                    document.getElementById('forgotPwBox').classList.add('hidden');
+                    document.getElementById('forgotEmail').value = '';
+                } finally {
+                    setSyncing(false);
+                }
+            };
+
+            window.updateNewPassword = async () => {
+                const pw = document.getElementById('newPwInput').value;
+                const pw2 = document.getElementById('newPwConfirm').value;
+                if (pw.length < 6) return showToast("6 caractères minimum.");
+                if (pw !== pw2) return showToast("Les mots de passe ne correspondent pas.");
+                setSyncing(true);
+                try {
+                    const { error } = await sb.auth.updateUser({ password: pw });
+                    if (error) { showToast(authErrMsg(error.message)); return; }
+                    showToast("Mot de passe mis à jour !");
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    window.__recoveryUser = null;
+                    setTimeout(() => location.reload(), 700);
+                } finally {
+                    setSyncing(false);
+                }
+            };
+
             function clearLocalData() {
                 ['medUser', 'medSchedules', 'medNotified', 'medQueue', 'pendingMigration', 'pendingProfile'].forEach(k => localStorage.removeItem(k));
             }
 
-            // === Gestion du compte (modal) ===
+            // === Gestion du compte ===
             window.saveProfile = async () => {
                 const ln = document.getElementById('editLN').value.trim();
                 const fn = document.getElementById('editFN').value.trim();
@@ -1728,6 +1804,63 @@
                 await sb.auth.signOut();
                 clearLocalData();
                 location.reload();
+            };
+
+            // === TELEGRAM : liaison par code + statut ===
+            window.refreshTelegramStatus = async () => {
+                const el = document.getElementById('tgStatus');
+                if (!el || !uid) return;
+                try {
+                    const { data } = await sb.from('telegram_ids').select('chat_id, timezone').eq('user_id', uid).maybeSingle();
+                    if (data && data.chat_id) {
+                        el.innerHTML = '<span class="text-green-500 font-black">● Telegram lié</span> — rappels activés <span class="opacity-50 font-semibold">(' + (data.timezone || 'UTC') + ')</span>';
+                    } else {
+                        el.innerHTML = '<span class="text-orange-500 font-black">● Telegram non lié</span> — envoyez /start au bot, puis entrez le code ci-dessous.';
+                    }
+                } catch (e) {
+                    el.innerHTML = '<span class="opacity-50">État inconnu.</span>';
+                }
+            };
+
+            window.linkTelegram = async () => {
+                const code = document.getElementById('tgLinkCode').value.trim();
+                if (code.length < 4) return showToast("Entrez le code à 6 chiffres reçu dans le bot.");
+                const tz = (Intl.DateTimeFormat().resolvedOptions().timeZone) || 'UTC';
+                setSyncing(true);
+                try {
+                    const { data: res, error } = await sb.rpc('link_telegram', { p_code: code, p_tz: tz });
+                    if (error || !res || res.success === false) {
+                        showToast((res && res.message) || "Code invalide ou expiré.");
+                        return;
+                    }
+                    document.getElementById('tgLinkCode').value = '';
+                    showToast(res.message || "Telegram lié avec succès !");
+                    refreshTelegramStatus();
+                } catch (e) {
+                    showToast("Erreur de liaison");
+                } finally {
+                    setSyncing(false);
+                }
+            };
+
+            window.saveTelegramId = async () => {
+                const chatId = document.getElementById('telegramChatId').value.trim();
+                if (!chatId) return showToast("Veuillez entrer un ID Telegram");
+                const tz = (Intl.DateTimeFormat().resolvedOptions().timeZone) || 'UTC';
+                setSyncing(true);
+                try {
+                    const { error } = await sb.from('telegram_ids').upsert(
+                        { user_id: uid, chat_id: chatId, timezone: tz },
+                        { onConflict: 'user_id' }
+                    );
+                    if (error) throw error;
+                    showToast("ID Telegram enregistré !");
+                    refreshTelegramStatus();
+                } catch (e) {
+                    showToast("Erreur lors de l'enregistrement");
+                } finally {
+                    setSyncing(false);
+                }
             };
 
             // ============================================================
@@ -1949,25 +2082,6 @@
                 }
             };
 
-            window.saveTelegramId = async () => {
-                const chatId = document.getElementById('telegramChatId').value.trim();
-                if (!chatId) return showToast("Veuillez entrer un ID Telegram");
-                
-                setSyncing(true);
-                try {
-                    const { error } = await sb.from('telegram_ids').upsert(
-                        { user_id: uid, chat_id: chatId },
-                        { onConflict: 'user_id' }
-                    );
-                    if (error) throw error;
-                    showToast("ID Telegram enregistré !");
-                } catch (e) {
-                    showToast("Erreur lors de l'enregistrement");
-                } finally {
-                    setSyncing(false);
-                }
-            };
-
             window.addScheduleRow = (isEdit = false) => {
                 window.currentEditingSchedules.push({ time: "08:00", days: [1,2,3,4,5] });
                 renderScheduleList(isEdit);
@@ -2143,12 +2257,12 @@
                 }
             };
 
-            // === ENTREE DANS L'APP (utilisateur connecté) ===
+            // === ENTREE DANS L'APP ===
             async function enterApp(authUser) {
+                if (uid) return;
                 uid = authUser.id;
                 userEmail = authUser.email || "";
 
-                // === Migration en attente (ancien compte à rattacher) ===
                 try {
                     const pending = JSON.parse(localStorage.getItem('pendingMigration') || 'null');
                     if (pending) {
@@ -2162,7 +2276,6 @@
                     localStorage.removeItem('pendingMigration');
                 }
 
-                // === Profil ===
                 let prof = null;
                 try {
                     const { data } = await sb.from('profiles').select('*').eq('id', uid).maybeSingle();
@@ -2183,11 +2296,7 @@
                 document.getElementById('editBD').value = prof.birth_date || '';
                 document.getElementById('editAgeDisplay').innerText = calculateAge(prof.birth_date || '');
 
-                // === Telegram ===
-                try {
-                    const { data: tg } = await sb.from('telegram_ids').select('chat_id').eq('user_id', uid).maybeSingle();
-                    if (tg) document.getElementById('telegramChatId').value = tg.chat_id;
-                } catch (e) {}
+                refreshTelegramStatus();
 
                 document.getElementById('loginBox').classList.add('hidden');
                 document.getElementById('appBody').classList.remove('hidden');
@@ -3425,24 +3534,36 @@
                 }
             };
 
-            // === BOOT : session Supabase Auth ===
+            // === BOOT : session + récupération de mot de passe ===
             initUI();
 
+            sb.auth.onAuthStateChange(async (event, session) => {
+                if (event === 'SIGNED_OUT') { location.reload(); return; }
+                if (event === 'PASSWORD_RECOVERY' && session) {
+                    window.__recoveryUser = session.user;
+                    document.getElementById('loginBox').classList.add('hidden');
+                    openModal('resetPwModal');
+                    return;
+                }
+                if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && !uid && !window.__recoveryUser) {
+                    await enterApp(session.user);
+                }
+            });
+
             (async function boot() {
+                const flow = (window.location.search + window.location.hash);
+                if (flow.includes('code=') || flow.includes('type=recovery')) {
+                    await new Promise(r => setTimeout(r, 1500));
+                }
                 const { data: { session } } = await sb.auth.getSession();
+                if (window.__recoveryUser) return;
                 if (session && session.user) {
                     await enterApp(session.user);
                 } else if (localStorage.getItem('medUser')) {
-                    // ancien utilisateur détecté → on l'envoie directement sur l'onglet Migrer
                     showLoginTab('migrate');
                 }
-                sb.auth.onAuthStateChange((event) => {
-                    if (event === 'SIGNED_OUT') {
-                        location.reload();
-                    }
-                });
             })();
         });
     </script>
 </body>
-</html>
+    </html>
