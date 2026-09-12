@@ -488,6 +488,37 @@
             color: rgba(249, 115, 22, 0.7);
         }
 
+        .toggle-btn {
+            padding: 10px 6px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: transform 0.15s var(--ease-spring), background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+            will-change: transform;
+        }
+
+        .toggle-btn:active {
+            transform: scale(0.93);
+        }
+
+        .toggle-btn.active {
+            background: #6366f1;
+            color: white;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+        }
+
+        .toggle-btn:not(.active) {
+            background: rgba(148, 163, 184, 0.2);
+            color: rgba(148, 163, 184, 1);
+        }
+
         .time-display {
             font-size: 48px;
             font-weight: 800;
@@ -634,7 +665,7 @@
         }
 
         .confirm-icon-wrap:hover {
-            transform: scale(1.15) rotate(5deg;
+            transform: scale(1.15) rotate(5deg);
         }
     </style>
 </head>
@@ -664,38 +695,98 @@
     </nav>
 
     <main class="max-w-5xl mx-auto space-y-6 pb-12">
-        <div id="loginBox" class="glass p-6 sm:p-10 text-center space-y-6 max-w-md mx-auto mt-8 sm:mt-12 rounded-[2rem]" style="animation: popIn 0.4s var(--ease-spring) forwards;">
+        <div id="loginBox" class="glass p-6 sm:p-8 text-center space-y-5 max-w-md mx-auto mt-8 sm:mt-12 rounded-[2rem]" style="animation: popIn 0.4s var(--ease-spring) forwards;">
             <div class="w-20 h-20 sm:w-24 sm:h-24 bg-indigo-500/10 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-2 transition-transform duration-500 hover:scale-110 hover:rotate-12">
                 <i class="ph ph-lock-key text-4xl sm:text-5xl"></i>
             </div>
             <div>
                 <h2 class="text-2xl sm:text-3xl font-black mb-1 tracking-tight">Bienvenue</h2>
-                <p class="text-sm opacity-60 font-semibold">Veuillez vous identifier pour continuer</p>
+                <p class="text-sm opacity-60 font-semibold">Connexion sécurisée à votre compte</p>
             </div>
-            <div class="space-y-4">
+            <div class="flex gap-2 bg-slate-500/5 p-2 rounded-2xl">
+                <button onclick="showLoginTab('login')" id="loginTabBtn" class="flex-1 py-2.5 rounded-xl font-bold text-sm transition-all action-btn bg-indigo-500 text-white shadow-md">Connexion</button>
+                <button onclick="showLoginTab('signup')" id="signupTabBtn" class="flex-1 py-2.5 rounded-xl font-bold text-sm transition-all action-btn text-slate-500">Créer</button>
+                <button onclick="showLoginTab('migrate')" id="migrateTabBtn" class="flex-1 py-2.5 rounded-xl font-bold text-sm transition-all action-btn text-slate-500">Migrer</button>
+            </div>
+
+            <!-- PANEL CONNEXION -->
+            <div id="loginPanel" class="space-y-4">
                 <div class="relative">
-                    <i class="ph ph-text-aa absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl transition-all duration-300" id="iconLN"></i>
-                    <input type="text" id="lastName" oninput="validateInput('lastName', 'iconLN')" placeholder="Nom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
-                </div>
-                <div class="relative">
-                    <i class="ph ph-text-a-underline absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl transition-all duration-300" id="iconFN"></i>
-                    <input type="text" id="firstName" oninput="validateInput('firstName', 'iconFN')" placeholder="Prénom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
-                </div>
-                <div>
-                    <div class="relative">
-                        <i class="ph ph-calendar-blank absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl transition-all duration-300" id="iconBD"></i>
-                        <input type="text" id="birthDate" readonly onclick="openCustomDatePicker('birthDate')" placeholder="Date de naissance" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 cursor-pointer text-base">
-                    </div>
-                    <div id="ageDisplay" class="text-xs font-bold text-indigo-500 mt-2 hidden text-right pr-3" style="animation: slideInRight 0.3s forwards;"></div>
+                    <i class="ph ph-envelope-simple absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
+                    <input type="email" id="loginEmail" oninput="validateLoginForm()" placeholder="Email" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
                 </div>
                 <div class="relative">
                     <i class="ph ph-password absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
-                    <input type="password" id="passInput" placeholder="Mot de passe" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 hidden text-base">
+                    <input type="password" id="loginPw" oninput="validateLoginForm()" placeholder="Mot de passe" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
                 </div>
+                <button id="loginBtn" onclick="handleLogin()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl opacity-50 pointer-events-none action-btn flex items-center justify-center gap-2 text-sm tracking-widest uppercase shadow-lg shadow-indigo-600/30">
+                    SE CONNECTER <i class="ph ph-arrow-right font-bold text-xl"></i>
+                </button>
+                <p class="text-[11px] opacity-50 font-semibold leading-relaxed">Compte de l'ancienne version ? Utilisez l'onglet <span class="text-indigo-500 font-bold">Migrer</span> pour le récupérer.</p>
             </div>
-            <button id="authBtn" onclick="handleAuth()" class="w-full py-4 sm:py-5 mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl opacity-50 pointer-events-none action-btn flex items-center justify-center gap-2 text-sm tracking-widest uppercase shadow-lg shadow-indigo-600/30">
-                VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>
-            </button>
+
+            <!-- PANEL CREER -->
+            <div id="signupPanel" class="space-y-4 hidden">
+                <div class="relative">
+                    <i class="ph ph-text-aa absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
+                    <input type="text" id="signupLN" oninput="validateSignupForm()" placeholder="Nom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
+                </div>
+                <div class="relative">
+                    <i class="ph ph-text-a-underline absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
+                    <input type="text" id="signupFN" oninput="validateSignupForm()" placeholder="Prénom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
+                </div>
+                <div class="relative">
+                    <i class="ph ph-calendar-blank absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
+                    <input type="text" id="signupBD" readonly onclick="openCustomDatePicker('signupBD')" placeholder="Date de naissance" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 cursor-pointer text-base">
+                </div>
+                <div class="relative">
+                    <i class="ph ph-envelope-simple absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
+                    <input type="email" id="signupEmail" oninput="validateSignupForm()" placeholder="Email" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
+                </div>
+                <div class="relative">
+                    <i class="ph ph-password absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
+                    <input type="password" id="signupPw" oninput="validateSignupForm()" placeholder="Mot de passe (6 caractères min)" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
+                </div>
+                <button id="signupBtn" onclick="handleSignup()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl opacity-50 pointer-events-none action-btn flex items-center justify-center gap-2 text-sm tracking-widest uppercase shadow-lg shadow-indigo-600/30">
+                    CRÉER MON COMPTE <i class="ph ph-arrow-right font-bold text-xl"></i>
+                </button>
+            </div>
+
+            <!-- PANEL MIGRER -->
+            <div id="migratePanel" class="space-y-4 hidden">
+                <p class="text-[11px] bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold p-3 rounded-xl leading-relaxed text-left">
+                    <i class="ph ph-magic-wand"></i> Vous aviez un compte avant la mise à jour ? Migrez-le pour retrouver vos médicaments et votre historique.
+                </p>
+                <div class="text-[10px] font-black uppercase tracking-widest opacity-40 text-left pl-1">Ancien compte</div>
+                <div class="relative">
+                    <i class="ph ph-text-aa absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
+                    <input type="text" id="migrateLN" oninput="validateMigrateForm()" placeholder="Nom (ancien)" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
+                </div>
+                <div class="relative">
+                    <i class="ph ph-text-a-underline absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
+                    <input type="text" id="migrateFN" oninput="validateMigrateForm()" placeholder="Prénom (ancien)" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
+                </div>
+                <div class="relative">
+                    <i class="ph ph-calendar-blank absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
+                    <input type="text" id="migrateBD" readonly onclick="openCustomDatePicker('migrateBD')" placeholder="Date de naissance (ancienne)" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 cursor-pointer text-base">
+                </div>
+                <div class="relative">
+                    <i class="ph ph-password absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
+                    <input type="password" id="migrateOldPw" oninput="validateMigrateForm()" placeholder="Ancien mot de passe" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
+                </div>
+                <div class="text-[10px] font-black uppercase tracking-widest opacity-40 text-left pl-1 pt-1">Nouvel identifiant</div>
+                <div class="relative">
+                    <i class="ph ph-envelope-simple absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
+                    <input type="email" id="migrateEmail" oninput="validateMigrateForm()" placeholder="Nouvel email" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
+                </div>
+                <div class="relative">
+                    <i class="ph ph-password absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
+                    <input type="password" id="migratePw" oninput="validateMigrateForm()" placeholder="Nouveau mot de passe (6 caractères min)" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
+                </div>
+                <button id="migrateBtn" onclick="handleMigrate()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl opacity-50 pointer-events-none action-btn flex items-center justify-center gap-2 text-sm tracking-widest uppercase shadow-lg shadow-indigo-600/30">
+                    MIGRER MON COMPTE <i class="ph ph-arrow-right font-bold text-xl"></i>
+                </button>
+            </div>
         </div>
 
         <div id="appBody" class="hidden space-y-6">
@@ -746,15 +837,24 @@
             </div>
             <h3 class="font-black mb-6 text-center uppercase text-sm tracking-widest text-indigo-500">Profil Utilisateur</h3>
             <div class="space-y-3 sm:space-y-4 mb-6">
+                <div class="bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 flex items-center gap-3">
+                    <i class="ph ph-envelope-simple text-xl text-indigo-500"></i>
+                    <div class="flex-1 text-left min-w-0">
+                        <div class="text-[9px] font-black uppercase opacity-50 tracking-wider">Email de connexion</div>
+                        <div id="accountEmail" class="font-bold text-sm truncate text-slate-800 dark:text-white"></div>
+                    </div>
+                </div>
                 <input type="text" id="editLN" placeholder="Nom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
                 <input type="text" id="editFN" placeholder="Prénom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
                 <div>
                     <input type="text" id="editBD" readonly onclick="openCustomDatePicker('editBD')" placeholder="Date de naissance" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5 cursor-pointer">
                     <div id="editAgeDisplay" class="text-xs font-bold text-indigo-500 mt-2 text-right pr-3"></div>
                 </div>
+                <button onclick="saveProfile()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-xs uppercase tracking-widest action-btn shadow-lg shadow-indigo-600/30">Enregistrer le profil</button>
                 <div class="h-px w-full bg-slate-500/20 my-4 sm:my-6 rounded-full"></div>
-                <input type="password" id="oldPassCheck" placeholder="Ancien mot de passe" class="w-full bg-slate-500/5 border border-indigo-500/40 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
-                <input type="password" id="newPassSet" placeholder="Nouveau mot de passe" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
+                <input type="password" id="oldPassCheck" placeholder="Mot de passe actuel" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
+                <input type="password" id="newPassSet" placeholder="Nouveau mot de passe (6 car. min)" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 sm:p-4 font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
+                <button onclick="changePassword()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-xs uppercase tracking-widest action-btn shadow-lg shadow-indigo-600/30">Changer le mot de passe</button>
                 <div class="h-px w-full bg-slate-500/20 my-4 sm:my-6 rounded-full"></div>
                 <div class="space-y-2">
                     <label class="text-xs font-black uppercase opacity-60">Lier Telegram</label>
@@ -768,7 +868,6 @@
                 </div>
                 <div class="h-px w-full bg-slate-500/20 my-4 sm:my-6 rounded-full"></div>
                 <div class="pt-3 space-y-2">
-                    <button onclick="updateAccount()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-xs uppercase tracking-widest action-btn shadow-lg shadow-indigo-600/30">Sauvegarder</button>
                     <button onclick="handleLogout()" class="w-full py-3.5 bg-slate-500/10 hover:bg-slate-500/20 font-bold rounded-2xl text-xs uppercase tracking-widest action-btn flex items-center justify-center gap-2 text-slate-800 dark:text-white">
                         <i class="ph ph-sign-out text-lg"></i> Déconnexion
                     </button>
@@ -796,16 +895,65 @@
                     <i class="ph ph-text-aa absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl transition-all" id="iconMedName"></i>
                     <input type="text" id="newMedName" oninput="validateMedForm()" placeholder="Nom du médicament" class="w-full p-4 pl-12 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
                 </div>
-                <div class="grid grid-cols-2 gap-3 sm:gap-4">
-                    <div class="relative">
-                        <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4 transition-all">Doses/Plq</label>
-                        <input type="number" id="newMedPieces" oninput="validateMedForm()" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
+
+                <div class="bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 flex flex-col gap-3">
+                    <span class="text-[10px] font-black uppercase opacity-60">Mode de suivi</span>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" id="trackStockBtn" onclick="setTrackingMode('stock', false)" class="toggle-btn active"><i class="ph ph-package text-sm"></i> Stock</button>
+                        <button type="button" id="trackDurationBtn" onclick="setTrackingMode('duration', false)" class="toggle-btn"><i class="ph ph-calendar-check text-sm"></i> Durée</button>
+                        <button type="button" id="trackBothBtn" onclick="setTrackingMode('both', false)" class="toggle-btn"><i class="ph ph-squares-four text-sm"></i> Les deux</button>
                     </div>
-                    <div class="relative">
-                        <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4 transition-all">Plaques</label>
-                        <input type="number" id="newMedPlates" oninput="validateMedForm()" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
+                    <p id="modeHint" class="text-[10px] opacity-50 font-semibold leading-relaxed"></p>
+                </div>
+
+                <div id="stockSection" class="space-y-3">
+                    <div class="bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 flex flex-col gap-3">
+                        <span class="text-[10px] font-black uppercase opacity-60">Conditionnement</span>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" id="pkgPlateBtn" onclick="setPackaging('plate', false)" class="toggle-btn active"><i class="ph ph-stack text-sm"></i> Plaquettes</button>
+                            <button type="button" id="pkgBottleBtn" onclick="setPackaging('bottle', false)" class="toggle-btn"><i class="ph ph-flask text-sm"></i> Flacon</button>
+                        </div>
+                    </div>
+                    <div id="stockPlateFields" class="grid grid-cols-2 gap-3 sm:gap-4">
+                        <div class="relative">
+                            <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4 transition-all">Doses/Plq</label>
+                            <input type="number" id="newMedPieces" oninput="validateMedForm()" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
+                        </div>
+                        <div class="relative">
+                            <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4 transition-all">Plaques</label>
+                            <input type="number" id="newMedPlates" oninput="validateMedForm()" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
+                        </div>
+                    </div>
+                    <div id="stockBottleFields" class="grid grid-cols-2 gap-3 sm:gap-4 hidden">
+                        <div class="relative">
+                            <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4 transition-all">Doses/flacon</label>
+                            <input type="number" id="newMedBottlePieces" oninput="validateMedForm()" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
+                        </div>
+                        <div class="relative">
+                            <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4 transition-all">Flacons</label>
+                            <input type="number" id="newMedBottles" oninput="validateMedForm()" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
+                        </div>
                     </div>
                 </div>
+
+                <div id="durationSection" class="hidden bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 flex flex-col gap-3">
+                    <span class="text-[10px] font-black uppercase opacity-60">Durée du traitement</span>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="relative">
+                            <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4 transition-all">Durée</label>
+                            <input type="number" id="newMedDurationValue" oninput="validateMedForm()" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 content-center">
+                            <button type="button" id="unitDayBtn" onclick="setDurationUnit('day', false)" class="toggle-btn active">Jours</button>
+                            <button type="button" id="unitMonthBtn" onclick="setDurationUnit('month', false)" class="toggle-btn">Mois</button>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <i class="ph ph-calendar-blank absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
+                        <input type="text" id="newMedStartDate" readonly onclick="openCustomDatePicker('newMedStartDate')" placeholder="Début (aujourd'hui par défaut)" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 cursor-pointer text-base">
+                    </div>
+                </div>
+
                 <div class="bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 flex flex-col gap-3">
                     <div class="flex justify-between items-center">
                         <span class="text-[10px] font-black uppercase opacity-60">Planification des prises</span>
@@ -836,16 +984,65 @@
                     <i class="ph ph-text-aa absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl transition-all" id="iconEditMedName"></i>
                     <input type="text" id="editMedName" placeholder="Nom du médicament" class="w-full p-4 pl-12 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold text-base outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
                 </div>
-                <div class="grid grid-cols-2 gap-3 sm:gap-4">
-                    <div class="relative">
-                        <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4 transition-all">Doses/Plq</label>
-                        <input type="number" id="editMedPieces" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
+
+                <div class="bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 flex flex-col gap-3">
+                    <span class="text-[10px] font-black uppercase opacity-60">Mode de suivi</span>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" id="trackStockBtnEdit" onclick="setTrackingMode('stock', true)" class="toggle-btn active"><i class="ph ph-package text-sm"></i> Stock</button>
+                        <button type="button" id="trackDurationBtnEdit" onclick="setTrackingMode('duration', true)" class="toggle-btn"><i class="ph ph-calendar-check text-sm"></i> Durée</button>
+                        <button type="button" id="trackBothBtnEdit" onclick="setTrackingMode('both', true)" class="toggle-btn"><i class="ph ph-squares-four text-sm"></i> Les deux</button>
                     </div>
-                    <div class="relative">
-                        <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4 transition-all">Plaques</label>
-                        <input type="number" id="editMedPlates" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
+                    <p id="editModeHint" class="text-[10px] opacity-50 font-semibold leading-relaxed"></p>
+                </div>
+
+                <div id="editStockSection" class="space-y-3">
+                    <div class="bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 flex flex-col gap-3">
+                        <span class="text-[10px] font-black uppercase opacity-60">Conditionnement</span>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" id="pkgPlateBtnEdit" onclick="setPackaging('plate', true)" class="toggle-btn active"><i class="ph ph-stack text-sm"></i> Plaquettes</button>
+                            <button type="button" id="pkgBottleBtnEdit" onclick="setPackaging('bottle', true)" class="toggle-btn"><i class="ph ph-flask text-sm"></i> Flacon</button>
+                        </div>
+                    </div>
+                    <div id="editStockPlateFields" class="grid grid-cols-2 gap-3 sm:gap-4">
+                        <div class="relative">
+                            <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4 transition-all">Doses/Plq</label>
+                            <input type="number" id="editMedPieces" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
+                        </div>
+                        <div class="relative">
+                            <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4 transition-all">Plaques</label>
+                            <input type="number" id="editMedPlates" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
+                        </div>
+                    </div>
+                    <div id="editStockBottleFields" class="grid grid-cols-2 gap-3 sm:gap-4 hidden">
+                        <div class="relative">
+                            <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4 transition-all">Doses/flacon</label>
+                            <input type="number" id="editMedBottlePieces" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
+                        </div>
+                        <div class="relative">
+                            <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4 transition-all">Flacons</label>
+                            <input type="number" id="editMedBottles" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
+                        </div>
                     </div>
                 </div>
+
+                <div id="editDurationSection" class="hidden bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 flex flex-col gap-3">
+                    <span class="text-[10px] font-black uppercase opacity-60">Durée du traitement</span>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="relative">
+                            <label class="absolute text-[10px] font-black uppercase opacity-60 top-2 left-4 transition-all">Durée</label>
+                            <input type="number" id="editMedDurationValue" class="w-full p-4 pt-7 bg-slate-500/5 border border-slate-500/10 rounded-2xl font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-center text-lg">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 content-center">
+                            <button type="button" id="unitDayBtnEdit" onclick="setDurationUnit('day', true)" class="toggle-btn active">Jours</button>
+                            <button type="button" id="unitMonthBtnEdit" onclick="setDurationUnit('month', true)" class="toggle-btn">Mois</button>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <i class="ph ph-calendar-blank absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
+                        <input type="text" id="editMedStartDate" readonly onclick="openCustomDatePicker('editMedStartDate')" placeholder="Début (aujourd'hui par défaut)" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 cursor-pointer text-base">
+                    </div>
+                </div>
+
                 <div class="bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 flex flex-col gap-3">
                     <div class="flex justify-between items-center">
                         <span class="text-[10px] font-black uppercase opacity-60">Planification des prises</span>
@@ -981,15 +1178,20 @@
 
             const sb = supabase.createClient(
                 'https://jyjjlaqmmfmoqrxcbizy.supabase.co',
-                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5ampsYXFtbWZtb3FyeGNiaXp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MDIzMTksImV4cCI6MjA5OTE3ODMxOX0.XPVACZLMNcdYcZBhNbuHdql6NBMRdgZDuhHKZfxNM6I'
+                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5ampsYXFtbWZtb3FyeGNiaXp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MDIzMTksImV4cCI6MjA5OTE3ODMxOX0.XPVACZLMNcdYcZBhNbuHdql6NBMRdgZDuhHKZfxNM6I',
+                { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } }
             );
 
-            let user = localStorage.getItem('medUser') || "";
+            // === AUTH : utilisateur connecté (Supabase Auth) ===
+            let uid = null;
+            let userEmail = "";
+
             let medsData = {}, currentDate = new Date();
             let toastTimeout;
             let pendingRequests = 0;
             window.medsHistoryMap = {};
             window.dayDosesMap = {};
+            window.todayTakesMap = {};
             window.allHistoryData = [];
             window.activeDatePickerTarget = "";
             window.selectedDateParts = { y: null, m: null, d: null };
@@ -1000,6 +1202,20 @@
             let swRegistration = null;
             let lastCheckedDate = '';
 
+            // === ETAT DES FORMULAIRES (ajout / édition) ===
+            let addPackaging = 'plate';
+            let addTrackingMode = 'stock';
+            let addDurationUnit = 'day';
+            let editPackaging = 'plate';
+            let editTrackingMode = 'stock';
+            let editDurationUnit = 'day';
+
+            const modeHints = {
+                stock: "Suivi du stock restant : plaquettes/boîtes ou flacons, avec alertes de fin de stock.",
+                duration: "Suivi par durée : comptage des jours de traitement à partir de la date de début.",
+                both: "Double suivi : progression du stock ET de la durée du traitement en parallèle."
+            };
+
             const extendedColors = [
                 '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e',
                 '#10b981', '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1',
@@ -1008,7 +1224,7 @@
                 '#34d399', '#22d3ee', '#38bdf8', '#60a5fa', '#818cf8'
             ];
 
-            // === LOCAL DATE HELPERS (fixes 00:00am bug) ===
+            // === LOCAL DATE HELPERS ===
             function getLocalDateStr(date = new Date()) {
                 const y = date.getFullYear();
                 const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -1031,6 +1247,29 @@
                 const parts = at.split('T');
                 if (parts.length < 2) return "00:00";
                 return parts[1].substring(0, 5);
+            }
+
+            function getTotalPieces(med) {
+                if ((med.packaging || 'plate') === 'bottle') {
+                    return (med.bottle_pieces || 0) * (med.bottles_count || 1);
+                }
+                return (med.pieces_per_plate || 0) * (med.plates_per_box || 1);
+            }
+
+            function getDurationInfo(med) {
+                const value = parseInt(med.duration_value) || 0;
+                if (value <= 0) return null;
+                const totalDays = (med.duration_unit === 'month') ? value * 30 : value;
+                const startStr = med.duration_start || (typeof med.created_at === 'string' ? med.created_at.split('T')[0] : '') || getLocalDateStr();
+                const start = new Date(startStr + 'T00:00:00');
+                const today = new Date(getLocalDateStr() + 'T00:00:00');
+                const daysElapsed = Math.floor((today - start) / 86400000) + 1;
+                return {
+                    totalDays: totalDays,
+                    daysElapsed: Math.min(Math.max(daysElapsed, 0), totalDays),
+                    daysRemaining: Math.max(totalDays - daysElapsed, 0),
+                    finished: daysElapsed >= totalDays
+                };
             }
 
             lastCheckedDate = getLocalDateStr();
@@ -1216,6 +1455,9 @@
                     `<div onclick="selectEditColor('${c}')" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl cursor-pointer action-btn shadow-lg border-2 border-white/20" style="background:${c}; animation: popIn 0.3s var(--ease-spring) forwards; opacity: 0; animation-delay: ${idx * 0.015}s;"></div>`
                 ).join('');
 
+                const mh = document.getElementById('modeHint');
+                if (mh) mh.innerText = modeHints.stock;
+
                 document.body.addEventListener('click', (e) => {
                     const target = e.target.closest('.action-btn');
                     if (!target || target.classList.contains('ph')) return;
@@ -1235,6 +1477,295 @@
                     setTimeout(() => ripple.remove(), 500);
                 });
             }
+
+            // ============================================================
+            // === SYSTEME DE LOGIN : SUPABASE AUTH (RLS compatible) ===
+            // ============================================================
+
+            function validEmail(v) {
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+            }
+
+            function setSubmitState(id, ok) {
+                const b = document.getElementById(id);
+                b.classList.toggle('opacity-50', !ok);
+                b.classList.toggle('pointer-events-none', !ok);
+            }
+
+            function authErrMsg(e) {
+                const m = (e || "erreur").toLowerCase();
+                if (m.includes('invalid login credentials')) return "Email ou mot de passe incorrect.";
+                if (m.includes('already')) return "Cet email est déjà utilisé.";
+                if (m.includes('password should be at least')) return "Mot de passe trop court (6 caractères minimum).";
+                if (m.includes('email not confirmed')) return "Email non confirmé — vérifiez votre boîte mail.";
+                if (m.includes('rate limit') || m.includes('too many')) return "Trop de tentatives, patientez un instant.";
+                if (m.includes('unable to validate email')) return "Adresse email invalide.";
+                return "Erreur : " + e;
+            }
+
+            window.showLoginTab = (tab) => {
+                const panels = { login: 'loginPanel', signup: 'signupPanel', migrate: 'migratePanel' };
+                const btns = { login: 'loginTabBtn', signup: 'signupTabBtn', migrate: 'migrateTabBtn' };
+                Object.entries(panels).forEach(([k, p]) => {
+                    document.getElementById(p).classList.toggle('hidden', k !== tab);
+                });
+                Object.entries(btns).forEach(([k, b]) => {
+                    const el = document.getElementById(b);
+                    if (k === tab) {
+                        el.classList.add('bg-indigo-500', 'text-white', 'shadow-md');
+                        el.classList.remove('text-slate-500');
+                    } else {
+                        el.classList.remove('bg-indigo-500', 'text-white', 'shadow-md');
+                        el.classList.add('text-slate-500');
+                    }
+                });
+            };
+
+            window.validateLoginForm = () => {
+                const ok = validEmail(document.getElementById('loginEmail').value.trim())
+                    && document.getElementById('loginPw').value.length >= 6;
+                setSubmitState('loginBtn', ok);
+            };
+
+            window.validateSignupForm = () => {
+                const ok = document.getElementById('signupLN').value.trim() !== ''
+                    && document.getElementById('signupFN').value.trim() !== ''
+                    && document.getElementById('signupBD').value !== ''
+                    && validEmail(document.getElementById('signupEmail').value.trim())
+                    && document.getElementById('signupPw').value.length >= 6;
+                setSubmitState('signupBtn', ok);
+            };
+
+            window.validateMigrateForm = () => {
+                const ok = document.getElementById('migrateLN').value.trim() !== ''
+                    && document.getElementById('migrateFN').value.trim() !== ''
+                    && document.getElementById('migrateBD').value !== ''
+                    && document.getElementById('migrateOldPw').value.length > 0
+                    && validEmail(document.getElementById('migrateEmail').value.trim())
+                    && document.getElementById('migratePw').value.length >= 6;
+                setSubmitState('migrateBtn', ok);
+            };
+
+            window.handleLogin = async () => {
+                const btn = document.getElementById('loginBtn');
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="ph ph-spinner animate-spin text-2xl"></i>';
+                btn.style.pointerEvents = 'none';
+
+                const email = document.getElementById('loginEmail').value.trim();
+                const pw = document.getElementById('loginPw').value;
+
+                const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+                if (error) {
+                    showToast(authErrMsg(error.message));
+                    btn.innerHTML = original;
+                    btn.style.pointerEvents = '';
+                    return;
+                }
+                location.reload();
+            };
+
+            window.handleSignup = async () => {
+                const btn = document.getElementById('signupBtn');
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="ph ph-spinner animate-spin text-2xl"></i>';
+                btn.style.pointerEvents = 'none';
+
+                const ln = document.getElementById('signupLN').value.trim();
+                const fn = document.getElementById('signupFN').value.trim();
+                const bd = document.getElementById('signupBD').value;
+                const email = document.getElementById('signupEmail').value.trim();
+                const pw = document.getElementById('signupPw').value;
+
+                const { data, error } = await sb.auth.signUp({ email, password: pw });
+                if (error) {
+                    showToast(authErrMsg(error.message));
+                    btn.innerHTML = original;
+                    btn.style.pointerEvents = '';
+                    return;
+                }
+                if (data && data.session) {
+                    try {
+                        await sb.from('profiles').insert({ id: data.user.id, first_name: fn, last_name: ln, birth_date: bd || null });
+                    } catch (e) {}
+                    showToast("Compte créé, bienvenue !");
+                    setTimeout(() => location.reload(), 700);
+                } else {
+                    localStorage.setItem('pendingProfile', JSON.stringify({ ln, fn, bd }));
+                    showToast("Compte créé ! Confirmez votre email puis connectez-vous.");
+                    btn.innerHTML = original;
+                    btn.style.pointerEvents = '';
+                }
+            };
+
+            window.handleMigrate = async () => {
+                const btn = document.getElementById('migrateBtn');
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="ph ph-spinner animate-spin text-2xl"></i>';
+                btn.style.pointerEvents = 'none';
+
+                const ln = document.getElementById('migrateLN').value.trim().toLowerCase();
+                const fn = document.getElementById('migrateFN').value.trim().toLowerCase();
+                const bd = document.getElementById('migrateBD').value;
+                const oldPw = document.getElementById('migrateOldPw').value;
+                const email = document.getElementById('migrateEmail').value.trim();
+                const pw = document.getElementById('migratePw').value;
+                const oldKey = `${ln}_${fn}_${bd.replace(/-/g, '')}`;
+
+                const runClaim = async () => {
+                    const { data: res, error: rpcErr } = await sb.rpc('claim_legacy_account', { old_key: oldKey, old_pw: oldPw });
+                    if (rpcErr || !res || !res.success) {
+                        const msg = (res && res.message) ? res.message : "La migration a échoué. Vérifiez vos anciennes informations.";
+                        customConfirm("Migration échouée", msg, async () => {
+                            await sb.auth.signOut();
+                            location.reload();
+                        }, "Réessayer", false);
+                        btn.innerHTML = original;
+                        btn.style.pointerEvents = '';
+                        return;
+                    }
+                    localStorage.removeItem('medUser');
+                    showToast(res.message || "Compte migré avec succès !");
+                    setTimeout(() => location.reload(), 800);
+                };
+
+                const { data, error } = await sb.auth.signUp({ email, password: pw });
+                if (error) {
+                    const msg = error.message.toLowerCase();
+                    if (msg.includes('already')) {
+                        const { error: siErr } = await sb.auth.signInWithPassword({ email, password: pw });
+                        if (!siErr) {
+                            await runClaim();
+                            return;
+                        }
+                        customConfirm("Email déjà utilisé", "Cet email possède déjà un compte, mais le mot de passe saisi ne correspond pas. Réessayez en utilisant le mot de passe de ce compte email.", () => {}, "Compris", false);
+                    } else {
+                        showToast(authErrMsg(error.message));
+                    }
+                    btn.innerHTML = original;
+                    btn.style.pointerEvents = '';
+                    return;
+                }
+                if (data && data.session) {
+                    await runClaim();
+                } else {
+                    localStorage.setItem('pendingMigration', JSON.stringify({ key: oldKey, pw: oldPw }));
+                    localStorage.removeItem('medUser');
+                    showToast("Compte créé ! Confirmez votre email puis connectez-vous : la migration sera automatique.");
+                    btn.innerHTML = original;
+                    btn.style.pointerEvents = '';
+                }
+            };
+
+            function clearLocalData() {
+                ['medUser', 'medSchedules', 'medNotified', 'medQueue', 'pendingMigration', 'pendingProfile'].forEach(k => localStorage.removeItem(k));
+            }
+
+            // === Gestion du compte (modal) ===
+            window.saveProfile = async () => {
+                const ln = document.getElementById('editLN').value.trim();
+                const fn = document.getElementById('editFN').value.trim();
+                const bd = document.getElementById('editBD').value;
+                if (!ln || !fn) return showToast("Nom et prénom requis.");
+                setSyncing(true);
+                try {
+                    const { error } = await sb.from('profiles').update({
+                        first_name: fn, last_name: ln, birth_date: bd || null
+                    }).eq('id', uid);
+                    if (error) throw error;
+                    document.getElementById('editAgeDisplay').innerText = calculateAge(bd);
+                    showToast("Profil mis à jour avec succès !");
+                } catch (e) {
+                    showToast("Erreur lors de la mise à jour du profil");
+                } finally {
+                    setSyncing(false);
+                }
+            };
+
+            window.changePassword = async () => {
+                const oldP = document.getElementById('oldPassCheck').value;
+                const newP = document.getElementById('newPassSet').value;
+                if (!oldP) return showToast("Entrez votre mot de passe actuel.");
+                if (newP.length < 6) return showToast("Nouveau mot de passe : 6 caractères minimum.");
+                setSyncing(true);
+                try {
+                    const { error: checkErr } = await sb.auth.signInWithPassword({ email: userEmail, password: oldP });
+                    if (checkErr) {
+                        showToast("Mot de passe actuel incorrect.");
+                        return;
+                    }
+                    const { error } = await sb.auth.updateUser({ password: newP });
+                    if (error) throw error;
+                    document.getElementById('oldPassCheck').value = '';
+                    document.getElementById('newPassSet').value = '';
+                    showToast("Mot de passe modifié avec succès !");
+                } catch (e) {
+                    showToast("Erreur lors du changement de mot de passe");
+                } finally {
+                    setSyncing(false);
+                }
+            };
+
+            window.deleteAccount = () => {
+                customConfirm(
+                    "Supprimer le compte",
+                    "Supprimer définitivement votre compte, vos médicaments et tout votre historique ? Cette action est irréversible.",
+                    async () => {
+                        setSyncing(true);
+                        try {
+                            await sb.rpc('delete_my_account');
+                        } catch (e) {}
+                        await sb.auth.signOut();
+                        clearLocalData();
+                        location.reload();
+                    },
+                    "Supprimer",
+                    true
+                );
+            };
+
+            window.handleLogout = async () => {
+                await sb.auth.signOut();
+                clearLocalData();
+                location.reload();
+            };
+
+            // ============================================================
+            // === SELECTEURS UI ===
+            // ============================================================
+
+            window.setTrackingMode = (mode, isEdit) => {
+                if (isEdit) editTrackingMode = mode; else addTrackingMode = mode;
+                const suffix = isEdit ? 'Edit' : '';
+                ['Stock', 'Duration', 'Both'].forEach(m => {
+                    const btn = document.getElementById(`track${m}Btn${suffix}`);
+                    if (btn) btn.classList.toggle('active', mode === m.toLowerCase());
+                });
+                const stockSection = document.getElementById(isEdit ? 'editStockSection' : 'stockSection');
+                const durationSection = document.getElementById(isEdit ? 'editDurationSection' : 'durationSection');
+                stockSection.classList.toggle('hidden', mode === 'duration');
+                durationSection.classList.toggle('hidden', mode === 'stock');
+                const hint = document.getElementById(isEdit ? 'editModeHint' : 'modeHint');
+                if (hint) hint.innerText = modeHints[mode];
+                if (!isEdit) validateMedForm();
+            };
+
+            window.setPackaging = (pkg, isEdit) => {
+                if (isEdit) editPackaging = pkg; else addPackaging = pkg;
+                const suffix = isEdit ? 'Edit' : '';
+                document.getElementById(`pkgPlateBtn${suffix}`).classList.toggle('active', pkg === 'plate');
+                document.getElementById(`pkgBottleBtn${suffix}`).classList.toggle('active', pkg === 'bottle');
+                document.getElementById(isEdit ? 'editStockPlateFields' : 'stockPlateFields').classList.toggle('hidden', pkg !== 'plate');
+                document.getElementById(isEdit ? 'editStockBottleFields' : 'stockBottleFields').classList.toggle('hidden', pkg !== 'bottle');
+                if (!isEdit) validateMedForm();
+            };
+
+            window.setDurationUnit = (unit, isEdit) => {
+                if (isEdit) editDurationUnit = unit; else addDurationUnit = unit;
+                const suffix = isEdit ? 'Edit' : '';
+                document.getElementById(`unitDayBtn${suffix}`).classList.toggle('active', unit === 'day');
+                document.getElementById(`unitMonthBtn${suffix}`).classList.toggle('active', unit === 'month');
+            };
 
             window.openCustomDatePicker = (targetId) => {
                 window.activeDatePickerTarget = targetId;
@@ -1294,46 +1825,34 @@
                 const input = document.getElementById(window.activeDatePickerTarget);
                 input.value = dateStr;
 
-                if (window.activeDatePickerTarget === 'birthDate') {
-                    const ageDiv = document.getElementById('ageDisplay');
-                    ageDiv.innerText = calculateAge(dateStr);
-                    ageDiv.classList.remove('hidden');
-                    validateInput('birthDate', 'iconBD');
-                } else if (window.activeDatePickerTarget === 'editBD') {
+                if (window.activeDatePickerTarget === 'editBD') {
                     document.getElementById('editAgeDisplay').innerText = calculateAge(dateStr);
+                } else if (window.activeDatePickerTarget === 'signupBD' || window.activeDatePickerTarget === 'migrateBD') {
+                    validateSignupForm();
+                    validateMigrateForm();
+                } else if (window.activeDatePickerTarget === 'newMedStartDate') {
+                    validateMedForm();
                 }
                 closeModal('customDateModal');
             };
 
-            window.validateInput = (id, iconId) => {
-                const el = document.getElementById(id);
-                const icon = document.getElementById(iconId);
-                if (el.value.trim() !== "") {
-                    el.classList.add('valid-input');
-                    if (icon) {
-                        icon.classList.remove('ph-text-aa', 'ph-text-a-underline', 'ph-calendar-blank');
-                        icon.classList.add('ph-check-circle', 'text-green-500');
-                        icon.classList.remove('opacity-50');
-                        icon.style.transform = 'scale(1.2)';
-                        setTimeout(() => icon.style.transform = 'scale(1)', 200);
-                    }
-                } else {
-                    el.classList.remove('valid-input');
-                    if (icon) {
-                        icon.classList.add(id === 'lastName' ? 'ph-text-aa' : id === 'firstName' ? 'ph-text-a-underline' : 'ph-calendar-blank');
-                        icon.classList.remove('ph-check-circle', 'text-green-500');
-                        icon.classList.add('opacity-50');
-                    }
-                }
-                updateKey();
-            };
-
             window.validateMedForm = () => {
                 const n = document.getElementById('newMedName').value.trim();
-                const pi = document.getElementById('newMedPieces').value;
-                const btn = document.getElementById('addMedBtn');
+                let ok = !!n;
 
-                if (n && pi) {
+                if (addTrackingMode !== 'duration') {
+                    if (addPackaging === 'bottle') {
+                        ok = ok && (parseInt(document.getElementById('newMedBottlePieces').value) > 0);
+                    } else {
+                        ok = ok && !!document.getElementById('newMedPieces').value;
+                    }
+                }
+                if (addTrackingMode !== 'stock') {
+                    ok = ok && (parseInt(document.getElementById('newMedDurationValue').value) > 0);
+                }
+
+                const btn = document.getElementById('addMedBtn');
+                if (ok) {
                     btn.classList.remove('opacity-50', 'pointer-events-none');
                 } else {
                     btn.classList.add('opacity-50', 'pointer-events-none');
@@ -1356,113 +1875,6 @@
                 preview.style.transform = 'scale(1.2)';
                 setTimeout(() => preview.style.transform = 'scale(1)', 250);
                 closeModal('colorModalEdit');
-            };
-
-            window.updateKey = () => {
-                const ln = document.getElementById('lastName').value.trim();
-                const fn = document.getElementById('firstName').value.trim();
-                const bd = document.getElementById('birthDate').value;
-                if (ln && fn && bd) {
-                    document.getElementById('passInput').classList.remove('hidden');
-                    document.getElementById('authBtn').classList.remove('opacity-50', 'pointer-events-none');
-                } else {
-                    document.getElementById('passInput').classList.add('hidden');
-                    document.getElementById('authBtn').classList.add('opacity-50', 'pointer-events-none');
-                }
-            };
-
-            window.handleAuth = async () => {
-                const btn = document.getElementById('authBtn');
-                btn.innerHTML = '<i class="ph ph-spinner animate-spin text-2xl"></i>';
-                btn.disabled = true;
-
-                const ln = document.getElementById('lastName').value.trim().toLowerCase();
-                const fn = document.getElementById('firstName').value.trim().toLowerCase();
-                const bd = document.getElementById('birthDate').value;
-                const pw = document.getElementById('passInput').value.trim();
-                const key = `${ln}_${fn}_${bd.replace(/-/g, '')}`;
-
-                try {
-                    const { data, error } = await sb.from('credentials').select('pw').eq('key', key).maybeSingle();
-                    if (error) {
-                        showToast("Erreur base de données");
-                        btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>';
-                        btn.disabled = false;
-                        return;
-                    }
-                    if (data) {
-                        if (data.pw !== pw) {
-                            showToast("Mot de passe incorrect");
-                            btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>';
-                            btn.disabled = false;
-                            return;
-                        }
-                    } else {
-                        const { error: insertErr } = await sb.from('credentials').insert({ key, pw, info: { ln, fn, bd } });
-                        if (insertErr) {
-                            showToast("Erreur création compte");
-                            btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>';
-                            btn.disabled = false;
-                            return;
-                        }
-                    }
-                    user = key;
-                    localStorage.setItem('medUser', user);
-                    location.reload();
-                } catch(e) {
-                    showToast("Erreur de connexion");
-                    btn.innerHTML = 'VÉRIFIER <i class="ph ph-arrow-right font-bold text-xl"></i>';
-                    btn.disabled = false;
-                }
-            };
-
-            window.updateAccount = async () => {
-                const oldP = document.getElementById('oldPassCheck').value;
-                const newP = document.getElementById('newPassSet').value;
-                const ln = document.getElementById('editLN').value;
-                const fn = document.getElementById('editFN').value;
-                const bd = document.getElementById('editBD').value;
-
-                const { data: u, error: fetchErr } = await sb.from('credentials').select('pw').eq('key', user).maybeSingle();
-                if (fetchErr || !u) {
-                    showToast("Erreur lors de la récupération du profil");
-                    return;
-                }
-
-                if (u.pw !== oldP) return showToast("Ancien mot de passe requis.");
-
-                const newKey = `${ln.toLowerCase()}_${fn.toLowerCase()}_${bd.replace(/-/g, '')}`;
-                const { error: updateErr } = await sb.from('credentials').update({ pw: newP || oldP, info: { ln, fn, bd } }).eq('key', user);
-
-                if (updateErr) {
-                    showToast("Erreur lors de la mise à jour");
-                    return;
-                }
-
-                if (newKey !== user) {
-                    handleLogout();
-                } else {
-                    showToast("Profil mis à jour avec succès !");
-                    closeModal('accountModal');
-                }
-            };
-
-            window.deleteAccount = () => {
-                customConfirm(
-                    "Supprimer le compte",
-                    "Supprimer le compte définitivement ? Cette action est irréversible.",
-                    async () => {
-                        await sb.from('credentials').delete().eq('key', user);
-                        handleLogout();
-                    },
-                    "Supprimer",
-                    true
-                );
-            };
-
-            window.handleLogout = () => {
-                localStorage.removeItem('medUser');
-                location.reload();
             };
 
             window.toggleTheme = () => {
@@ -1544,10 +1956,9 @@
                 setSyncing(true);
                 try {
                     const { error } = await sb.from('telegram_ids').upsert(
-                        { user_key: user, chat_id: chatId },
-                        { onConflict: 'user_key' }
+                        { user_id: uid, chat_id: chatId },
+                        { onConflict: 'user_id' }
                     );
-                    
                     if (error) throw error;
                     showToast("ID Telegram enregistré !");
                 } catch (e) {
@@ -1641,19 +2052,44 @@
 
             window.confirmAddMed = async () => {
                 const name = document.getElementById('newMedName').value.trim();
-                const pieces = parseInt(document.getElementById('newMedPieces').value) || 0;
-                const plates = parseInt(document.getElementById('newMedPlates').value) || 1;
                 const color = document.getElementById('newMedColor').value;
 
-                if (!name || !pieces) return showToast("Veuillez remplir les champs obligatoires");
+                let pieces = 0, plates = 1, bottlePieces = 0, bottles = 1;
+                if (addPackaging === 'plate') {
+                    pieces = parseInt(document.getElementById('newMedPieces').value) || 0;
+                    plates = parseInt(document.getElementById('newMedPlates').value) || 1;
+                } else {
+                    bottlePieces = parseInt(document.getElementById('newMedBottlePieces').value) || 0;
+                    bottles = parseInt(document.getElementById('newMedBottles').value) || 1;
+                }
+
+                let durationValue = 0;
+                if (addTrackingMode !== 'stock') {
+                    durationValue = parseInt(document.getElementById('newMedDurationValue').value) || 0;
+                }
+                const durationStart = addTrackingMode !== 'stock'
+                    ? (document.getElementById('newMedStartDate').value || getLocalDateStr())
+                    : null;
+
+                if (!name) return showToast("Veuillez renseigner le nom du médicament");
+                if (addTrackingMode !== 'duration' && addPackaging === 'plate' && pieces < 1) return showToast("Indiquez les doses par plaquette");
+                if (addTrackingMode !== 'duration' && addPackaging === 'bottle' && bottlePieces < 1) return showToast("Indiquez les doses par flacon");
+                if (addTrackingMode !== 'stock' && durationValue < 1) return showToast("Indiquez la durée du traitement");
 
                 setSyncing(true);
                 try {
                     const { data: newMed, error: medError } = await sb.from('medications').insert({
-                        user_key: user,
+                        user_id: uid,
                         name: name,
+                        packaging: addPackaging,
                         pieces_per_plate: pieces,
                         plates_per_box: plates,
+                        bottle_pieces: bottlePieces,
+                        bottles_count: bottles,
+                        tracking_mode: addTrackingMode,
+                        duration_value: durationValue,
+                        duration_unit: addDurationUnit,
+                        duration_start: durationStart,
                         color: color
                     }).select().single();
 
@@ -1667,7 +2103,8 @@
                         const schedInserts = window.currentEditingSchedules.map(s => ({
                             medication_id: newMed.id,
                             time: s.time,
-                            days: s.days
+                            days: s.days,
+                            user_id: uid
                         }));
                         await sb.from('medication_schedules').insert(schedInserts);
                         
@@ -1681,10 +2118,20 @@
                     document.getElementById('newMedName').value = '';
                     document.getElementById('newMedPieces').value = '';
                     document.getElementById('newMedPlates').value = '';
+                    document.getElementById('newMedBottlePieces').value = '';
+                    document.getElementById('newMedBottles').value = '';
+                    document.getElementById('newMedDurationValue').value = '';
+                    document.getElementById('newMedStartDate').value = '';
                     document.getElementById('newMedColor').value = '#6366f1';
                     document.getElementById('colorPreview').style.background = '#6366f1';
                     window.currentEditingSchedules = [];
                     renderScheduleList(false);
+                    addPackaging = 'plate';
+                    addTrackingMode = 'stock';
+                    addDurationUnit = 'day';
+                    setPackaging('plate', false);
+                    setTrackingMode('stock', false);
+                    setDurationUnit('day', false);
                     validateMedForm();
                     
                     closeModal('addMedModal');
@@ -1696,32 +2143,58 @@
                 }
             };
 
-            async function initApp() {
-                if (!user) return;
+            // === ENTREE DANS L'APP (utilisateur connecté) ===
+            async function enterApp(authUser) {
+                uid = authUser.id;
+                userEmail = authUser.email || "";
+
+                // === Migration en attente (ancien compte à rattacher) ===
+                try {
+                    const pending = JSON.parse(localStorage.getItem('pendingMigration') || 'null');
+                    if (pending) {
+                        const { data: res } = await sb.rpc('claim_legacy_account', { old_key: pending.key, old_pw: pending.pw });
+                        localStorage.removeItem('pendingMigration');
+                        localStorage.removeItem('medUser');
+                        if (res && res.success) showToast("Migration réussie : vos données ont été récupérées !");
+                        else if (res && res.message) showToast(res.message);
+                    }
+                } catch (e) {
+                    localStorage.removeItem('pendingMigration');
+                }
+
+                // === Profil ===
+                let prof = null;
+                try {
+                    const { data } = await sb.from('profiles').select('*').eq('id', uid).maybeSingle();
+                    prof = data;
+                } catch (e) {}
+
+                if (!prof) {
+                    const pp = JSON.parse(localStorage.getItem('pendingProfile') || 'null');
+                    const row = pp ? { first_name: pp.fn, last_name: pp.ln, birth_date: pp.bd || null } : {};
+                    try { await sb.from('profiles').insert({ id: uid, ...row }); } catch (e) {}
+                    if (pp) localStorage.removeItem('pendingProfile');
+                    prof = row;
+                }
+
+                document.getElementById('accountEmail').innerText = userEmail;
+                document.getElementById('editLN').value = prof.last_name || '';
+                document.getElementById('editFN').value = prof.first_name || '';
+                document.getElementById('editBD').value = prof.birth_date || '';
+                document.getElementById('editAgeDisplay').innerText = calculateAge(prof.birth_date || '');
+
+                // === Telegram ===
+                try {
+                    const { data: tg } = await sb.from('telegram_ids').select('chat_id').eq('user_id', uid).maybeSingle();
+                    if (tg) document.getElementById('telegramChatId').value = tg.chat_id;
+                } catch (e) {}
+
                 document.getElementById('loginBox').classList.add('hidden');
                 document.getElementById('appBody').classList.remove('hidden');
                 document.getElementById('accBtn').classList.remove('hidden');
                 document.getElementById('accBtn').classList.add('flex');
                 document.getElementById('syncBtn').classList.remove('hidden');
                 document.getElementById('syncBtn').classList.add('flex');
-
-                try {
-                    const { data: u } = await sb.from('credentials').select('info').eq('key', user).maybeSingle();
-                    if (u) {
-                        const i = u.info;
-                        document.getElementById('editLN').value = i.ln || '';
-                        document.getElementById('editFN').value = i.fn || '';
-                        document.getElementById('editBD').value = i.bd || '';
-                        document.getElementById('editAgeDisplay').innerText = calculateAge(i.bd || '');
-                    }
-                } catch (e) {}
-
-                try {
-                    const { data: tg } = await sb.from('telegram_ids').select('chat_id').eq('user_key', user).maybeSingle();
-                    if (tg) {
-                        document.getElementById('telegramChatId').value = tg.chat_id;
-                    }
-                } catch (e) {}
 
                 if (localStorage.getItem('theme') === 'dark') {
                     document.body.classList.add('dark');
@@ -1774,36 +2247,28 @@
                     }
                 }, 15000);
 
-                // === DAY CHANGE DETECTION: uses local date string for accurate midnight detection ===
-                setInterval(() => {
+                function checkDayChange() {
                     const todayStr = getLocalDateStr();
                     if (todayStr !== lastCheckedDate) {
                         lastCheckedDate = todayStr;
+                        window.todayTakesMap = {};
                         renderAllMeds();
                     }
-                }, 5000);
-
-                // === VISIBILITY CHANGE: instant refresh when app becomes visible ===
+                }
+                setInterval(checkDayChange, 5000);
                 document.addEventListener('visibilitychange', () => {
-                    if (!document.hidden) {
-                        const todayStr = getLocalDateStr();
-                        if (todayStr !== lastCheckedDate) {
-                            lastCheckedDate = todayStr;
-                            renderAllMeds();
-                        }
-                    }
+                    if (!document.hidden) checkDayChange();
                 });
 
                 processQueue();
                 await loadMeds();
-                initUI();
                 addScheduleRow();
             }
 
             async function loadMeds() {
                 setSyncing(true);
                 try {
-                    const { data: meds, error } = await sb.from('medications').select('*').eq('user_key', user);
+                    const { data: meds, error } = await sb.from('medications').select('*').eq('user_id', uid);
                     if (error) throw error;
 
                     medsData = {};
@@ -1832,6 +2297,9 @@
                         }
 
                         (meds || []).forEach(m => {
+                            if (!m.packaging) m.packaging = 'plate';
+                            if (!m.tracking_mode) m.tracking_mode = 'stock';
+                            if (!m.duration_unit) m.duration_unit = 'day';
                             m._count = counts[m.id] || 0;
                             medsData[m.id] = m;
                         });
@@ -1853,6 +2321,15 @@
                             const dStr = d.created_at.split('T')[0];
                             if (!window.dayDosesMap[dStr]) window.dayDosesMap[dStr] = [];
                             window.dayDosesMap[dStr].push(d);
+                        });
+                    }
+
+                    const todayStr = getLocalDateStr();
+                    window.todayTakesMap = {};
+                    if (Object.keys(medsData).length > 0) {
+                        const { data: todayDoses } = await sb.from('medication_doses').select('medication_id').in('medication_id', Object.keys(medsData)).gte('created_at', `${todayStr}T00:00:00`).lte('created_at', `${todayStr}T23:59:59`);
+                        (todayDoses || []).forEach(td => {
+                            window.todayTakesMap[td.medication_id] = (window.todayTakesMap[td.medication_id] || 0) + 1;
                         });
                     }
 
@@ -1938,48 +2415,78 @@
             function updateMedCardDOM(id) {
                 const med = medsData[id];
                 const card = document.getElementById(`med-card-${id}`);
-                if (!card) return;
+                if (!card || !med) return;
 
+                const isBottle = (med.packaging || 'plate') === 'bottle';
+                const perUnit = Math.max(isBottle ? (med.bottle_pieces || 0) : (med.pieces_per_plate || 0), 1);
+                const units = Math.max(isBottle ? (med.bottles_count || 1) : (med.plates_per_box || 1), 1);
                 const count = med._count || 0;
-                const total = med.pieces_per_plate * med.plates_per_box;
-                const prog = total ? (count / total) * 100 : 0;
-                
-                const isBoxEmpty = count >= total && total > 0;
-                const dosesTakenInPlate = isBoxEmpty ? 0 : count % med.pieces_per_plate;
-                const currentPlateNumber = isBoxEmpty ? med.plates_per_box : Math.floor(count / med.pieces_per_plate) + 1;
-                const remainingFullPlates = isBoxEmpty ? 0 : med.plates_per_box - currentPlateNumber;
-                const remainingDosesInCurrentPlate = isBoxEmpty ? 0 : med.pieces_per_plate - dosesTakenInPlate;
-                const remaining = total - count;
+                const totalPieces = perUnit * units;
 
-                let tag = prog >= 90 ?
-                    `<span class="alert-stock bg-red-500 text-white">URGENT</span>` :
-                    prog >= 80 ?
-                    `<span class="alert-stock bg-orange-500 text-white">STOCK BAS</span>` :
-                    `<span class="text-[9px] font-black opacity-50 uppercase tracking-wider text-slate-800 dark:text-white">${remaining} prises au total</span>`;
+                const durInfo = getDurationInfo(med);
+                let mode = med.tracking_mode || 'stock';
+                if (mode !== 'stock' && !durInfo) mode = 'stock';
+                const hasStock = mode !== 'duration';
+                const hasDur = mode !== 'stock';
 
-                const doseText = card.querySelector(`#dose-text-${id}`);
-                if (doseText) {
-                    doseText.innerText = isBoxEmpty ? 0 : count % med.pieces_per_plate;
-                    
-                    const progressBar = card.querySelector('.progress-bar');
-                    if (progressBar) progressBar.style.width = `${prog}%`;
-                    
-                    const progressText = card.querySelector('.progress-text');
-                    if (progressText) progressText.innerText = `${Math.round(prog)}%`;
-                    
-                    const plateText = card.querySelector('.plate-text');
-                    if (plateText) plateText.innerText = `Plq ${currentPlateNumber}/${med.plates_per_box}`;
-                    
-                    const stockAlert = card.querySelector('.stock-alert');
-                    if (stockAlert) stockAlert.innerHTML = tag;
+                const stockProg = totalPieces > 0 ? Math.min((count / totalPieces) * 100, 100) : 0;
+                const isStockEmpty = totalPieces > 0 && count >= totalPieces;
+                const durProg = durInfo ? Math.min((durInfo.daysElapsed / durInfo.totalDays) * 100, 100) : 0;
 
-                    const remainingPlatesEl = card.querySelector('.remaining-plates');
-                    if (remainingPlatesEl) remainingPlatesEl.innerText = remainingFullPlates;
+                const tagBase = 'text-[9px] font-black opacity-50 uppercase tracking-wider text-slate-800 dark:text-white';
+                let tag = '';
+                if (mode === 'stock') {
+                    if (stockProg >= 90) tag = '<span class="alert-stock bg-red-500 text-white">URGENT</span>';
+                    else if (stockProg >= 80) tag = '<span class="alert-stock bg-orange-500 text-white">STOCK BAS</span>';
+                    else tag = `<span class="${tagBase}">${totalPieces - count} prises au total</span>`;
+                } else if (mode === 'duration') {
+                    if (durInfo.finished) tag = '<span class="alert-stock bg-green-500 text-white">TERMINÉ</span>';
+                    else if (durInfo.daysRemaining <= 3) tag = '<span class="alert-stock bg-orange-500 text-white">DERNIERS JOURS</span>';
+                    else tag = `<span class="${tagBase}">${durInfo.daysRemaining} jours restants</span>`;
+                } else {
+                    if (stockProg >= 90) tag = '<span class="alert-stock bg-red-500 text-white">URGENT</span>';
+                    else if (stockProg >= 80) tag = '<span class="alert-stock bg-orange-500 text-white">STOCK BAS</span>';
+                    else if (durInfo.finished) tag = '<span class="alert-stock bg-green-500 text-white">TERMINÉ</span>';
+                    else if (durInfo.daysRemaining <= 3) tag = '<span class="alert-stock bg-orange-500 text-white">DERNIERS JOURS</span>';
+                    else tag = `<span class="${tagBase}">${totalPieces - count} prises · ${durInfo.daysRemaining} j restants</span>`;
+                }
 
-                    const remainingDosesEl = card.querySelector('.remaining-doses');
-                    if (remainingDosesEl) remainingDosesEl.innerText = remainingDosesInCurrentPlate;
-                    
-                    return;
+                let barsHtml = '';
+                if (hasStock) {
+                    barsHtml += `<div class="progress-container ${hasDur ? 'mb-1' : 'mb-2.5'}" style="height: 5px;"><div class="progress-bar" style="width:${stockProg}%; background:${med.color}"></div></div>`;
+                }
+                if (hasDur) {
+                    barsHtml += `<div class="progress-container mb-2.5" style="height: 5px;"><div class="progress-bar" style="width:${durProg}%; background:#10b981"></div></div>`;
+                }
+
+                const short = isBottle ? 'flc' : 'plq';
+                const unitFull = isBottle ? 'Flacon' : 'Plq';
+                let pills = '';
+                if (hasStock) {
+                    const dosesTakenInUnit = isStockEmpty ? 0 : count % perUnit;
+                    const currentUnitNumber = isStockEmpty ? units : Math.floor(count / perUnit) + 1;
+                    const remainingFullUnits = isStockEmpty ? 0 : units - currentUnitNumber;
+                    const remainingDosesInUnit = isStockEmpty ? 0 : perUnit - dosesTakenInUnit;
+                    pills += `
+                        <span class="plate-text bg-slate-500/10 px-2 py-1 rounded text-slate-800 dark:text-white">${unitFull} ${currentUnitNumber}/${units}</span>
+                        <span class="hidden sm:inline-block bg-slate-500/10 px-2 py-1 rounded text-slate-800 dark:text-white"><span class="remaining-plates">${remainingFullUnits}</span> ${short} rest.</span>
+                        <span class="hidden sm:inline-block bg-slate-500/10 px-2 py-1 rounded text-slate-800 dark:text-white"><span class="remaining-doses">${remainingDosesInUnit}</span> /${short}</span>
+                        <span class="progress-text bg-slate-500/10 px-2 py-1 rounded font-black" style="color:${med.color}">${Math.round(stockProg)}%</span>`;
+                }
+                if (hasDur) {
+                    pills += `
+                        <span class="bg-slate-500/10 px-2 py-1 rounded text-slate-800 dark:text-white"><i class="ph ph-calendar-check text-[9px] text-emerald-500"></i> Jour ${durInfo.daysElapsed}/${durInfo.totalDays}</span>
+                        <span class="hidden sm:inline-block bg-slate-500/10 px-2 py-1 rounded text-slate-800 dark:text-white">${durInfo.daysRemaining} j rest.</span>
+                        <span class="bg-slate-500/10 px-2 py-1 rounded font-black text-emerald-600 dark:text-emerald-400">${Math.round(durProg)}%</span>`;
+                }
+
+                let doseVal, doseSub;
+                if (mode === 'duration') {
+                    doseVal = window.todayTakesMap[id] || 0;
+                    doseSub = 'auj.';
+                } else {
+                    doseVal = isStockEmpty ? 0 : count % perUnit;
+                    doseSub = `/ ${perUnit}`;
                 }
 
                 card.innerHTML = `
@@ -1992,23 +2499,16 @@
                             <div class="font-black text-sm sm:text-base uppercase tracking-wide truncate flex-1" style="color:${med.color}">${med.name}</div>
                         </div>
                         <div class="stock-alert mb-2">${tag}</div>
-                        <div class="progress-container mb-2.5" style="height: 5px;">
-                            <div class="progress-bar" style="width:${prog}%; background:${med.color}"></div>
-                        </div>
+                        ${barsHtml}
                         <div class="flex items-center justify-between gap-2">
-                            <div class="flex flex-wrap gap-1 text-[9px] font-bold">
-                                <span class="plate-text bg-slate-500/10 px-2 py-1 rounded text-slate-800 dark:text-white">Plq ${currentPlateNumber}/${med.plates_per_box}</span>
-                                <span class="hidden sm:inline-block bg-slate-500/10 px-2 py-1 rounded text-slate-800 dark:text-white"><span class="remaining-plates">${remainingFullPlates}</span> plq rest.</span>
-                                <span class="hidden sm:inline-block bg-slate-500/10 px-2 py-1 rounded text-slate-800 dark:text-white"><span class="remaining-doses">${remainingDosesInCurrentPlate}</span> /plq</span>
-                                <span class="progress-text bg-slate-500/10 px-2 py-1 rounded font-black" style="color:${med.color}">${Math.round(prog)}%</span>
-                            </div>
+                            <div class="flex flex-wrap gap-1 text-[9px] font-bold">${pills}</div>
                             <div class="flex items-center gap-1 bg-slate-500/5 p-1 rounded-xl flex-shrink-0">
                                 <button onclick="changeDose('${med.id}', -1)" class="dose-btn w-8 h-8 rounded-lg bg-white dark:bg-slate-800 shadow-sm text-red-500 font-black flex items-center justify-center">
                                     <i class="ph ph-minus text-sm"></i>
                                 </button>
                                 <div class="text-center min-w-[36px]">
-                                    <div class="text-lg font-black dose-anim" id="dose-text-${med.id}" style="color:${med.color}">${isBoxEmpty ? 0 : count % med.pieces_per_plate}</div>
-                                    <div class="text-[8px] opacity-50 font-bold">/ ${med.pieces_per_plate}</div>
+                                    <div class="text-lg font-black dose-anim" id="dose-text-${med.id}" style="color:${med.color}">${doseVal}</div>
+                                    <div class="text-[8px] opacity-50 font-bold">${doseSub}</div>
                                 </div>
                                 <button onclick="changeDose('${med.id}', 1)" class="dose-btn w-8 h-8 rounded-lg bg-white dark:bg-slate-800 shadow-sm font-black flex items-center justify-center" style="color:${med.color}">
                                     <i class="ph ph-plus text-sm"></i>
@@ -2025,10 +2525,22 @@
 
                 document.getElementById('editMedId').value = id;
                 document.getElementById('editMedName').value = med.name;
-                document.getElementById('editMedPieces').value = med.pieces_per_plate;
-                document.getElementById('editMedPlates').value = med.plates_per_box;
+                document.getElementById('editMedPieces').value = med.pieces_per_plate || '';
+                document.getElementById('editMedPlates').value = med.plates_per_box || '';
                 document.getElementById('editMedColor').value = med.color;
                 document.getElementById('editColorPreview').style.background = med.color;
+
+                editPackaging = med.packaging || 'plate';
+                editTrackingMode = med.tracking_mode || 'stock';
+                editDurationUnit = med.duration_unit || 'day';
+                setPackaging(editPackaging, true);
+                setTrackingMode(editTrackingMode, true);
+                setDurationUnit(editDurationUnit, true);
+
+                document.getElementById('editMedBottlePieces').value = med.bottle_pieces || '';
+                document.getElementById('editMedBottles').value = med.bottles_count || '';
+                document.getElementById('editMedDurationValue').value = med.duration_value || '';
+                document.getElementById('editMedStartDate').value = med.duration_start || '';
 
                 const sched = JSON.parse(localStorage.getItem('medSchedules') || '{}');
                 window.currentEditingSchedules = sched[id] ? [...sched[id].map(s => ({...s}))] : [];
@@ -2043,17 +2555,42 @@
             window.confirmEditMed = async () => {
                 const id = document.getElementById('editMedId').value;
                 const name = document.getElementById('editMedName').value.trim();
-                const pieces = parseInt(document.getElementById('editMedPieces').value) || 0;
-                const plates = parseInt(document.getElementById('editMedPlates').value) || 1;
                 const color = document.getElementById('editMedColor').value;
 
-                if (!name || !pieces) return showToast("Nom et doses/plq sont obligatoires");
+                let pieces = 0, plates = 1, bottlePieces = 0, bottles = 1;
+                if (editPackaging === 'plate') {
+                    pieces = parseInt(document.getElementById('editMedPieces').value) || 0;
+                    plates = parseInt(document.getElementById('editMedPlates').value) || 1;
+                } else {
+                    bottlePieces = parseInt(document.getElementById('editMedBottlePieces').value) || 0;
+                    bottles = parseInt(document.getElementById('editMedBottles').value) || 1;
+                }
+
+                let durationValue = 0;
+                if (editTrackingMode !== 'stock') {
+                    durationValue = parseInt(document.getElementById('editMedDurationValue').value) || 0;
+                }
+                const durationStart = editTrackingMode !== 'stock'
+                    ? (document.getElementById('editMedStartDate').value || getLocalDateStr())
+                    : null;
+
+                if (!name) return showToast("Le nom est obligatoire");
+                if (editTrackingMode !== 'duration' && editPackaging === 'plate' && pieces < 1) return showToast("Indiquez les doses par plaquette");
+                if (editTrackingMode !== 'duration' && editPackaging === 'bottle' && bottlePieces < 1) return showToast("Indiquez les doses par flacon");
+                if (editTrackingMode !== 'stock' && durationValue < 1) return showToast("Indiquez la durée du traitement");
 
                 setSyncing(true);
                 try {
                     medsData[id].name = name;
+                    medsData[id].packaging = editPackaging;
                     medsData[id].pieces_per_plate = pieces;
                     medsData[id].plates_per_box = plates;
+                    medsData[id].bottle_pieces = bottlePieces;
+                    medsData[id].bottles_count = bottles;
+                    medsData[id].tracking_mode = editTrackingMode;
+                    medsData[id].duration_value = durationValue;
+                    medsData[id].duration_unit = editDurationUnit;
+                    medsData[id].duration_start = durationStart;
                     medsData[id].color = color;
                     updateMedCardDOM(id);
 
@@ -2066,8 +2603,15 @@
 
                     const { error } = await sb.from('medications').update({
                         name,
+                        packaging: editPackaging,
                         pieces_per_plate: pieces,
                         plates_per_box: plates,
+                        bottle_pieces: bottlePieces,
+                        bottles_count: bottles,
+                        tracking_mode: editTrackingMode,
+                        duration_value: durationValue,
+                        duration_unit: editDurationUnit,
+                        duration_start: durationStart,
                         color
                     }).eq('id', id);
 
@@ -2078,7 +2622,8 @@
                         const schedInserts = window.currentEditingSchedules.map(s => ({
                             medication_id: id,
                             time: s.time,
-                            days: s.days
+                            days: s.days,
+                            user_id: uid
                         }));
                         await sb.from('medication_schedules').insert(schedInserts);
                     }
@@ -2345,15 +2890,15 @@
                 window.activeTimePickerTarget = null;
             };
 
-            // === NEW BOX LOGIC (extracted for custom confirm) ===
             window.startNewBox = async (id, med, d) => {
                 med.box_count = (med.box_count || 1) + 1;
                 med._count = 0;
+                window.todayTakesMap[id] = 0;
                 setSyncing(true);
                 try {
                     await sb.from('medication_doses').delete().eq('medication_id', id);
                     await sb.from('medications').update({ box_count: med.box_count }).eq('id', id);
-                    showToast("Nouvelle boîte entamée");
+                    showToast((med.packaging === 'bottle') ? "Nouveau flacon entamé" : "Nouvelle boîte entamée");
                     for (let k in window.medsHistoryMap) {
                         if (k.endsWith(`_${id}`)) delete window.medsHistoryMap[k];
                     }
@@ -2372,20 +2917,26 @@
                 const d = date || getLocalDateStr();
 
                 if (!med._count) med._count = 0;
-                const maxTotal = med.pieces_per_plate * med.plates_per_box;
+                const maxTotal = (med.tracking_mode === 'duration') ? Infinity : getTotalPieces(med);
 
-                if (val > 0 && med._count >= maxTotal) {
+                if (val > 0 && maxTotal !== Infinity && maxTotal > 0 && med._count >= maxTotal) {
+                    const isBottle = med.packaging === 'bottle';
                     customConfirm(
-                        "Boîte terminée",
-                        "La boîte actuelle est terminée. Voulez-vous entamer une nouvelle boîte ?",
+                        isBottle ? "Flacon terminé" : "Boîte terminée",
+                        isBottle ? "Le flacon actuel est terminé. Voulez-vous entamer un nouveau flacon ?" : "La boîte actuelle est terminée. Voulez-vous entamer une nouvelle boîte ?",
                         () => startNewBox(id, med, d),
-                        "Nouvelle boîte",
+                        isBottle ? "Nouveau flacon" : "Nouvelle boîte",
                         false
                     );
                     return;
                 }
 
                 med._count = Math.max(0, med._count + val);
+
+                if (d === getLocalDateStr()) {
+                    if (val > 0) window.todayTakesMap[id] = (window.todayTakesMap[id] || 0) + 1;
+                    else if (val < 0) window.todayTakesMap[id] = Math.max(0, (window.todayTakesMap[id] || 0) - 1);
+                }
 
                 const hKey = `${d}_${id}`;
                 if (!window.medsHistoryMap[hKey]) window.medsHistoryMap[hKey] = { count: 0, color: med.color, date: d, medication_id: id };
@@ -2443,7 +2994,7 @@
                                 createdAtStr = getLocalDateTimeStr();
                             }
                         }
-                        await sb.from('medication_doses').insert({ medication_id: id, created_at: createdAtStr });
+                        await sb.from('medication_doses').insert({ medication_id: id, created_at: createdAtStr, user_id: uid });
                     } else if (val < 0) {
                         const startOfDay = `${d}T00:00:00`;
                         const endOfDay = `${d}T23:59:59`;
@@ -2475,7 +3026,7 @@
                         if (exist) {
                             await sb.from('medication_history').update({ count: dailyCount, cumulative: totalCount, color: med.color }).eq('id', exist.id);
                         } else {
-                            await sb.from('medication_history').insert({ medication_id: id, date: d, count: dailyCount, cumulative: totalCount, color: med.color });
+                            await sb.from('medication_history').insert({ medication_id: id, date: d, count: dailyCount, cumulative: totalCount, color: med.color, user_id: uid });
                         }
                     } else if (exist) {
                         await sb.from('medication_history').delete().eq('id', exist.id);
@@ -2637,6 +3188,9 @@
                 }
                 
                 if (medsData[medId]) medsData[medId]._count = Math.max(0, (medsData[medId]._count || 0) - 1);
+                if (dateStr === getLocalDateStr()) {
+                    window.todayTakesMap[medId] = Math.max(0, (window.todayTakesMap[medId] || 0) - 1);
+                }
                 
                 const hKey = `${dateStr}_${medId}`;
                 if (window.medsHistoryMap[hKey]) {
@@ -2679,7 +3233,6 @@
                 }
             };
 
-            // === RENDER HISTORY: fetches ALL history, shows medicament + plate pills + total ===
             window.renderHistory = async () => {
                 const list = document.getElementById('historyView');
                 list.innerHTML = `<div class="flex flex-col items-center justify-center py-10 gap-3"><div class="spinner"></div><div class="text-xs opacity-50 font-bold">Chargement de l'historique...</div></div>`;
@@ -2721,10 +3274,28 @@
                         const med = medsData[h.medication_id];
                         if (med) {
                             const cumulative = h.cumulative || 0;
-                            const piecesPerPlate = med.pieces_per_plate || 1;
-                            const pillsFromPlate = cumulative % piecesPerPlate;
-                            const plateNum = Math.floor(cumulative / piecesPerPlate) + 1;
-                            const plateProgress = piecesPerPlate > 0 ? (pillsFromPlate / piecesPerPlate) * 100 : 0;
+                            const isBottleHist = (med.packaging || 'plate') === 'bottle';
+                            const perUnitHist = isBottleHist ? (med.bottle_pieces || 0) : (med.pieces_per_plate || 0);
+                            const unitNameHist = isBottleHist ? 'Flacon' : 'Plaque';
+
+                            let unitBlockHtml = '';
+                            if (perUnitHist > 0) {
+                                const pillsFromPlate = cumulative % perUnitHist;
+                                const plateNum = Math.floor(cumulative / perUnitHist) + 1;
+                                const plateProgress = (pillsFromPlate / perUnitHist) * 100;
+                                unitBlockHtml = `
+                                    <div class="flex items-center gap-2">
+                                        <div class="flex-1">
+                                            <div class="flex justify-between items-center mb-1">
+                                                <span class="text-[9px] font-black uppercase opacity-50 tracking-wider">${unitNameHist} ${plateNum}</span>
+                                                <span class="text-[9px] font-black opacity-60">${pillsFromPlate}/${perUnitHist}</span>
+                                            </div>
+                                            <div class="progress-mini">
+                                                <div class="progress-mini-bar" style="width:${plateProgress}%; background:${med.color}"></div>
+                                            </div>
+                                        </div>
+                                    </div>`;
+                            }
 
                             html += `
                                 <div class="history-item bg-slate-500/5 p-4 rounded-2xl mb-2 border border-slate-500/10" style="animation: fadeInUp 0.3s var(--ease-spring) forwards; opacity: 0; animation-delay: ${Math.min(itemIndex * 0.03, 0.6)}s;">
@@ -2737,17 +3308,7 @@
                                         <span class="font-black text-xs bg-white dark:bg-slate-800 px-2.5 py-1 rounded-lg shadow-sm border border-slate-500/10 text-slate-800 dark:text-white">${h.count} prise${h.count > 1 ? 's' : ''}</span>
                                     </div>
                                     <div class="pl-2 space-y-2">
-                                        <div class="flex items-center gap-2">
-                                            <div class="flex-1">
-                                                <div class="flex justify-between items-center mb-1">
-                                                    <span class="text-[9px] font-black uppercase opacity-50 tracking-wider">Plaque ${plateNum}</span>
-                                                    <span class="text-[9px] font-black opacity-60">${pillsFromPlate}/${piecesPerPlate}</span>
-                                                </div>
-                                                <div class="progress-mini">
-                                                    <div class="progress-mini-bar" style="width:${plateProgress}%; background:${med.color}"></div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        ${unitBlockHtml}
                                         <div class="flex justify-between items-center pt-1">
                                             <span class="text-[9px] font-bold opacity-50 uppercase tracking-wider flex items-center gap-1"><i class="ph ph-stack text-xs"></i> Total cumulé</span>
                                             <span class="text-xs font-black" style="color:${med.color}">${cumulative} prises</span>
@@ -2777,11 +3338,13 @@
 
                 allMeds.forEach((med, idx) => {
                     const isArchived = med.active === false;
+                    const pkgLabel = (med.packaging === 'bottle') ? '<i class="ph ph-flask text-[10px] opacity-60"></i>' : '<i class="ph ph-stack text-[10px] opacity-60"></i>';
                     list.innerHTML += `
                         <div class="bg-slate-500/5 p-4 rounded-2xl border border-slate-500/10 flex flex-col gap-3" style="animation: fadeInUp 0.3s forwards; animation-delay: ${idx * 0.05}s;">
                             <div class="flex items-center gap-3">
                                 <div class="w-3 h-3 rounded-full shadow-sm" style="background:${med.color}"></div>
                                 <span class="font-bold text-sm flex-1 truncate" style="color:${med.color}">${med.name}</span>
+                                ${pkgLabel}
                             </div>
                             <div class="flex gap-2">
                                 <button onclick="toggleArchive('${med.id}')" class="flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider action-btn ${isArchived ? 'bg-green-500/20 text-green-500' : 'bg-orange-500/20 text-orange-500'}">
@@ -2862,8 +3425,24 @@
                 }
             };
 
-            initApp();
+            // === BOOT : session Supabase Auth ===
+            initUI();
+
+            (async function boot() {
+                const { data: { session } } = await sb.auth.getSession();
+                if (session && session.user) {
+                    await enterApp(session.user);
+                } else if (localStorage.getItem('medUser')) {
+                    // ancien utilisateur détecté → on l'envoie directement sur l'onglet Migrer
+                    showLoginTab('migrate');
+                }
+                sb.auth.onAuthStateChange((event) => {
+                    if (event === 'SIGNED_OUT') {
+                        location.reload();
+                    }
+                });
+            })();
         });
     </script>
 </body>
-    </html>
+</html>
