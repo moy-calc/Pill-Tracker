@@ -670,6 +670,24 @@
     </style>
 </head>
 <body class="p-3 sm:p-5 lg:p-6">
+    <script>
+        // === ANTI-CACHE : force le vidage du cache quand la version change ===
+        (function(){
+            var APP_VERSION = 'medtracker-v5-authfix';
+            try {
+                if (localStorage.getItem('mtAppVersion') !== APP_VERSION) {
+                    localStorage.setItem('mtAppVersion', APP_VERSION);
+                    if ('caches' in window) {
+                        caches.keys().then(function(keys){ keys.forEach(function(k){ caches.delete(k); }); }).catch(function(){});
+                    }
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.getRegistrations().then(function(regs){ regs.forEach(function(r){ r.unregister(); }); }).catch(function(){});
+                    }
+                }
+            } catch(e) {}
+        })();
+    </script>
+
     <div id="toastContainer" class="toast"><i class="ph ph-info text-xl"></i><span id="toastMsg"></span></div>
 
     <div id="drawerOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[2000] hidden opacity-0" onclick="closeDrawers()"></div>
@@ -723,7 +741,7 @@
                     <button type="button" onclick="toggleForgotPw()" class="text-[11px] font-bold text-indigo-500 hover:underline">Mot de passe oublié ?</button>
                 </div>
                 <div id="forgotPwBox" class="hidden space-y-3 bg-indigo-500/5 border border-indigo-500/20 rounded-2xl p-4" style="animation: fadeInUp 0.3s var(--ease-spring) forwards;">
-                    <p class="text-[11px] font-semibold opacity-70 text-left leading-relaxed">Entrez l'email de votre compte : vous recevrez un lien pour choisir un nouveau mot de passe. (Comptes avec email uniquement — pas les anciens comptes non migrés.)</p>
+                    <p class="text-[11px] font-semibold opacity-70 text-left leading-relaxed">Entrez l'email de votre compte : vous recevrez un lien pour choisir un nouveau mot de passe.</p>
                     <input type="email" id="forgotEmail" placeholder="Email du compte" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-xl p-3 font-bold text-sm outline-none focus:border-indigo-500 focus:bg-indigo-500/5">
                     <button onclick="sendResetEmail()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs uppercase tracking-widest action-btn shadow-lg shadow-indigo-600/30">📧 Envoyer le lien</button>
                 </div>
@@ -733,20 +751,8 @@
                 <p class="text-[11px] opacity-50 font-semibold leading-relaxed">Compte de l'ancienne version ? Utilisez l'onglet <span class="text-indigo-500 font-bold">Migrer</span> pour le récupérer.</p>
             </div>
 
-            <!-- PANEL CREER -->
+            <!-- PANEL CREER (NOUVELLE MÉTHODE : EMAIL + MOT DE PASSE UNIQUEMENT) -->
             <div id="signupPanel" class="space-y-4 hidden">
-                <div class="relative">
-                    <i class="ph ph-text-aa absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
-                    <input type="text" id="signupLN" oninput="validateSignupForm()" placeholder="Nom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
-                </div>
-                <div class="relative">
-                    <i class="ph ph-text-a-underline absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
-                    <input type="text" id="signupFN" oninput="validateSignupForm()" placeholder="Prénom" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
-                </div>
-                <div class="relative">
-                    <i class="ph ph-calendar-blank absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
-                    <input type="text" id="signupBD" readonly onclick="openCustomDatePicker('signupBD')" placeholder="Date de naissance" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 cursor-pointer text-base">
-                </div>
                 <div class="relative">
                     <i class="ph ph-envelope-simple absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
                     <input type="email" id="signupEmail" oninput="validateSignupForm()" placeholder="Email" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
@@ -755,9 +761,14 @@
                     <i class="ph ph-password absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
                     <input type="password" id="signupPw" oninput="validateSignupForm()" placeholder="Mot de passe (6 caractères min)" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
                 </div>
+                <div class="relative">
+                    <i class="ph ph-password absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
+                    <input type="password" id="signupPw2" oninput="validateSignupForm()" placeholder="Confirmer le mot de passe" class="w-full bg-slate-500/5 border border-slate-500/10 rounded-2xl p-4 pl-12 font-bold outline-none focus:border-indigo-500 focus:bg-indigo-500/5 text-base">
+                </div>
                 <button id="signupBtn" onclick="handleSignup()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl opacity-50 pointer-events-none action-btn flex items-center justify-center gap-2 text-sm tracking-widest uppercase shadow-lg shadow-indigo-600/30">
                     CRÉER MON COMPTE <i class="ph ph-arrow-right font-bold text-xl"></i>
                 </button>
+                <p class="text-[11px] opacity-50 font-semibold leading-relaxed">Un simple email + mot de passe suffit. Votre nom et prénom seront ajoutés juste après, dans votre profil.</p>
             </div>
 
             <!-- PANEL MIGRER -->
@@ -1529,13 +1540,31 @@
                 b.classList.toggle('pointer-events-none', !ok);
             }
 
+            // === Affichage d'erreur PERMANENT et VISIBLE (cadre rouge) ===
+            function showAuthError(panelId, msg) {
+                let box = document.getElementById(panelId + 'ErrBox');
+                if (!box) {
+                    box = document.createElement('div');
+                    box.id = panelId + 'ErrBox';
+                    box.style.cssText = 'display:none;margin-bottom:12px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.45);color:#ef4444;padding:12px 16px;border-radius:16px;font-weight:800;font-size:12px;text-align:center;line-height:1.5;';
+                    document.getElementById(panelId).prepend(box);
+                }
+                box.innerText = msg;
+                box.style.display = 'block';
+            }
+
+            function hideAuthError(panelId) {
+                const box = document.getElementById(panelId + 'ErrBox');
+                if (box) box.style.display = 'none';
+            }
+
             function authErrMsg(e) {
                 const m = (e || "erreur").toLowerCase();
-                if (m.includes('invalid login credentials')) return "Email ou mot de passe incorrect.";
+                if (m.includes('invalid login credentials')) return "Email ou mot de passe incorrect. Vérifiez les MAJUSCULES (le clavier mobile en ajoute parfois au début).";
                 if (m.includes('already')) return "Cet email est déjà utilisé.";
                 if (m.includes('password should be at least')) return "Mot de passe trop court (6 caractères minimum).";
                 if (m.includes('email not confirmed')) return "Email non confirmé — vérifiez votre boîte mail.";
-                if (m.includes('rate limit') || m.includes('too many')) return "Trop de tentatives, patientez un instant.";
+                if (m.includes('rate limit') || m.includes('too many')) return "Trop de tentatives, patientez 60 secondes.";
                 if (m.includes('unable to validate email')) return "Adresse email invalide.";
                 return "Erreur : " + e;
             }
@@ -1564,12 +1593,11 @@
                 setSubmitState('loginBtn', ok);
             };
 
+            // === NOUVELLE MÉTHODE : Email + Mot de passe + Confirmation uniquement ===
             window.validateSignupForm = () => {
-                const ok = document.getElementById('signupLN').value.trim() !== ''
-                    && document.getElementById('signupFN').value.trim() !== ''
-                    && document.getElementById('signupBD').value !== ''
-                    && validEmail(document.getElementById('signupEmail').value.trim())
-                    && document.getElementById('signupPw').value.length >= 6;
+                const ok = validEmail(document.getElementById('signupEmail').value.trim())
+                    && document.getElementById('signupPw').value.length >= 6
+                    && document.getElementById('signupPw2').value.length >= 6;
                 setSubmitState('signupBtn', ok);
             };
 
@@ -1583,53 +1611,90 @@
                 setSubmitState('migrateBtn', ok);
             };
 
+            // === CONNEXION : erreur visible en rouge + entrée directe (pas de rechargement) ===
             window.handleLogin = async () => {
                 const btn = document.getElementById('loginBtn');
                 const original = btn.innerHTML;
+                hideAuthError('loginPanel');
+
+                const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+                const pw = document.getElementById('loginPw').value;
+
                 btn.innerHTML = '<i class="ph ph-spinner animate-spin text-2xl"></i>';
                 btn.style.pointerEvents = 'none';
 
-                const email = document.getElementById('loginEmail').value.trim();
-                const pw = document.getElementById('loginPw').value;
+                try {
+                    const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
 
-                const { error } = await sb.auth.signInWithPassword({ email, password: pw });
-                if (error) {
-                    showToast(authErrMsg(error.message));
+                    if (error) {
+                        showAuthError('loginPanel', authErrMsg(error.message));
+                        showToast(authErrMsg(error.message));
+                        btn.innerHTML = original;
+                        btn.style.pointerEvents = '';
+                        return;
+                    }
+
+                    if (data && data.session && data.user) {
+                        try { await enterApp(data.user); } catch (e) {}
+                        for (let i = 0; i < 6; i++) {
+                            if (!document.getElementById('appBody').classList.contains('hidden')) break;
+                            await new Promise(r => setTimeout(r, 500));
+                        }
+                        if (document.getElementById('appBody').classList.contains('hidden')) {
+                            location.reload();
+                        }
+                    } else {
+                        location.reload();
+                    }
+                } catch (e) {
+                    showAuthError('loginPanel', 'Erreur inattendue : ' + ((e && e.message) ? e.message : e));
                     btn.innerHTML = original;
                     btn.style.pointerEvents = '';
-                    return;
                 }
-                location.reload();
             };
 
+            // === CRÉATION DE COMPTE : nouvelle méthode (email + mot de passe uniquement) ===
             window.handleSignup = async () => {
                 const btn = document.getElementById('signupBtn');
                 const original = btn.innerHTML;
+                hideAuthError('signupPanel');
+
+                const email = document.getElementById('signupEmail').value.trim().toLowerCase();
+                const pw = document.getElementById('signupPw').value;
+                const pw2 = document.getElementById('signupPw2').value;
+
+                if (pw !== pw2) {
+                    showAuthError('signupPanel', "Les deux mots de passe ne correspondent pas.");
+                    return;
+                }
+
                 btn.innerHTML = '<i class="ph ph-spinner animate-spin text-2xl"></i>';
                 btn.style.pointerEvents = 'none';
 
-                const ln = document.getElementById('signupLN').value.trim();
-                const fn = document.getElementById('signupFN').value.trim();
-                const bd = document.getElementById('signupBD').value;
-                const email = document.getElementById('signupEmail').value.trim();
-                const pw = document.getElementById('signupPw').value;
-
-                const { data, error } = await sb.auth.signUp({ email, password: pw });
-                if (error) {
-                    showToast(authErrMsg(error.message));
-                    btn.innerHTML = original;
-                    btn.style.pointerEvents = '';
-                    return;
-                }
-                if (data && data.session) {
-                    try {
-                        await sb.from('profiles').insert({ id: data.user.id, first_name: fn, last_name: ln, birth_date: bd || null });
-                    } catch (e) {}
-                    showToast("Compte créé, bienvenue !");
-                    setTimeout(() => location.reload(), 700);
-                } else {
-                    localStorage.setItem('pendingProfile', JSON.stringify({ ln, fn, bd }));
-                    showToast("Compte créé ! Confirmez votre email puis connectez-vous.");
+                try {
+                    const { data, error } = await sb.auth.signUp({ email, password: pw });
+                    if (error) {
+                        showAuthError('signupPanel', authErrMsg(error.message));
+                        showToast(authErrMsg(error.message));
+                        btn.innerHTML = original;
+                        btn.style.pointerEvents = '';
+                        return;
+                    }
+                    if (data && data.session && data.user) {
+                        try { await sb.from('profiles').insert({ id: data.user.id }); } catch (e) {}
+                        try { await enterApp(data.user); } catch (e) {}
+                        showToast("Compte créé ! Complétez votre profil (nom, prénom) 🎉");
+                        setTimeout(() => { openModal('accountModal'); }, 700);
+                        btn.innerHTML = original;
+                        btn.style.pointerEvents = '';
+                    } else {
+                        showAuthError('signupPanel', "Compte créé ! Un email de confirmation vous a été envoyé — cliquez sur le lien reçu puis connectez-vous.");
+                        showToast("Vérifiez votre boîte mail pour confirmer le compte.");
+                        btn.innerHTML = original;
+                        btn.style.pointerEvents = '';
+                    }
+                } catch (e) {
+                    showAuthError('signupPanel', 'Erreur inattendue : ' + ((e && e.message) ? e.message : e));
                     btn.innerHTML = original;
                     btn.style.pointerEvents = '';
                 }
@@ -1638,6 +1703,7 @@
             window.handleMigrate = async () => {
                 const btn = document.getElementById('migrateBtn');
                 const original = btn.innerHTML;
+                hideAuthError('migratePanel');
                 btn.innerHTML = '<i class="ph ph-spinner animate-spin text-2xl"></i>';
                 btn.style.pointerEvents = 'none';
 
@@ -1645,7 +1711,7 @@
                 const fn = document.getElementById('migrateFN').value.trim().toLowerCase();
                 const bd = document.getElementById('migrateBD').value;
                 const oldPw = document.getElementById('migrateOldPw').value;
-                const email = document.getElementById('migrateEmail').value.trim();
+                const email = document.getElementById('migrateEmail').value.trim().toLowerCase();
                 const pw = document.getElementById('migratePw').value;
                 const oldKey = `${ln}_${fn}_${bd.replace(/-/g, '')}`;
 
@@ -1677,6 +1743,7 @@
                         }
                         customConfirm("Email déjà utilisé", "Cet email possède déjà un compte, mais le mot de passe saisi ne correspond pas. Réessayez en utilisant le mot de passe de ce compte email.", () => {}, "Compris", false);
                     } else {
+                        showAuthError('migratePanel', authErrMsg(error.message));
                         showToast(authErrMsg(error.message));
                     }
                     btn.innerHTML = original;
@@ -1688,7 +1755,8 @@
                 } else {
                     localStorage.setItem('pendingMigration', JSON.stringify({ key: oldKey, pw: oldPw }));
                     localStorage.removeItem('medUser');
-                    showToast("Compte créé ! Confirmez votre email puis connectez-vous : la migration sera automatique.");
+                    showAuthError('migratePanel', "Compte créé ! Un email de confirmation vous a été envoyé — cliquez sur le lien puis connectez-vous : la migration sera automatique.");
+                    showToast("Vérifiez votre boîte mail.");
                     btn.innerHTML = original;
                     btn.style.pointerEvents = '';
                 }
@@ -1960,8 +2028,7 @@
 
                 if (window.activeDatePickerTarget === 'editBD') {
                     document.getElementById('editAgeDisplay').innerText = calculateAge(dateStr);
-                } else if (window.activeDatePickerTarget === 'signupBD' || window.activeDatePickerTarget === 'migrateBD') {
-                    validateSignupForm();
+                } else if (window.activeDatePickerTarget === 'migrateBD') {
                     validateMigrateForm();
                 } else if (window.activeDatePickerTarget === 'newMedStartDate') {
                     validateMedForm();
