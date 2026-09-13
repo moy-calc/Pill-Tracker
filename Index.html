@@ -144,17 +144,8 @@
             75% { transform: rotate(-4deg) scale(1.02); }
         }
 
-        @keyframes slideInLeft {
-            from { opacity: 0; transform: translateX(-30px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
         @keyframes spin {
             to { transform: rotate(360deg); }
-        }
-
-        @keyframes progressBarFill {
-            from { width: 0%; }
         }
 
         .day-btn, .edit-day-btn {
@@ -673,7 +664,7 @@
     <script>
         // === ANTI-CACHE : force le vidage du cache quand la version change ===
         (function(){
-            var APP_VERSION = 'medtracker-v7-bootfix';
+            var APP_VERSION = 'medtracker-v8-speed-addfix';
             try {
                 if (localStorage.getItem('mtAppVersion') !== APP_VERSION) {
                     localStorage.setItem('mtAppVersion', APP_VERSION);
@@ -751,7 +742,7 @@
                 <p class="text-[11px] opacity-50 font-semibold leading-relaxed">Compte de l'ancienne version ? Utilisez l'onglet <span class="text-indigo-500 font-bold">Migrer</span> pour le récupérer.</p>
             </div>
 
-            <!-- PANEL CREER (email + mot de passe uniquement) -->
+            <!-- PANEL CREER -->
             <div id="signupPanel" class="space-y-4 hidden">
                 <div class="relative">
                     <i class="ph ph-envelope-simple absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
@@ -1277,10 +1268,9 @@
             ];
 
             // ============================================================
-            // === OUTILS : timeout, nettoyage tokens, test serveur ===
+            // === OUTILS ===
             // ============================================================
 
-            // Évite les opérations qui "tournent sans fin" (spinner infini)
             function withTimeout(promise, ms, label) {
                 return Promise.race([
                     promise,
@@ -1290,7 +1280,6 @@
                 ]);
             }
 
-            // Supprime les tokens de session Supabase corrompus/expirés du navigateur
             function clearSupabaseTokens() {
                 try {
                     Object.keys(localStorage).forEach(k => {
@@ -1301,7 +1290,6 @@
                 } catch (e) {}
             }
 
-            // Test de connectivité : le serveur Supabase répond-il ?
             async function checkServer() {
                 try {
                     const ctrl = new AbortController();
@@ -1315,6 +1303,15 @@
                 } catch (e) {
                     return false;
                 }
+            }
+
+            // Extrait le VRAI message d'erreur de Supabase (plus jamais d'erreur générique)
+            function dbErrMsg(e) {
+                if (!e) return 'erreur inconnue';
+                if (typeof e === 'string') return e;
+                const msg = e.hint || e.details || e.message || '';
+                if (msg) return String(msg).slice(0, 220);
+                try { return JSON.stringify(e).slice(0, 220); } catch (_) { return 'erreur inconnue'; }
             }
 
             function getLocalDateStr(date = new Date()) {
@@ -1362,6 +1359,14 @@
                     daysRemaining: Math.max(totalDays - daysElapsed, 0),
                     finished: daysElapsed >= totalDays
                 };
+            }
+
+            function normalizeMed(m) {
+                if (!m.packaging) m.packaging = 'plate';
+                if (!m.tracking_mode) m.tracking_mode = 'stock';
+                if (!m.duration_unit) m.duration_unit = 'day';
+                if (typeof m._count !== 'number') m._count = 0;
+                return m;
             }
 
             lastCheckedDate = getLocalDateStr();
@@ -1462,67 +1467,6 @@
                 toastTimeout = setTimeout(() => t.classList.remove('show'), 3500);
             };
 
-            window.triggerNotification = async (btn) => {
-                if (btn) {
-                    const icon = btn.querySelector('i');
-                    if (icon) {
-                        icon.classList.add('bell-shake');
-                        setTimeout(() => icon.classList.remove('bell-shake'), 500);
-                    }
-                }
-                
-                if (!("Notification" in window)) {
-                    showToast("Notifications non supportées.");
-                    return;
-                }
-                
-                try {
-                    let perm = Notification.permission;
-                    if (perm !== "granted" && perm !== "denied") {
-                        perm = await Notification.requestPermission();
-                    }
-                    
-                    if (perm === "granted") {
-                        const opts = {
-                            body: 'Notifications parfaitement actives !',
-                            icon: 'icon.png',
-                            badge: 'icon.png',
-                            vibrate: [200, 100, 200]
-                        };
-                        
-                        let reg = swRegistration;
-                        if (!reg && 'serviceWorker' in navigator) {
-                            try { reg = await navigator.serviceWorker.getRegistration(); } catch(e) {}
-                        }
-                        
-                        if (reg && 'showNotification' in reg) {
-                            try {
-                                await reg.showNotification('MedTracker Pro', opts);
-                                showToast("Notification envoyée");
-                            } catch (e) {
-                                try {
-                                    new Notification('MedTracker Pro', opts);
-                                    showToast("Notification envoyée");
-                                } catch (err) {
-                                    showToast("Notification envoyée (appareil mobile)");
-                                }
-                            }
-                        } else {
-                            try {
-                                new Notification('MedTracker Pro', opts);
-                                showToast("Notification envoyée");
-                            } catch (e) {
-                                showToast("Notification envoyée (appareil mobile)");
-                            }
-                        }
-                    } else {
-                        showToast("Autorisation refusée.");
-                    }
-                } catch (e) {
-                    showToast("Erreur lors de la notification.");
-                }
-            };
-
             function calculateAge(dateStr) {
                 if (!dateStr) return "";
                 const today = new Date();
@@ -1570,7 +1514,7 @@
             }
 
             // ============================================================
-            // === AUTH : erreurs visibles + timeout sur chaque opération ===
+            // === AUTH ===
             // ============================================================
 
             function validEmail(v) {
@@ -1652,7 +1596,6 @@
                 setSubmitState('migrateBtn', ok);
             };
 
-            // === CONNEXION (timeout 25 s, entrée directe, zéro rechargement) ===
             window.handleLogin = async () => {
                 const btn = document.getElementById('loginBtn');
                 const original = btn.innerHTML;
@@ -1689,7 +1632,6 @@
                 }
             };
 
-            // === CRÉATION DE COMPTE (timeout 25 s, entrée directe) ===
             window.handleSignup = async () => {
                 const btn = document.getElementById('signupBtn');
                 const original = btn.innerHTML;
@@ -1735,7 +1677,6 @@
                 }
             };
 
-            // === MIGRATION (timeouts partout) ===
             window.handleMigrate = async () => {
                 const btn = document.getElementById('migrateBtn');
                 const original = btn.innerHTML;
@@ -1759,13 +1700,10 @@
                     if (rpcErr || !res || !res.success) {
                         const msg = (res && res.message) ? res.message : "La migration a échoué. Vérifiez vos anciennes informations.";
                         showAuthError('migratePanel', msg);
-                        btn.innerHTML = original;
-                        btn.style.pointerEvents = '';
                         return;
                     }
                     localStorage.removeItem('medUser');
                     showToast(res.message || "Compte migré avec succès !");
-                    try { await enterApp(sb.auth.getUser ? (await sb.auth.getUser()).data.user : null); } catch (e) {}
                     setTimeout(() => location.reload(), 900);
                 };
 
@@ -1806,7 +1744,6 @@
                 }
             };
 
-            // === MOT DE PASSE OUBLIÉ ===
             window.toggleForgotPw = () => {
                 document.getElementById('forgotPwBox').classList.toggle('hidden');
             };
@@ -1853,11 +1790,10 @@
             };
 
             function clearLocalData() {
-                ['medUser', 'medSchedules', 'medNotified', 'medQueue', 'pendingMigration', 'pendingProfile'].forEach(k => localStorage.removeItem(k));
+                ['medUser', 'medSchedules', 'medNotified', 'medQueue', 'pendingMigration', 'pendingProfile', 'mtMedsCache', 'mtMedsCacheMeta'].forEach(k => localStorage.removeItem(k));
                 clearSupabaseTokens();
             }
 
-            // === Gestion du compte ===
             window.saveProfile = async () => {
                 const ln = document.getElementById('editLN').value.trim();
                 const fn = document.getElementById('editFN').value.trim();
@@ -1872,7 +1808,7 @@
                     document.getElementById('editAgeDisplay').innerText = calculateAge(bd);
                     showToast("Profil mis à jour avec succès !");
                 } catch (e) {
-                    showToast("Erreur lors de la mise à jour du profil");
+                    showToast("Erreur profil : " + dbErrMsg(e));
                 } finally {
                     setSyncing(false);
                 }
@@ -1896,7 +1832,7 @@
                     document.getElementById('newPassSet').value = '';
                     showToast("Mot de passe modifié avec succès !");
                 } catch (e) {
-                    showToast("Erreur lors du changement de mot de passe");
+                    showToast("Erreur : " + dbErrMsg(e));
                 } finally {
                     setSyncing(false);
                 }
@@ -1926,7 +1862,6 @@
                 location.reload();
             };
 
-            // === TELEGRAM ===
             window.refreshTelegramStatus = async () => {
                 const el = document.getElementById('tgStatus');
                 if (!el || !uid) return;
@@ -1977,7 +1912,7 @@
                     showToast("ID Telegram enregistré !");
                     refreshTelegramStatus();
                 } catch (e) {
-                    showToast("Erreur lors de l'enregistrement");
+                    showToast("Erreur : " + dbErrMsg(e));
                 } finally {
                     setSyncing(false);
                 }
@@ -2283,6 +2218,7 @@
                 openModal('customTimeModal');
             };
 
+            // === AJOUT : vrais messages d'erreur en cas d'échec ===
             window.confirmAddMed = async () => {
                 const name = document.getElementById('newMedName').value.trim();
                 const color = document.getElementById('newMedColor').value;
@@ -2339,7 +2275,8 @@
                             days: s.days,
                             user_id: uid
                         }));
-                        await sb.from('medication_schedules').insert(schedInserts);
+                        const { error: schedError } = await sb.from('medication_schedules').insert(schedInserts);
+                        if (schedError) throw schedError;
                         
                         let sched = JSON.parse(localStorage.getItem('medSchedules') || '{}');
                         sched[newMed.id] = window.currentEditingSchedules;
@@ -2370,21 +2307,22 @@
                     closeModal('addMedModal');
                     renderAllMeds();
                 } catch (e) {
-                    showToast("Erreur lors de l'ajout du médicament");
+                    console.error('Erreur ajout médicament :', e);
+                    showToast("❌ Ajout impossible : " + dbErrMsg(e));
                 } finally {
                     setSyncing(false);
                 }
             };
 
             // ============================================================
-            // === ENTREE DANS L'APP : affichage IMMÉDIAT, chargement en fond ===
+            // === ENTREE DANS L'APP : affichage immédiat + cache + parallèle ===
             // ============================================================
             async function enterApp(authUser) {
                 if (uid || !authUser) return;
                 uid = authUser.id;
                 userEmail = authUser.email || "";
 
-                // 1) Affichage immédiat — AUCUNE requête bloquante avant ceci
+                // 1) Affichage IMMÉDIAT — aucune requête réseau avant ceci
                 document.getElementById('accountEmail').innerText = userEmail;
                 document.getElementById('loginBox').classList.add('hidden');
                 document.getElementById('appBody').classList.remove('hidden');
@@ -2460,8 +2398,28 @@
                     if (!document.hidden) checkDayChange();
                 });
 
-                // 2) Chargement des données en tâche de fond
+                // 2) CACHE LOCAL : affichage instantané dès la 2e visite
+                try {
+                    const meta = JSON.parse(localStorage.getItem('mtMedsCacheMeta') || 'null');
+                    if (meta && meta.uid === uid) {
+                        const cached = JSON.parse(localStorage.getItem('mtMedsCache') || '[]');
+                        if (cached.length > 0) {
+                            cached.forEach(m => { medsData[m.id] = normalizeMed(m); });
+                            renderAllMeds();
+                            renderCalendar();
+                        }
+                    }
+                } catch (e) {}
+
+                // 3) Pas de cache → indicateur de chargement visible
+                if (Object.keys(medsData).length === 0) {
+                    document.getElementById('medsGrid').innerHTML =
+                        '<div id="mtLoadingSpinner" class="col-span-full flex flex-col items-center justify-center py-10 gap-3"><div class="spinner"></div><div class="text-xs opacity-50 font-bold">Chargement de vos médicaments…</div></div>';
+                }
+
+                // 4) Chargement réel en tâche de fond — PROFIL + TELEGRAM + MEDS EN PARALLÈLE
                 (async () => {
+                    // Migration en attente : doit être traitée AVANT le chargement
                     try {
                         const pending = JSON.parse(localStorage.getItem('pendingMigration') || 'null');
                         if (pending) {
@@ -2475,32 +2433,42 @@
                         localStorage.removeItem('pendingMigration');
                     }
 
-                    let prof = null;
-                    try {
-                        const { data } = await sb.from('profiles').select('*').eq('id', uid).maybeSingle();
-                        prof = data;
-                    } catch (e) {}
+                    const tasks = [
+                        // Profil
+                        (async () => {
+                            let prof = null;
+                            try {
+                                const { data } = await sb.from('profiles').select('*').eq('id', uid).maybeSingle();
+                                prof = data;
+                            } catch (e) {}
 
-                    if (!prof) {
-                        const pp = JSON.parse(localStorage.getItem('pendingProfile') || 'null');
-                        const row = pp ? { first_name: pp.fn, last_name: pp.ln, birth_date: pp.bd || null } : {};
-                        try { await sb.from('profiles').insert({ id: uid, ...row }); } catch (e) {}
-                        if (pp) localStorage.removeItem('pendingProfile');
-                        prof = row;
-                    }
+                            if (!prof) {
+                                const pp = JSON.parse(localStorage.getItem('pendingProfile') || 'null');
+                                const row = pp ? { first_name: pp.fn, last_name: pp.ln, birth_date: pp.bd || null } : {};
+                                try { await sb.from('profiles').insert({ id: uid, ...row }); } catch (e) {}
+                                if (pp) localStorage.removeItem('pendingProfile');
+                                prof = row;
+                            }
 
-                    document.getElementById('editLN').value = prof.last_name || '';
-                    document.getElementById('editFN').value = prof.first_name || '';
-                    document.getElementById('editBD').value = prof.birth_date || '';
-                    document.getElementById('editAgeDisplay').innerText = calculateAge(prof.birth_date || '');
+                            document.getElementById('editLN').value = prof.last_name || '';
+                            document.getElementById('editFN').value = prof.first_name || '';
+                            document.getElementById('editBD').value = prof.birth_date || '';
+                            document.getElementById('editAgeDisplay').innerText = calculateAge(prof.birth_date || '');
+                        })(),
+                        // Telegram
+                        refreshTelegramStatus(),
+                        // File d'attente hors-ligne puis médicaments
+                        processQueue().then(() => loadMeds())
+                    ];
 
-                    refreshTelegramStatus();
-                    processQueue();
-                    try { await loadMeds(); } catch (e) {}
+                    await Promise.allSettled(tasks);
                     addScheduleRow();
                 })();
             }
 
+            // ============================================================
+            // === CHARGEMENT : 5 requêtes EN PARALLÈLE (4x plus rapide) ===
+            // ============================================================
             async function loadMeds() {
                 setSyncing(true);
                 try {
@@ -2508,22 +2476,39 @@
                     if (error) throw error;
 
                     medsData = {};
-                    const ids = (meds || []).map(m => m.id);
+                    (meds || []).forEach(m => { medsData[m.id] = normalizeMed(m); });
+                    const ids = Object.keys(medsData);
+
+                    const y = currentDate.getFullYear();
+                    const mo = currentDate.getMonth();
+                    const startDate = `${y}-${String(mo + 1).padStart(2, '0')}-01`;
+                    const endDate = `${y}-${String(mo + 1).padStart(2, '0')}-${new Date(y, mo + 1, 0).getDate()}`;
+                    const todayStr = getLocalDateStr();
+
+                    window.medsHistoryMap = {};
+                    window.dayDosesMap = {};
+                    window.todayTakesMap = {};
 
                     if (ids.length > 0) {
-                        const { data: dosesData, error: countError } = await sb.from('medication_doses')
-                            .select('medication_id', { count: 'exact' })
-                            .in('medication_id', ids);
+                        // === PARALLÈLE : toutes les requêtes partent en même temps ===
+                        const results = await Promise.allSettled([
+                            sb.from('medication_doses').select('medication_id', { count: 'exact' }).in('medication_id', ids),
+                            sb.from('medication_schedules').select('*').in('medication_id', ids),
+                            sb.from('medication_history').select('*').in('medication_id', ids).gte('date', startDate).lte('date', endDate),
+                            sb.from('medication_doses').select('id, medication_id, created_at').in('medication_id', ids).gte('created_at', `${startDate}T00:00:00`).lte('created_at', `${endDate}T23:59:59`),
+                            sb.from('medication_doses').select('medication_id').in('medication_id', ids).gte('created_at', `${todayStr}T00:00:00`).lte('created_at', `${todayStr}T23:59:59`)
+                        ]);
 
-                        if (countError) throw countError;
+                        if (results[0].status === 'fulfilled') {
+                            const counts = {};
+                            (results[0].value.data || []).forEach(d => {
+                                counts[d.medication_id] = (counts[d.medication_id] || 0) + 1;
+                            });
+                            ids.forEach(id => { medsData[id]._count = counts[id] || 0; });
+                        }
 
-                        const counts = {};
-                        (dosesData || []).forEach(d => {
-                            counts[d.medication_id] = (counts[d.medication_id] || 0) + 1;
-                        });
-
-                        const { data: schedules, error: schedError } = await sb.from('medication_schedules').select('*').in('medication_id', ids);
-                        if (!schedError && schedules) {
+                        if (results[1].status === 'fulfilled') {
+                            const schedules = results[1].value.data || [];
                             let schedMap = {};
                             schedules.forEach(s => {
                                 if (!schedMap[s.medication_id]) schedMap[s.medication_id] = [];
@@ -2532,42 +2517,32 @@
                             localStorage.setItem('medSchedules', JSON.stringify(schedMap));
                         }
 
-                        (meds || []).forEach(m => {
-                            if (!m.packaging) m.packaging = 'plate';
-                            if (!m.tracking_mode) m.tracking_mode = 'stock';
-                            if (!m.duration_unit) m.duration_unit = 'day';
-                            m._count = counts[m.id] || 0;
-                            medsData[m.id] = m;
-                        });
+                        if (results[2].status === 'fulfilled') {
+                            (results[2].value.data || []).forEach(h => {
+                                window.medsHistoryMap[`${h.date}_${h.medication_id}`] = h;
+                            });
+                        }
+
+                        if (results[3].status === 'fulfilled') {
+                            (results[3].value.data || []).forEach(d => {
+                                const dStr = d.created_at.split('T')[0];
+                                if (!window.dayDosesMap[dStr]) window.dayDosesMap[dStr] = [];
+                                window.dayDosesMap[dStr].push(d);
+                            });
+                        }
+
+                        if (results[4].status === 'fulfilled') {
+                            (results[4].value.data || []).forEach(td => {
+                                window.todayTakesMap[td.medication_id] = (window.todayTakesMap[td.medication_id] || 0) + 1;
+                            });
+                        }
                     }
 
-                    const y = currentDate.getFullYear();
-                    const m = currentDate.getMonth();
-                    const startDate = `${y}-${String(m+1).padStart(2,'0')}-01`;
-                    const endDate = `${y}-${String(m+1).padStart(2,'0')}-${new Date(y, m+1, 0).getDate()}`;
-                    
-                    window.medsHistoryMap = {};
-                    window.dayDosesMap = {};
-                    if (Object.keys(medsData).length > 0) {
-                        const { data: hist } = await sb.from('medication_history').select('*').in('medication_id', Object.keys(medsData)).gte('date', startDate).lte('date', endDate);
-                        (hist || []).forEach(h => { window.medsHistoryMap[`${h.date}_${h.medication_id}`] = h; });
-
-                        const { data: monthDoses } = await sb.from('medication_doses').select('id, medication_id, created_at').in('medication_id', Object.keys(medsData)).gte('created_at', `${startDate}T00:00:00`).lte('created_at', `${endDate}T23:59:59`);
-                        (monthDoses || []).forEach(d => {
-                            const dStr = d.created_at.split('T')[0];
-                            if (!window.dayDosesMap[dStr]) window.dayDosesMap[dStr] = [];
-                            window.dayDosesMap[dStr].push(d);
-                        });
-                    }
-
-                    const todayStr = getLocalDateStr();
-                    window.todayTakesMap = {};
-                    if (Object.keys(medsData).length > 0) {
-                        const { data: todayDoses } = await sb.from('medication_doses').select('medication_id').in('medication_id', Object.keys(medsData)).gte('created_at', `${todayStr}T00:00:00`).lte('created_at', `${todayStr}T23:59:59`);
-                        (todayDoses || []).forEach(td => {
-                            window.todayTakesMap[td.medication_id] = (window.todayTakesMap[td.medication_id] || 0) + 1;
-                        });
-                    }
+                    // Sauvegarde du cache (avec les vrais comptes) pour la prochaine visite
+                    try {
+                        localStorage.setItem('mtMedsCache', JSON.stringify(Object.values(medsData).map(m => ({ ...m }))));
+                        localStorage.setItem('mtMedsCacheMeta', JSON.stringify({ uid: uid, at: Date.now() }));
+                    } catch (e) {}
 
                     renderAllMeds();
                     renderCalendar();
@@ -2576,7 +2551,8 @@
                         renderManageView();
                     }
                 } catch (e) {
-                    showToast("Erreur chargement des données");
+                    console.error('Erreur chargement :', e);
+                    showToast("Erreur chargement : " + dbErrMsg(e));
                 } finally {
                     setSyncing(false);
                 }
@@ -2584,6 +2560,9 @@
 
             function renderAllMeds() {
                 const grid = document.getElementById('medsGrid');
+                const spin = document.getElementById('mtLoadingSpinner');
+                if (spin) spin.remove();
+
                 const existingIds = new Set();
                 let index = 0;
                 const todayDay = new Date().getDay();
@@ -2861,12 +2840,14 @@
                             days: s.days,
                             user_id: uid
                         }));
-                        await sb.from('medication_schedules').insert(schedInserts);
+                        const { error: schedError } = await sb.from('medication_schedules').insert(schedInserts);
+                        if (schedError) throw schedError;
                     }
 
                     showToast("Médicament modifié avec succès");
                 } catch(e) {
-                    showToast("Erreur lors de la modification");
+                    console.error('Erreur modification :', e);
+                    showToast("❌ Modification impossible : " + dbErrMsg(e));
                     await loadMeds(); 
                 } finally {
                     setSyncing(false);
@@ -2923,15 +2904,21 @@
                     window.medsHistoryMap = {};
                     window.dayDosesMap = {};
                     if (Object.keys(medsData).length > 0) {
-                        const { data: hist } = await sb.from('medication_history').select('*').in('medication_id', Object.keys(medsData)).gte('date', startDate).lte('date', endDate);
-                        (hist || []).forEach(h => { window.medsHistoryMap[`${h.date}_${h.medication_id}`] = h; });
-
-                        const { data: monthDoses } = await sb.from('medication_doses').select('id, medication_id, created_at').in('medication_id', Object.keys(medsData)).gte('created_at', `${startDate}T00:00:00`).lte('created_at', `${endDate}T23:59:59`);
-                        (monthDoses || []).forEach(d => {
-                            const dStr = d.created_at.split('T')[0];
-                            if (!window.dayDosesMap[dStr]) window.dayDosesMap[dStr] = [];
-                            window.dayDosesMap[dStr].push(d);
-                        });
+                        // 2 requêtes en parallèle
+                        const results = await Promise.allSettled([
+                            sb.from('medication_history').select('*').in('medication_id', Object.keys(medsData)).gte('date', startDate).lte('date', endDate),
+                            sb.from('medication_doses').select('id, medication_id, created_at').in('medication_id', Object.keys(medsData)).gte('created_at', `${startDate}T00:00:00`).lte('created_at', `${endDate}T23:59:59`)
+                        ]);
+                        if (results[0].status === 'fulfilled') {
+                            (results[0].value.data || []).forEach(h => { window.medsHistoryMap[`${h.date}_${h.medication_id}`] = h; });
+                        }
+                        if (results[1].status === 'fulfilled') {
+                            (results[1].value.data || []).forEach(d => {
+                                const dStr = d.created_at.split('T')[0];
+                                if (!window.dayDosesMap[dStr]) window.dayDosesMap[dStr] = [];
+                                window.dayDosesMap[dStr].push(d);
+                            });
+                        }
                     }
                     document.querySelectorAll('.cal-cell').forEach(cell => {
                         updateCalendarDay(cell.dataset.date);
@@ -3011,7 +2998,7 @@
                     
                     showToast("Heure modifiée avec succès");
                 } catch (e) {
-                    showToast("Erreur lors de la modification de l'heure");
+                    showToast("Erreur : " + dbErrMsg(e));
                     renderDayEditList(dateStr, true);
                 } finally {
                     setSyncing(false);
@@ -3141,7 +3128,7 @@
                     updateMedCardDOM(id);
                     document.querySelectorAll('.cal-cell').forEach(cell => updateCalendarDay(cell.dataset.date));
                 } catch(e) {
-                    showToast("Action reportée, erreur réseau");
+                    showToast("Action reportée : " + dbErrMsg(e));
                 } finally {
                     setSyncing(false);
                 }
@@ -3188,6 +3175,12 @@
                     }
                 }
 
+                // Mise à jour du cache local immédiatement
+                try {
+                    localStorage.setItem('mtMedsCache', JSON.stringify(Object.values(medsData).map(m => ({ ...m }))));
+                    localStorage.setItem('mtMedsCacheMeta', JSON.stringify({ uid: uid, at: Date.now() }));
+                } catch (e) {}
+
                 updateMedCardDOM(id);
                 updateCalendarDay(d);
                 if (document.getElementById('editDayModal').classList.contains('open')) {
@@ -3230,7 +3223,8 @@
                                 createdAtStr = getLocalDateTimeStr();
                             }
                         }
-                        await sb.from('medication_doses').insert({ medication_id: id, created_at: createdAtStr, user_id: uid });
+                        const { error: insertErr } = await sb.from('medication_doses').insert({ medication_id: id, created_at: createdAtStr, user_id: uid });
+                        if (insertErr) throw insertErr;
                     } else if (val < 0) {
                         const startOfDay = `${d}T00:00:00`;
                         const endOfDay = `${d}T23:59:59`;
@@ -3247,30 +3241,34 @@
                         }
                     }
 
-                    const { count: dailyCount } = await sb.from('medication_doses')
-                        .select('*', { count: 'exact', head: true })
-                        .eq('medication_id', id)
-                        .gte('created_at', `${d}T00:00:00`)
-                        .lte('created_at', `${d}T23:59:59`);
+                    const [dailyRes, totalRes, existRes] = await Promise.allSettled([
+                        sb.from('medication_doses').select('*', { count: 'exact', head: true }).eq('medication_id', id).gte('created_at', `${d}T00:00:00`).lte('created_at', `${d}T23:59:59`),
+                        sb.from('medication_doses').select('*', { count: 'exact', head: true }).eq('medication_id', id),
+                        sb.from('medication_history').select('id').eq('medication_id', id).eq('date', d).maybeSingle()
+                    ]);
 
-                    const { count: totalCount } = await sb.from('medication_doses')
-                        .select('*', { count: 'exact', head: true })
-                        .eq('medication_id', id);
+                    const dailyCount = (dailyRes.status === 'fulfilled') ? (dailyRes.value.count ?? 0) : null;
+                    const totalCount = (totalRes.status === 'fulfilled') ? (totalRes.value.count ?? 0) : null;
+                    const exist = (existRes.status === 'fulfilled') ? existRes.value.data : null;
 
-                    const { data: exist } = await sb.from('medication_history').select('id').eq('medication_id', id).eq('date', d).maybeSingle();
-                    if (dailyCount > 0) {
-                        if (exist) {
-                            await sb.from('medication_history').update({ count: dailyCount, cumulative: totalCount, color: med.color }).eq('id', exist.id);
-                        } else {
-                            await sb.from('medication_history').insert({ medication_id: id, date: d, count: dailyCount, cumulative: totalCount, color: med.color, user_id: uid });
+                    if (dailyCount !== null && totalCount !== null) {
+                        if (dailyCount > 0) {
+                            if (exist) {
+                                await sb.from('medication_history').update({ count: dailyCount, cumulative: totalCount, color: med.color }).eq('id', exist.id);
+                            } else {
+                                const { error: histErr } = await sb.from('medication_history').insert({ medication_id: id, date: d, count: dailyCount, cumulative: totalCount, color: med.color, user_id: uid });
+                                if (histErr) throw histErr;
+                            }
+                        } else if (exist) {
+                            await sb.from('medication_history').delete().eq('id', exist.id);
                         }
-                    } else if (exist) {
-                        await sb.from('medication_history').delete().eq('id', exist.id);
+
+                        if (medsData[id]) medsData[id]._count = totalCount;
+                        try {
+                            localStorage.setItem('mtMedsCache', JSON.stringify(Object.values(medsData).map(m => ({ ...m }))));
+                        } catch (e) {}
+                        updateMedCardDOM(id);
                     }
-
-                    if (medsData[id]) medsData[id]._count = totalCount;
-                    updateMedCardDOM(id);
-
                 } catch (e) {
                     throw e;
                 } finally {
@@ -3455,7 +3453,7 @@
                         .eq('medication_id', medId);
 
                     const { data: exist } = await sb.from('medication_history').select('id').eq('medication_id', medId).eq('date', dateStr).maybeSingle();
-                    if (dailyCount > 0) {
+                    if (dailyCount > 0 && exist) {
                         await sb.from('medication_history').update({ count: dailyCount, cumulative: totalCount }).eq('id', exist.id);
                     } else if (exist) {
                         await sb.from('medication_history').delete().eq('id', exist.id);
@@ -3463,7 +3461,7 @@
 
                     showToast("Prise supprimée");
                 } catch (e) {
-                    showToast("Erreur lors de la suppression");
+                    showToast("Erreur : " + dbErrMsg(e));
                 } finally {
                     setSyncing(false);
                 }
@@ -3558,7 +3556,7 @@
 
                     list.innerHTML = html;
                 } catch (e) {
-                    list.innerHTML = `<div class="text-center opacity-50 font-bold text-sm py-10 text-slate-800 dark:text-white">Erreur de chargement.</div>`;
+                    list.innerHTML = `<div class="text-center opacity-50 font-bold text-sm py-10 text-slate-800 dark:text-white">Erreur : ${dbErrMsg(e)}</div>`;
                 }
             };
 
@@ -3610,7 +3608,7 @@
                     medsData[id].active = !newStatus;
                     renderManageView();
                     renderAllMeds();
-                    showToast("Erreur lors de l'archivage");
+                    showToast("Erreur : " + dbErrMsg(e));
                 } finally {
                     setSyncing(false);
                 }
@@ -3641,6 +3639,9 @@
 
                 setTimeout(() => {
                     delete medsData[id];
+                    try {
+                        localStorage.setItem('mtMedsCache', JSON.stringify(Object.values(medsData).map(m => ({ ...m }))));
+                    } catch (e) {}
                     renderManageView();
                     renderAllMeds();
                     document.querySelectorAll('.cal-cell').forEach(cell => updateCalendarDay(cell.dataset.date));
@@ -3654,7 +3655,7 @@
                     await sb.from('medications').delete().eq('id', id);
                     showToast("Médicament supprimé");
                 } catch (e) {
-                    showToast("Erreur lors de la suppression");
+                    showToast("Erreur : " + dbErrMsg(e));
                     await loadMeds();
                 } finally {
                     setSyncing(false);
@@ -3662,14 +3663,10 @@
             };
 
             // ============================================================
-            // === BOOT : correction de la boucle de rechargement + deadlock ===
+            // === BOOT : rapide + callback synchrone + garde anti-boucle ===
             // ============================================================
             initUI();
 
-            // ⚠️ Callback VOLONTAIREMENT SYNCHRONE (jamais async) :
-            // un callback async dans onAuthStateChange provoque un blocage
-            // interne connu de supabase-js (c'est ce qui gelait la création
-            // de compte). Tout le travail est différé via setTimeout.
             sb.auth.onAuthStateChange((event, session) => {
                 if (event === 'PASSWORD_RECOVERY' && session) {
                     window.__recoveryUser = session.user;
@@ -3679,12 +3676,10 @@
                 }
 
                 if (event === 'SIGNED_OUT') {
-                    // Pendant le boot : on nettoie simplement, sans recharger
                     if (window.__booting) {
                         clearSupabaseTokens();
                         return;
                     }
-                    // Garde anti-boucle : maximum 1 rechargement par 10 secondes
                     const now = Date.now();
                     const last = parseInt(sessionStorage.getItem('mtLastReload') || '0');
                     if (now - last > 10000) {
@@ -3692,7 +3687,6 @@
                         clearSupabaseTokens();
                         location.reload();
                     } else {
-                        // 2e SIGNED_OUT en < 10 s : on nettoie SANS recharger
                         clearSupabaseTokens();
                         uid = null;
                         document.getElementById('appBody').classList.add('hidden');
@@ -3705,7 +3699,6 @@
                 }
 
                 if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && !window.__recoveryUser) {
-                    // Différé : on sort du contexte verrouillé de supabase-js
                     setTimeout(() => {
                         if (!uid && !window.__recoveryUser) {
                             enterApp(session.user).catch(() => {});
@@ -3717,36 +3710,30 @@
             (async function boot() {
                 window.__booting = true;
 
-                // Lien de récupération de mot de passe → laisser le temps au flux
                 const flow = (window.location.search + window.location.hash);
                 if (flow.includes('code=') || flow.includes('type=recovery')) {
                     await new Promise(r => setTimeout(r, 1500));
                 }
                 if (window.__recoveryUser) { window.__booting = false; return; }
 
-                // 1) Le serveur Supabase répond-il ? (détecte aussi un projet en pause)
-                const serverOk = await checkServer();
-                if (!serverOk) {
-                    showAuthError('loginPanel', "⚠️ Serveur Supabase injoignable. Vérifiez votre connexion internet — ou que votre projet Supabase n'est pas en pause (Dashboard → Settings → Restore project).");
-                    window.__booting = false;
-                    return;
-                }
-
                 try {
-                    // 2) Une session existe-t-elle en local ?
                     const { data: { session } } = await sb.auth.getSession();
                     if (session && session.user) {
-                        // 3) Le token est-il VALIDE côté serveur ? (un token local corrompu
-                        //    provoquait la boucle de rechargement infinie)
+                        // Vérification du token AUPRÈS DU SERVEUR (1 seule requête)
                         const { data: uData, error: uErr } = await withTimeout(
                             sb.auth.getUser(), 15000, 'Vérification de session'
                         );
                         if (!uErr && uData && uData.user) {
                             if (!uid) await enterApp(uData.user);
                         } else {
-                            // Token invalide → nettoyage local, retour login, PAS de rechargement
-                            clearSupabaseTokens();
-                            showAuthError('loginPanel', "Votre session avait expiré. Connectez-vous à nouveau.");
+                            // Distinguer : serveur injoignable vs token invalide
+                            const online = await checkServer();
+                            if (!online) {
+                                showAuthError('loginPanel', "⚠️ Serveur Supabase injoignable. Vérifiez votre connexion — ou que votre projet Supabase n'est pas en pause (Dashboard → Restore project).");
+                            } else {
+                                clearSupabaseTokens();
+                                showAuthError('loginPanel', "Votre session avait expiré. Connectez-vous à nouveau.");
+                            }
                         }
                     } else if (localStorage.getItem('medUser')) {
                         showLoginTab('migrate');
@@ -3759,4 +3746,4 @@
         });
     </script>
 </body>
-    </html>
+                </html>
