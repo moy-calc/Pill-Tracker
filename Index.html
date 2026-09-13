@@ -673,7 +673,7 @@
     <script>
         // === ANTI-CACHE : force le vidage du cache quand la version change ===
         (function(){
-            var APP_VERSION = 'medtracker-v5-authfix';
+            var APP_VERSION = 'medtracker-v7-bootfix';
             try {
                 if (localStorage.getItem('mtAppVersion') !== APP_VERSION) {
                     localStorage.setItem('mtAppVersion', APP_VERSION);
@@ -751,7 +751,7 @@
                 <p class="text-[11px] opacity-50 font-semibold leading-relaxed">Compte de l'ancienne version ? Utilisez l'onglet <span class="text-indigo-500 font-bold">Migrer</span> pour le récupérer.</p>
             </div>
 
-            <!-- PANEL CREER (NOUVELLE MÉTHODE : EMAIL + MOT DE PASSE UNIQUEMENT) -->
+            <!-- PANEL CREER (email + mot de passe uniquement) -->
             <div id="signupPanel" class="space-y-4 hidden">
                 <div class="relative">
                     <i class="ph ph-envelope-simple absolute left-4 top-1/2 -translate-y-1/2 opacity-50 text-xl"></i>
@@ -1227,11 +1227,12 @@
                 return;
             }
 
-            const sb = supabase.createClient(
-                'https://jyjjlaqmmfmoqrxcbizy.supabase.co',
-                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5ampsYXFtbWZtb3FyeGNiaXp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MDIzMTksImV4cCI6MjA5OTE3ODMxOX0.XPVACZLMNcdYcZBhNbuHdql6NBMRdgZDuhHKZfxNM6I',
-                { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
-            );
+            const SUPABASE_URL = 'https://jyjjlaqmmfmoqrxcbizy.supabase.co';
+            const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5ampsYXFtbWZtb3FyeGNiaXp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MDIzMTksImV4cCI6MjA5OTE3ODMxOX0.XPVACZLMNcdYcZBhNbuHdql6NBMRdgZDuhHKZfxNM6I';
+
+            const sb = supabase.createClient(SUPABASE_URL, ANON_KEY, {
+                auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+            });
 
             let uid = null;
             let userEmail = "";
@@ -1250,6 +1251,7 @@
             window.selectedTimeParts = { h: 8, m: 0 };
             window.currentEditingSchedules = [];
             window.__recoveryUser = null;
+            window.__booting = false;
             let swRegistration = null;
             let lastCheckedDate = '';
 
@@ -1273,6 +1275,47 @@
                 '#f87171', '#fb923c', '#fbbf24', '#a3e635', '#4ade80',
                 '#34d399', '#22d3ee', '#38bdf8', '#60a5fa', '#818cf8'
             ];
+
+            // ============================================================
+            // === OUTILS : timeout, nettoyage tokens, test serveur ===
+            // ============================================================
+
+            // Évite les opérations qui "tournent sans fin" (spinner infini)
+            function withTimeout(promise, ms, label) {
+                return Promise.race([
+                    promise,
+                    new Promise((_, reject) => setTimeout(() => {
+                        reject(new Error((label || 'Opération') + ' : délai dépassé — le serveur ne répond pas.'));
+                    }, ms))
+                ]);
+            }
+
+            // Supprime les tokens de session Supabase corrompus/expirés du navigateur
+            function clearSupabaseTokens() {
+                try {
+                    Object.keys(localStorage).forEach(k => {
+                        if (k.startsWith('sb-') && k.includes('auth-token')) {
+                            localStorage.removeItem(k);
+                        }
+                    });
+                } catch (e) {}
+            }
+
+            // Test de connectivité : le serveur Supabase répond-il ?
+            async function checkServer() {
+                try {
+                    const ctrl = new AbortController();
+                    const t = setTimeout(() => ctrl.abort(), 8000);
+                    const res = await fetch(SUPABASE_URL + '/auth/v1/health', {
+                        headers: { apikey: ANON_KEY },
+                        signal: ctrl.signal
+                    });
+                    clearTimeout(t);
+                    return res.ok;
+                } catch (e) {
+                    return false;
+                }
+            }
 
             function getLocalDateStr(date = new Date()) {
                 const y = date.getFullYear();
@@ -1416,7 +1459,7 @@
                 void t.offsetWidth;
                 t.classList.add('show');
                 clearTimeout(toastTimeout);
-                toastTimeout = setTimeout(() => t.classList.remove('show'), 3000);
+                toastTimeout = setTimeout(() => t.classList.remove('show'), 3500);
             };
 
             window.triggerNotification = async (btn) => {
@@ -1527,7 +1570,7 @@
             }
 
             // ============================================================
-            // === AUTH : LOGIN / SIGNUP / MIGRATION / MOT DE PASSE OUBLIÉ ===
+            // === AUTH : erreurs visibles + timeout sur chaque opération ===
             // ============================================================
 
             function validEmail(v) {
@@ -1540,7 +1583,6 @@
                 b.classList.toggle('pointer-events-none', !ok);
             }
 
-            // === Affichage d'erreur PERMANENT et VISIBLE (cadre rouge) ===
             function showAuthError(panelId, msg) {
                 let box = document.getElementById(panelId + 'ErrBox');
                 if (!box) {
@@ -1593,7 +1635,6 @@
                 setSubmitState('loginBtn', ok);
             };
 
-            // === NOUVELLE MÉTHODE : Email + Mot de passe + Confirmation uniquement ===
             window.validateSignupForm = () => {
                 const ok = validEmail(document.getElementById('signupEmail').value.trim())
                     && document.getElementById('signupPw').value.length >= 6
@@ -1611,7 +1652,7 @@
                 setSubmitState('migrateBtn', ok);
             };
 
-            // === CONNEXION : erreur visible en rouge + entrée directe (pas de rechargement) ===
+            // === CONNEXION (timeout 25 s, entrée directe, zéro rechargement) ===
             window.handleLogin = async () => {
                 const btn = document.getElementById('loginBtn');
                 const original = btn.innerHTML;
@@ -1624,36 +1665,31 @@
                 btn.style.pointerEvents = 'none';
 
                 try {
-                    const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+                    const { data, error } = await withTimeout(
+                        sb.auth.signInWithPassword({ email, password: pw }),
+                        25000, 'Connexion'
+                    );
 
                     if (error) {
                         showAuthError('loginPanel', authErrMsg(error.message));
-                        showToast(authErrMsg(error.message));
-                        btn.innerHTML = original;
-                        btn.style.pointerEvents = '';
                         return;
                     }
 
                     if (data && data.session && data.user) {
                         try { await enterApp(data.user); } catch (e) {}
-                        for (let i = 0; i < 6; i++) {
-                            if (!document.getElementById('appBody').classList.contains('hidden')) break;
-                            await new Promise(r => setTimeout(r, 500));
-                        }
-                        if (document.getElementById('appBody').classList.contains('hidden')) {
-                            location.reload();
-                        }
+                        showToast("Connecté ! Bienvenue 👋");
                     } else {
-                        location.reload();
+                        showAuthError('loginPanel', "Connexion incomplète — réessayez.");
                     }
                 } catch (e) {
-                    showAuthError('loginPanel', 'Erreur inattendue : ' + ((e && e.message) ? e.message : e));
+                    showAuthError('loginPanel', ((e && e.message) ? e.message : 'Erreur inconnue'));
+                } finally {
                     btn.innerHTML = original;
                     btn.style.pointerEvents = '';
                 }
             };
 
-            // === CRÉATION DE COMPTE : nouvelle méthode (email + mot de passe uniquement) ===
+            // === CRÉATION DE COMPTE (timeout 25 s, entrée directe) ===
             window.handleSignup = async () => {
                 const btn = document.getElementById('signupBtn');
                 const original = btn.innerHTML;
@@ -1672,34 +1708,34 @@
                 btn.style.pointerEvents = 'none';
 
                 try {
-                    const { data, error } = await sb.auth.signUp({ email, password: pw });
+                    const { data, error } = await withTimeout(
+                        sb.auth.signUp({ email, password: pw }),
+                        25000, 'Création du compte'
+                    );
+
                     if (error) {
                         showAuthError('signupPanel', authErrMsg(error.message));
-                        showToast(authErrMsg(error.message));
-                        btn.innerHTML = original;
-                        btn.style.pointerEvents = '';
                         return;
                     }
+
                     if (data && data.session && data.user) {
                         try { await sb.from('profiles').insert({ id: data.user.id }); } catch (e) {}
                         try { await enterApp(data.user); } catch (e) {}
-                        showToast("Compte créé ! Complétez votre profil (nom, prénom) 🎉");
-                        setTimeout(() => { openModal('accountModal'); }, 700);
-                        btn.innerHTML = original;
-                        btn.style.pointerEvents = '';
+                        showToast("Compte créé ! Complétez votre profil 🎉");
+                        setTimeout(() => { openModal('accountModal'); }, 900);
                     } else {
-                        showAuthError('signupPanel', "Compte créé ! Un email de confirmation vous a été envoyé — cliquez sur le lien reçu puis connectez-vous.");
-                        showToast("Vérifiez votre boîte mail pour confirmer le compte.");
-                        btn.innerHTML = original;
-                        btn.style.pointerEvents = '';
+                        showAuthError('signupPanel', "✅ Compte créé ! Un email de confirmation vous a été envoyé — cliquez sur le lien reçu puis connectez-vous.");
+                        showToast("Vérifiez votre boîte mail.");
                     }
                 } catch (e) {
-                    showAuthError('signupPanel', 'Erreur inattendue : ' + ((e && e.message) ? e.message : e));
+                    showAuthError('signupPanel', ((e && e.message) ? e.message : 'Erreur inconnue'));
+                } finally {
                     btn.innerHTML = original;
                     btn.style.pointerEvents = '';
                 }
             };
 
+            // === MIGRATION (timeouts partout) ===
             window.handleMigrate = async () => {
                 const btn = document.getElementById('migrateBtn');
                 const original = btn.innerHTML;
@@ -1716,47 +1752,55 @@
                 const oldKey = `${ln}_${fn}_${bd.replace(/-/g, '')}`;
 
                 const runClaim = async () => {
-                    const { data: res, error: rpcErr } = await sb.rpc('claim_legacy_account', { old_key: oldKey, old_pw: oldPw });
+                    const { data: res, error: rpcErr } = await withTimeout(
+                        sb.rpc('claim_legacy_account', { old_key: oldKey, old_pw: oldPw }),
+                        25000, 'Migration'
+                    );
                     if (rpcErr || !res || !res.success) {
-                        const msg = (res && res.message) ? res.message : "La migration a échouée. Vérifiez vos anciennes informations.";
-                        customConfirm("Migration échouée", msg, async () => {
-                            await sb.auth.signOut();
-                            location.reload();
-                        }, "Réessayer", false);
+                        const msg = (res && res.message) ? res.message : "La migration a échoué. Vérifiez vos anciennes informations.";
+                        showAuthError('migratePanel', msg);
                         btn.innerHTML = original;
                         btn.style.pointerEvents = '';
                         return;
                     }
                     localStorage.removeItem('medUser');
                     showToast(res.message || "Compte migré avec succès !");
-                    setTimeout(() => location.reload(), 800);
+                    try { await enterApp(sb.auth.getUser ? (await sb.auth.getUser()).data.user : null); } catch (e) {}
+                    setTimeout(() => location.reload(), 900);
                 };
 
-                const { data, error } = await sb.auth.signUp({ email, password: pw });
-                if (error) {
-                    const msg = error.message.toLowerCase();
-                    if (msg.includes('already')) {
-                        const { error: siErr } = await sb.auth.signInWithPassword({ email, password: pw });
-                        if (!siErr) {
-                            await runClaim();
-                            return;
+                try {
+                    const { data, error } = await withTimeout(
+                        sb.auth.signUp({ email, password: pw }),
+                        25000, 'Création du compte'
+                    );
+                    if (error) {
+                        const msg = error.message.toLowerCase();
+                        if (msg.includes('already')) {
+                            const { error: siErr } = await withTimeout(
+                                sb.auth.signInWithPassword({ email, password: pw }),
+                                25000, 'Connexion'
+                            );
+                            if (!siErr) {
+                                await runClaim();
+                                return;
+                            }
+                            showAuthError('migratePanel', "Cet email possède déjà un compte, mais le mot de passe saisi ne correspond pas. Utilisez le mot de passe de ce compte email.");
+                        } else {
+                            showAuthError('migratePanel', authErrMsg(error.message));
                         }
-                        customConfirm("Email déjà utilisé", "Cet email possède déjà un compte, mais le mot de passe saisi ne correspond pas. Réessayez en utilisant le mot de passe de ce compte email.", () => {}, "Compris", false);
-                    } else {
-                        showAuthError('migratePanel', authErrMsg(error.message));
-                        showToast(authErrMsg(error.message));
+                        return;
                     }
-                    btn.innerHTML = original;
-                    btn.style.pointerEvents = '';
-                    return;
-                }
-                if (data && data.session) {
-                    await runClaim();
-                } else {
-                    localStorage.setItem('pendingMigration', JSON.stringify({ key: oldKey, pw: oldPw }));
-                    localStorage.removeItem('medUser');
-                    showAuthError('migratePanel', "Compte créé ! Un email de confirmation vous a été envoyé — cliquez sur le lien puis connectez-vous : la migration sera automatique.");
-                    showToast("Vérifiez votre boîte mail.");
+                    if (data && data.session) {
+                        await runClaim();
+                    } else {
+                        localStorage.setItem('pendingMigration', JSON.stringify({ key: oldKey, pw: oldPw }));
+                        localStorage.removeItem('medUser');
+                        showAuthError('migratePanel', "✅ Compte créé ! Un email de confirmation a été envoyé — cliquez sur le lien puis connectez-vous : la migration sera automatique.");
+                    }
+                } catch (e) {
+                    showAuthError('migratePanel', ((e && e.message) ? e.message : 'Erreur inconnue'));
+                } finally {
                     btn.innerHTML = original;
                     btn.style.pointerEvents = '';
                 }
@@ -1773,11 +1817,16 @@
                 const redirectTo = window.location.origin + window.location.pathname;
                 setSyncing(true);
                 try {
-                    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo });
+                    const { error } = await withTimeout(
+                        sb.auth.resetPasswordForEmail(email, { redirectTo }),
+                        20000, 'Envoi de l\'email'
+                    );
                     if (error) { showToast(authErrMsg(error.message)); return; }
                     showToast("Lien envoyé ! Vérifiez votre boîte mail (et les spams).");
                     document.getElementById('forgotPwBox').classList.add('hidden');
                     document.getElementById('forgotEmail').value = '';
+                } catch (e) {
+                    showToast((e && e.message) ? e.message : 'Erreur d\'envoi.');
                 } finally {
                     setSyncing(false);
                 }
@@ -1790,12 +1839,14 @@
                 if (pw !== pw2) return showToast("Les mots de passe ne correspondent pas.");
                 setSyncing(true);
                 try {
-                    const { error } = await sb.auth.updateUser({ password: pw });
+                    const { error } = await withTimeout(sb.auth.updateUser({ password: pw }), 20000, 'Mise à jour');
                     if (error) { showToast(authErrMsg(error.message)); return; }
                     showToast("Mot de passe mis à jour !");
                     window.history.replaceState({}, document.title, window.location.pathname);
                     window.__recoveryUser = null;
                     setTimeout(() => location.reload(), 700);
+                } catch (e) {
+                    showToast((e && e.message) ? e.message : 'Erreur.');
                 } finally {
                     setSyncing(false);
                 }
@@ -1803,6 +1854,7 @@
 
             function clearLocalData() {
                 ['medUser', 'medSchedules', 'medNotified', 'medQueue', 'pendingMigration', 'pendingProfile'].forEach(k => localStorage.removeItem(k));
+                clearSupabaseTokens();
             }
 
             // === Gestion du compte ===
@@ -1874,7 +1926,7 @@
                 location.reload();
             };
 
-            // === TELEGRAM : liaison par code + statut ===
+            // === TELEGRAM ===
             window.refreshTelegramStatus = async () => {
                 const el = document.getElementById('tgStatus');
                 if (!el || !uid) return;
@@ -2324,53 +2376,25 @@
                 }
             };
 
-            // === ENTREE DANS L'APP ===
+            // ============================================================
+            // === ENTREE DANS L'APP : affichage IMMÉDIAT, chargement en fond ===
+            // ============================================================
             async function enterApp(authUser) {
-                if (uid) return;
+                if (uid || !authUser) return;
                 uid = authUser.id;
                 userEmail = authUser.email || "";
 
-                try {
-                    const pending = JSON.parse(localStorage.getItem('pendingMigration') || 'null');
-                    if (pending) {
-                        const { data: res } = await sb.rpc('claim_legacy_account', { old_key: pending.key, old_pw: pending.pw });
-                        localStorage.removeItem('pendingMigration');
-                        localStorage.removeItem('medUser');
-                        if (res && res.success) showToast("Migration réussie : vos données ont été récupérées !");
-                        else if (res && res.message) showToast(res.message);
-                    }
-                } catch (e) {
-                    localStorage.removeItem('pendingMigration');
-                }
-
-                let prof = null;
-                try {
-                    const { data } = await sb.from('profiles').select('*').eq('id', uid).maybeSingle();
-                    prof = data;
-                } catch (e) {}
-
-                if (!prof) {
-                    const pp = JSON.parse(localStorage.getItem('pendingProfile') || 'null');
-                    const row = pp ? { first_name: pp.fn, last_name: pp.ln, birth_date: pp.bd || null } : {};
-                    try { await sb.from('profiles').insert({ id: uid, ...row }); } catch (e) {}
-                    if (pp) localStorage.removeItem('pendingProfile');
-                    prof = row;
-                }
-
+                // 1) Affichage immédiat — AUCUNE requête bloquante avant ceci
                 document.getElementById('accountEmail').innerText = userEmail;
-                document.getElementById('editLN').value = prof.last_name || '';
-                document.getElementById('editFN').value = prof.first_name || '';
-                document.getElementById('editBD').value = prof.birth_date || '';
-                document.getElementById('editAgeDisplay').innerText = calculateAge(prof.birth_date || '');
-
-                refreshTelegramStatus();
-
                 document.getElementById('loginBox').classList.add('hidden');
                 document.getElementById('appBody').classList.remove('hidden');
                 document.getElementById('accBtn').classList.remove('hidden');
                 document.getElementById('accBtn').classList.add('flex');
                 document.getElementById('syncBtn').classList.remove('hidden');
                 document.getElementById('syncBtn').classList.add('flex');
+                hideAuthError('loginPanel');
+                hideAuthError('signupPanel');
+                hideAuthError('migratePanel');
 
                 if (localStorage.getItem('theme') === 'dark') {
                     document.body.classList.add('dark');
@@ -2436,9 +2460,45 @@
                     if (!document.hidden) checkDayChange();
                 });
 
-                processQueue();
-                await loadMeds();
-                addScheduleRow();
+                // 2) Chargement des données en tâche de fond
+                (async () => {
+                    try {
+                        const pending = JSON.parse(localStorage.getItem('pendingMigration') || 'null');
+                        if (pending) {
+                            const { data: res } = await sb.rpc('claim_legacy_account', { old_key: pending.key, old_pw: pending.pw });
+                            localStorage.removeItem('pendingMigration');
+                            localStorage.removeItem('medUser');
+                            if (res && res.success) showToast("Migration réussie : vos données ont été récupérées !");
+                            else if (res && res.message) showToast(res.message);
+                        }
+                    } catch (e) {
+                        localStorage.removeItem('pendingMigration');
+                    }
+
+                    let prof = null;
+                    try {
+                        const { data } = await sb.from('profiles').select('*').eq('id', uid).maybeSingle();
+                        prof = data;
+                    } catch (e) {}
+
+                    if (!prof) {
+                        const pp = JSON.parse(localStorage.getItem('pendingProfile') || 'null');
+                        const row = pp ? { first_name: pp.fn, last_name: pp.ln, birth_date: pp.bd || null } : {};
+                        try { await sb.from('profiles').insert({ id: uid, ...row }); } catch (e) {}
+                        if (pp) localStorage.removeItem('pendingProfile');
+                        prof = row;
+                    }
+
+                    document.getElementById('editLN').value = prof.last_name || '';
+                    document.getElementById('editFN').value = prof.first_name || '';
+                    document.getElementById('editBD').value = prof.birth_date || '';
+                    document.getElementById('editAgeDisplay').innerText = calculateAge(prof.birth_date || '');
+
+                    refreshTelegramStatus();
+                    processQueue();
+                    try { await loadMeds(); } catch (e) {}
+                    addScheduleRow();
+                })();
             }
 
             async function loadMeds() {
@@ -3601,34 +3661,100 @@
                 }
             };
 
-            // === BOOT : session + récupération de mot de passe ===
+            // ============================================================
+            // === BOOT : correction de la boucle de rechargement + deadlock ===
+            // ============================================================
             initUI();
 
-            sb.auth.onAuthStateChange(async (event, session) => {
-                if (event === 'SIGNED_OUT') { location.reload(); return; }
+            // ⚠️ Callback VOLONTAIREMENT SYNCHRONE (jamais async) :
+            // un callback async dans onAuthStateChange provoque un blocage
+            // interne connu de supabase-js (c'est ce qui gelait la création
+            // de compte). Tout le travail est différé via setTimeout.
+            sb.auth.onAuthStateChange((event, session) => {
                 if (event === 'PASSWORD_RECOVERY' && session) {
                     window.__recoveryUser = session.user;
                     document.getElementById('loginBox').classList.add('hidden');
                     openModal('resetPwModal');
                     return;
                 }
-                if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && !uid && !window.__recoveryUser) {
-                    await enterApp(session.user);
+
+                if (event === 'SIGNED_OUT') {
+                    // Pendant le boot : on nettoie simplement, sans recharger
+                    if (window.__booting) {
+                        clearSupabaseTokens();
+                        return;
+                    }
+                    // Garde anti-boucle : maximum 1 rechargement par 10 secondes
+                    const now = Date.now();
+                    const last = parseInt(sessionStorage.getItem('mtLastReload') || '0');
+                    if (now - last > 10000) {
+                        sessionStorage.setItem('mtLastReload', String(now));
+                        clearSupabaseTokens();
+                        location.reload();
+                    } else {
+                        // 2e SIGNED_OUT en < 10 s : on nettoie SANS recharger
+                        clearSupabaseTokens();
+                        uid = null;
+                        document.getElementById('appBody').classList.add('hidden');
+                        document.getElementById('loginBox').classList.remove('hidden');
+                        document.getElementById('accBtn').classList.add('hidden');
+                        document.getElementById('syncBtn').classList.add('hidden');
+                        showAuthError('loginPanel', "Session expirée — veuillez vous reconnecter.");
+                    }
+                    return;
+                }
+
+                if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && !window.__recoveryUser) {
+                    // Différé : on sort du contexte verrouillé de supabase-js
+                    setTimeout(() => {
+                        if (!uid && !window.__recoveryUser) {
+                            enterApp(session.user).catch(() => {});
+                        }
+                    }, 100);
                 }
             });
 
             (async function boot() {
+                window.__booting = true;
+
+                // Lien de récupération de mot de passe → laisser le temps au flux
                 const flow = (window.location.search + window.location.hash);
                 if (flow.includes('code=') || flow.includes('type=recovery')) {
                     await new Promise(r => setTimeout(r, 1500));
                 }
-                const { data: { session } } = await sb.auth.getSession();
-                if (window.__recoveryUser) return;
-                if (session && session.user) {
-                    await enterApp(session.user);
-                } else if (localStorage.getItem('medUser')) {
-                    showLoginTab('migrate');
+                if (window.__recoveryUser) { window.__booting = false; return; }
+
+                // 1) Le serveur Supabase répond-il ? (détecte aussi un projet en pause)
+                const serverOk = await checkServer();
+                if (!serverOk) {
+                    showAuthError('loginPanel', "⚠️ Serveur Supabase injoignable. Vérifiez votre connexion internet — ou que votre projet Supabase n'est pas en pause (Dashboard → Settings → Restore project).");
+                    window.__booting = false;
+                    return;
                 }
+
+                try {
+                    // 2) Une session existe-t-elle en local ?
+                    const { data: { session } } = await sb.auth.getSession();
+                    if (session && session.user) {
+                        // 3) Le token est-il VALIDE côté serveur ? (un token local corrompu
+                        //    provoquait la boucle de rechargement infinie)
+                        const { data: uData, error: uErr } = await withTimeout(
+                            sb.auth.getUser(), 15000, 'Vérification de session'
+                        );
+                        if (!uErr && uData && uData.user) {
+                            if (!uid) await enterApp(uData.user);
+                        } else {
+                            // Token invalide → nettoyage local, retour login, PAS de rechargement
+                            clearSupabaseTokens();
+                            showAuthError('loginPanel', "Votre session avait expiré. Connectez-vous à nouveau.");
+                        }
+                    } else if (localStorage.getItem('medUser')) {
+                        showLoginTab('migrate');
+                    }
+                } catch (e) {
+                    showAuthError('loginPanel', "Erreur de connexion au serveur : " + ((e && e.message) ? e.message : e));
+                }
+                window.__booting = false;
             })();
         });
     </script>
